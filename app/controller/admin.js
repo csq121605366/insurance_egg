@@ -6,7 +6,7 @@ class Admin extends BaseController {
 
   async index() {
     const { ctx } = this;
-    await ctx.renderClient('admin/index.js', { message: 'egg vue client side render' });
+    await ctx.renderClient('app/main.js', { message: 'egg vue client side render' });
   }
 
   async login() {

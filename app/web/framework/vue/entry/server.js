@@ -1,11 +1,11 @@
-import Vue from 'vue';
+import Vue from "vue";
 export default function render(options) {
   if (options.store && options.router) {
     return context => {
       options.router.push(context.state.url);
       const matchedComponents = options.router.getMatchedComponents();
       if (!matchedComponents) {
-        return Promise.reject({ code: '404' });
+        return Promise.reject({ code: "404" });
       }
       return Promise.all(
         matchedComponents.map(component => {

@@ -1,4 +1,3 @@
-
 module.exports = app => {
   const { router, controller } = app;
   console.log(controller);
@@ -8,19 +7,24 @@ module.exports = app => {
 
   // 公共接口
 
-  /**
-   * 管理员路由
-   */
-  router.get('admin', '/admin(/.+)?', 'admin.index'); // 首页
+
+  // 管理员接口
+  router.post("admin", "/api/admin/login", controller.admin.login);
+  router.post("admin", "/api/admin/register", controller.admin.login);
+  router.post(
+    "admin",
+    "/api/admin/upload",
+    tokenAuth,
+    controller.admin.uploadByStream
+  );
 
 
-  router.post('admin', '/api/admin/login', controller.admin.login);
-  router.post('admin', '/api/admin/register', controller.admin.login);
-  router.post('admin', '/api/admin/upload', tokenAuth, controller.admin.uploadByStream);
 
-  // 用户
+  // 用户接口
 
 
-  // 单页面渲染
-  router.get('spa', '/app(/.+)?', 'app.index');
+  // 管理员页面渲染
+  router.get("admin", "/admin(/.+)?", "admin.index");
+  // 用户页面渲染
+  router.get("spa", "/app(/.+)?", "app.index");
 };

@@ -5,6 +5,7 @@ const FormStream = require('formstream');
 class Admin extends BaseController {
 
   async index() {
+    // 后台管理员页面
     const { ctx } = this;
     await ctx.renderClient('app/main.js', { message: 'egg vue client side render' });
   }
@@ -21,18 +22,6 @@ class Admin extends BaseController {
     } else {
       this.error(467, '未找到');
     }
-
-    // const find = await ctx.service.admin.find({ username, password });
-
-    // if (!find) ctx.throw(403);
-    // ctx.session = { find };
-
-    // // 调用 rotateCsrfSecret 刷新用户的 CSRF token
-    // ctx.rotateCsrfSecret();
-
-    // ctx.body = { success: true };
-    // this.success(200, '请求成功', find);
-
   }
 
   async uploadByStream() {

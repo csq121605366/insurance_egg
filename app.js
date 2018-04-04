@@ -2,9 +2,7 @@
 
 module.exports = app => {
 
-
   app.beforeStart(async (ctx) => {
-
     // 应用会等待这个函数执行完成才启动
     console.log('---------------------------------启动le---------------------------------');
   });
@@ -23,4 +21,7 @@ module.exports = app => {
     // console.log(`${ctx.method} ${ctx.url} - ${used}ms`);
     // log total cost
   });
+
+  
+
 };

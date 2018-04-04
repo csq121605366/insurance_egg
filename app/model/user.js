@@ -3,7 +3,6 @@
  */
 
 const bcrypt = require('bcrypt');
-const validate = require('./validate');
 
 module.exports = app => {
   const config = app.config.myconfig.dbconfig;
@@ -16,11 +15,7 @@ module.exports = app => {
       trim: true
     }, // 用户账号
     password: String, // 密码
-    role: {
-      type: String,
-      enum: ['user', 'doctor', 'agent'], // 设置角色
-      required: [true, '未设置角色']
-    }, // 角色
+    role: String, // 角色
     name: String, // 姓名
     nickname: String, // 别名
     title: {
@@ -30,13 +25,7 @@ module.exports = app => {
     setions: [{ type: Schema.Types.ObjectId, ref: 'Setion' }], // 关联科室 医生只能关联一个科室,患者可以关联最多三个
     skills: [{ type: Schema.Types.ObjectId, ref: 'Skill' }], // 关联擅长领域
     description: String, // 简介
-    email: {
-      type: String,
-      validate: {
-        validator: validate.email,
-        message: '格式不正确'
-      }
-    }, // 邮箱
+    email: String, // 邮箱
     status: {
       type: Number,
       enum: [0, 1, 2, 3],
@@ -47,20 +36,8 @@ module.exports = app => {
       enum: [0, 1, 2] // 0代表女性 1代表男性 2代表未知
     }, // 性别
     avatarUrl: String, // 头像地址
-    phoneNumber: {
-      type: String,
-      validate: {
-        validator: validate.phone,
-        message: '必须是有效的11位手机号码!'
-      }
-    }, // 手机号
-    idcard: {
-      type: String,
-      validate: {
-        validator: validate.idcardnumber,
-        message: '身份证不正确'
-      }
-    },
+    phoneNumber: String, // 手机号
+    idcard: String,
     address: String, // 联系地址
     country: String, // 国家
     province: String, // 省份
@@ -70,9 +47,7 @@ module.exports = app => {
       required: true,
       default: 0
     }, // 登录错误试图次数
-    lockUntil: {
-      type: Number
-    }, // 锁定账号的截至时间
+    lockUntil: Number, // 锁定账号的截至时间
     resetPasswordToken: String, // 重置密码token
     resetPasswordTime: Date, // 重置密码时间
     meta: {
@@ -88,11 +63,11 @@ module.exports = app => {
   });
 
   // 定义虚拟属性是否锁了
-  UserSchema.virtual('isLocked').get(function() {
+  UserSchema.virtual('isLocked').get(function () {
     return !!(this.lockUntil && this.lockUntil > Date.now());
   });
 
-  UserSchema.pre('save', function(next) {
+  UserSchema.pre('save', function (next) {
     if (this.isNew) {
       this.meta.createdAt = this.meta.updatedAt = Date.now();
     } else {
@@ -101,7 +76,7 @@ module.exports = app => {
     next();
   });
 
-  UserSchema.pre('save', function(next) {
+  UserSchema.pre('save', function (next) {
     const user = this;
 
     if (!user.isModified('password')) return next();

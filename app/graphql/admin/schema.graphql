@@ -1,0 +1,12 @@
+type Admin {
+  _id(_id:ID): ID!
+  username(username:String): String!
+  email: String!
+  meta:[Meta]
+}
+
+type Meta{
+  createAt:String
+  updateAt:String
+}
+

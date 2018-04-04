@@ -11,11 +11,10 @@ class BaseController extends Controller {
       data
     };
   }
-  error(data, message = '请求失败') {
+  error( message = '请求失败') {
     this.ctx.body = {
-      success: true,
-      message,
-      data
+      success: false,
+      message
     };
   }
   notf(msg) {

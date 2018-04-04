@@ -4,10 +4,9 @@
  *
  */
 const bcrypt = require('bcrypt');
-const validate = require('./validate');
+const Identicon = require('identicon.js');
 
 module.exports = app => {
-
   const config = app.config.myconfig.dbconfig;
 
   const mongoose = app.mongoose;
@@ -16,44 +15,33 @@ module.exports = app => {
   const AdminSchema = new Schema({
     username: {
       type: String,
-      trim: true
+      trim: true,
+      require: true
     }, // 用户账号
     password: {
-      type: String
-    }, // 密码
-    email: {
       type: String,
-      validate: {
-        validator: validate.email,
-        message: '格式不正确'
-      }
-    }, // 邮箱
+      require: true
+    }, // 密码
+    email: String, // 邮箱
     role: {
-      type: Number,
-      enum: [1, 2, 3],
-      default: 1
-    }, // 管理员类型 1普通管理员 2.可读可写管理员 3.root管理员
+      type: String,
+      enum: config.ADMIN_ROLE_TYPE,
+      default: config.ADMIN_ROLE_TYPE[0]
+    }, //后台管理员角色 root超级管理员 admin管理员 normal普通管理员
     status: {
       type: Number,
-      enum: [0, 1, 2, 3],
-      default: 1
+      enum: config.ADMIN_ROLE_STATUS,
+      default: config.ADMIN_ROLE_STATUS[1]
     }, // 用户账号状态 0未激活 1激活 2锁定 3已删除
     email_code: {
       code: String,
       createdAt: Date
     }, // {code:验证码,createdAt:发送时间}
-    avatarUrl: String, // 头像地址
-    phoneNumber: {
-      type: String,
-      validate: {
-        validator: validate.phone,
-        message: '必须是有效的11位手机号码!'
-      }
-    },
+    avatarUrl: String, // 头像地址 或者头像png
+    phoneNumber: String,
     loginAttempts: {
       type: Number,
-      required: true,
-      default: 0
+      default: config.MAX_LOGIN_ATTEMPTS
     }, // 登录错误试图次数
     lockUntil: {
       type: Number
@@ -73,20 +61,11 @@ module.exports = app => {
   });
 
   // 定义虚拟属性是否锁了
-  AdminSchema.virtual('isLocked').get(function() {
+  AdminSchema.virtual('isLocked').get(function () {
     return !!(this.lockUntil && this.lockUntil > Date.now());
   });
 
-  AdminSchema.pre('save', function(next) {
-    if (this.isNew) {
-      this.meta.createdAt = this.meta.updatedAt = Date.now();
-    } else {
-      this.meta.updatedAt = Date.now();
-    }
-    next();
-  });
-
-  AdminSchema.pre('save', function(next) {
+  AdminSchema.pre('save', function (next) {
     const user = this;
     if (!user.isModified('password')) return next();
     bcrypt.genSalt(config.SALT_STRENGTH, (err, salt) => {
@@ -98,6 +77,26 @@ module.exports = app => {
       });
     });
   });
+
+  AdminSchema.pre('save', function (next) {
+    if (this.isNew) {
+      const options = {
+        margin: 0.2,
+        size: 120,
+      };
+      // 使用hash 生成初始化头像
+      let hash = Math.random().toString(16).slice(2);
+      let avatar = new Identicon(hash + hash, options).toString();
+      this.avatarUrl = 'data:image/png;base64,' + avatar;
+      // 创建时间
+      this.meta.createdAt = this.meta.updatedAt = Date.now();
+    } else {
+      this.meta.updatedAt = Date.now();
+    }
+    next();
+  });
+
+
 
   AdminSchema.methods = {
     comparePassword(password, hash) {
@@ -113,11 +112,10 @@ module.exports = app => {
               $unset: {
                 lockUntil: 1
               }
-            }, function(err, doc) {
+            }, function (err, doc) {
               if (!err) resolve(isMatch);
               reject(err);
             });
-            console.log(isMatch);
           } else {
             resolve(isMatch);
           }

@@ -2,7 +2,7 @@
  * 用户信息
  */
 
-const bcrypt = require('bcrypt');
+const bcrypt = require("bcrypt");
 
 module.exports = app => {
   const config = app.config.myconfig.dbconfig;
@@ -20,10 +20,10 @@ module.exports = app => {
     nickname: String, // 别名
     title: {
       type: Schema.Types.ObjectId,
-      ref: 'Title'
+      ref: "Title"
     }, // 职称
-    setions: [{ type: Schema.Types.ObjectId, ref: 'Setion' }], // 关联科室 医生只能关联一个科室,患者可以关联最多三个
-    skills: [{ type: Schema.Types.ObjectId, ref: 'Skill' }], // 关联擅长领域
+    setions: [{ type: Schema.Types.ObjectId, ref: "Setion" }], // 关联科室 医生只能关联一个科室,患者可以关联最多三个
+    skills: [{ type: Schema.Types.ObjectId, ref: "Skill" }], // 关联擅长领域
     description: String, // 简介
     email: String, // 邮箱
     status: {
@@ -35,8 +35,9 @@ module.exports = app => {
       type: Number,
       enum: [0, 1, 2] // 0代表女性 1代表男性 2代表未知
     }, // 性别
-    avatarUrl: String, // 头像地址
+    headimgurl: String, // 头像地址
     phoneNumber: String, // 手机号
+    privilege: Array, //特权
     idcard: String,
     address: String, // 联系地址
     country: String, // 国家
@@ -63,11 +64,11 @@ module.exports = app => {
   });
 
   // 定义虚拟属性是否锁了
-  UserSchema.virtual('isLocked').get(function () {
+  UserSchema.virtual("isLocked").get(function() {
     return !!(this.lockUntil && this.lockUntil > Date.now());
   });
 
-  UserSchema.pre('save', function (next) {
+  UserSchema.pre("save", function(next) {
     if (this.isNew) {
       this.meta.createdAt = this.meta.updatedAt = Date.now();
     } else {
@@ -76,10 +77,10 @@ module.exports = app => {
     next();
   });
 
-  UserSchema.pre('save', function (next) {
+  UserSchema.pre("save", function(next) {
     const user = this;
 
-    if (!user.isModified('password')) return next();
+    if (!user.isModified("password")) return next();
 
     bcrypt.genSalt(config.SALT_STRENGTH, (err, salt) => {
       if (err) return next(err);
@@ -130,7 +131,10 @@ module.exports = app => {
           loginAttempts: 1
         }
       };
-      if (this.loginAttempts + 1 >= config.MAX_LOGIN_ATTEMPTS && !this.isLocked) {
+      if (
+        this.loginAttempts + 1 >= config.MAX_LOGIN_ATTEMPTS &&
+        !this.isLocked
+      ) {
         updates.$set = {
           lockUntil: Date.now() + config.LOCK_TIME
         };
@@ -138,5 +142,5 @@ module.exports = app => {
       return await this.update(updates);
     }
   };
-  return mongoose.model('User', UserSchema);
+  return mongoose.model("User", UserSchema);
 };

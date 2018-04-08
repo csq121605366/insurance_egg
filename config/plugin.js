@@ -31,10 +31,10 @@ exports.mongoose = {
 //   package: 'egg-cors',
 // }
 
-exports.graphql = {
-  enable: true,
-  package: 'egg-graphql',
-};
+// exports.graphql = {
+//   enable: true,
+//   package: 'egg-graphql',
+// };
 
 exports.jwt = {
   enable: true,

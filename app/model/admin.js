@@ -38,7 +38,7 @@ module.exports = app => {
       createdAt: Date
     }, // {code:验证码,createdAt:发送时间}
     avatarUrl: String, // 头像地址 或者头像png
-    phoneNumber: String,
+    phone: String,
     loginAttempts: {
       type: Number,
       default: config.MAX_LOGIN_ATTEMPTS
@@ -99,6 +99,7 @@ module.exports = app => {
 
 
   AdminSchema.methods = {
+    // password要比较的密码, hash数据库里面的密码
     comparePassword(password, hash) {
       return new Promise((resolve, reject) => {
         bcrypt.compare(password, hash, async (err, isMatch) => {

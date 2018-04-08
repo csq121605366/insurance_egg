@@ -1,17 +1,19 @@
-const path = require('path');
-const fs = require('fs');
+const path = require("path");
+const fs = require("fs");
 module.exports = app => {
   const exports = {};
+  exports.version = "v1";
 
   exports.siteFile = {
-    '/favicon.ico': fs.readFileSync(path.join(app.baseDir, 'app/web/asset/images/favicon.ico'))
+    "/favicon.ico": fs.readFileSync(
+      path.join(app.baseDir, "app/web/asset/images/favicon.ico")
+    )
   };
 
-
   exports.vuessr = {
-    layout: path.join(app.baseDir, 'app/web/view/layout.html'),
+    layout: path.join(app.baseDir, "app/web/view/layout.html"),
     renderOptions: {
-      basedir: path.join(app.baseDir, 'app/view')
+      basedir: path.join(app.baseDir, "app/view")
     }
   };
 
@@ -19,53 +21,39 @@ module.exports = app => {
   Object.assign(exports, {
     security: {
       csrf: {
-        ignore: () => true,
-        ignoreJSON: true, // 默认为 false，当设置为 true 时，将会放过所有 content-type 为 `application/json` 的请求
-      },
+        enable: false
+      }
     },
     // 限制body大小
     bodyParser: {
-      jsonLimit: '1mb',
-      formLimit: '1mb',
+      jsonLimit: "1mb",
+      formLimit: "1mb"
     },
     view: {
       cache: false
     },
     logger: {
-      level: 'WARN',
-      consoleLevel: 'DEBUG', // ERROR  WARN  INFO DEBUG NONE
-      dir: path.join(app.baseDir, 'logs')
+      level: "WARN",
+      consoleLevel: "DEBUG", // ERROR  WARN  INFO DEBUG NONE
+      dir: path.join(app.baseDir, "logs")
     },
-    middleware: [
-      'access',
-      'gzip',
-      'errorHandler',
-      'graphql'
-    ],
+    middleware: ["access", "gzip", "errorHandler"],
     gzip: { threshold: 1024 },
     static: {
-      prefix: '/public/',
-      dir: path.join(app.baseDir, 'public')
+      prefix: "/public/",
+      dir: path.join(app.baseDir, "public")
     },
-    keys: 'insurance_cookie_secret',
-    key: 'insurance_cookie', // 承载 Session 的 Cookie 键值对名字
-    maxAge: 86400000, // Session 的最大有效时间
+    keys: "insurance_cookie_secret",
+    key: "insurance_cookie", // 承载 Session 的 Cookie 键值对名字
+    maxAge: 86400000 // Session 的最大有效时间
   });
-
-  exports.graphql = {
-    router: '/graphql',
-    // 是否加载到 app 上，默认开启
-    app: true,
-    // 是否加载到 agent 上，默认关闭
-    agent: false,
-  };
 
   // mongoose
   exports.mongoose = {
     client: {
-      url: 'mongodb://insurance_admin:csqcsq1214@47.52.63.21:27017/insurance',
-      options: {},
-    },
+      url: "mongodb://insurance_admin:csqcsq1214@47.52.63.21:27017/insurance",
+      options: {}
+    }
   };
 
   exports.onerror = {
@@ -77,12 +65,12 @@ module.exports = app => {
     // },
     html(err, ctx) {
       // html hander
-      ctx.body = '<h3>error</h3>';
+      ctx.body = "<h3>error</h3>";
       ctx.status = 500;
     },
     json(err, ctx) {
       // json hander
-      ctx.body = { message: 'error' };
+      ctx.body = { message: "error" };
       ctx.status = 500;
     }
   };
@@ -90,11 +78,13 @@ module.exports = app => {
   exports.regexp = {
     username: /^[a-zA-Z0-9_-]{4,16}$/, //用户名正则，4到16位（字母，数字，下划线，减号）
     password: /^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,21}$/, //6-21字母和数字组成，不能是纯数字或纯英文
-    email: /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/,  //Email正则
+    email: /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/, //Email正则
     phone: /^((13[0-9])|(14[5|7])|(15([0-3]|[5-9]))|(18[0,5-9]))\d{8}$/, //手机号正则
-    name: /^([a-zA-Z0-9\u4e00-\u9fa5\·]{1,10})$/, //姓名正则
+    name: /^[\u4E00-\u9FA5]{2,5}(?:·[\u4E00-\u9FA5]{2,5})*$/, //姓名正则
     idcard: /^[1-9]\d{5}(18|19|([23]\d))\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/, //18位身份证
-  }
+    url: /^(\w+:\/\/)?\w+(\.\w+)+.*$/, // url验证
+    money: /^(([1-9][0-9]*)|(([0]\.\d{1,2}|[1-9][0-9]*\.\d{1,2})))$/ //金额
+  };
 
   exports.httpclient = {
     // 是否开启本地 DNS 缓存，默认关闭，开启后有两个特性
@@ -108,7 +98,7 @@ module.exports = app => {
 
     request: {
       // 默认 request 超时时间
-      timeout: 3000,
+      timeout: 3000
     },
 
     httpAgent: {
@@ -121,7 +111,7 @@ module.exports = app => {
       // 允许创建的最大 socket 数
       maxSockets: Number.MAX_SAFE_INTEGER,
       // 最大空闲 socket 数
-      maxFreeSockets: 256,
+      maxFreeSockets: 256
     },
 
     httpsAgent: {
@@ -134,45 +124,49 @@ module.exports = app => {
       // 允许创建的最大 socket 数
       maxSockets: Number.MAX_SAFE_INTEGER,
       // 最大空闲 socket 数
-      maxFreeSockets: 256,
-    },
+      maxFreeSockets: 256
+    }
   };
 
   exports.jwt = {
-    secret: 'insurance:token', // token的加密密钥
-    exp: 2 * 60 * 60, //存在时间 单位位秒
+    secret: "insurance:token", // token的加密密钥
+    exp: 2 * 60 * 60 //存在时间 单位位秒
     // match: '/jwt',
-  }
+  };
 
   exports.myconfig = {
+    SITE_ROOT_URL: "http://csq.weixin.caishangqing.com",
     wechat: {
       refreshTime: { hour: [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23] }, // 每天定时更新access_token
-      appID: 'wxdb0b987716f5cc54',
-      appSecret: '40eb0adc05b563a5bbbad3c44b5d0276',
-      token: 'weixin'
+      appID: "wxdb0b987716f5cc54",
+      appSecret: "40eb0adc05b563a5bbbad3c44b5d0276",
+      token: "weixin",
+      oauthUrl: "http://csq.weixin.caishangqing.com/api/weixin/oauth"
     },
     email: {
-      accountUser: '121605366@qq.com', // 发送邮件的qq
-      accountPass: 'ilepztuozospbhfa', // 第三方授权密码，不是qq邮箱密码，在发送邮箱里面设置
-      service: 'qq',
-      host: 'smtp.qq.email',
+      accountUser: "121605366@qq.com", // 发送邮件的qq
+      accountPass: "ilepztuozospbhfa", // 第三方授权密码，不是qq邮箱密码，在发送邮箱里面设置
+      service: "qq",
+      host: "smtp.qq.email",
       port: 465,
       secure: true,
       interval: 3 * 60 * 1000
     },
     dbconfig: {
-      ADMIN_ROLE_TYPE: ['normal', 'admin', 'root'], //后台管理员角色 root超级管理员 admin管理员 normal普通管理员
+      ADMIN_ROLE_TYPE: ["normal", "admin", "root"], //后台管理员角色 root超级管理员 admin管理员 normal普通管理员
       ADMIN_ROLE_STATUS: [0, 1, 2, 3], // 用户账号状态 0未激活 1激活 2锁定 3已删除
-      USER_ROLE_TYPE: ['user', 'doctor', 'agent', 'admin'], // 用户角色列表 user普通用户 doctor医生 agent经理人 admin前台页面管理员
+      USER_ROLE_TYPE: ["user", "doctor", "agent", "admin"], // 用户角色列表 user普通用户 doctor医生 agent经理人 admin前台页面管理员
       SALT_STRENGTH: 10, // 密码加密强度
       MAX_LOGIN_ATTEMPTS: 15, // 尝试登录次数
       LOCK_TIME: 10 * 1000 // 锁定时间
     },
     qiniu: {
-      AK: '你的七牛 AK',
-      SK: '你的七牛 SK',
-      bucket: '你的七牛 bucket',
-      qiniuURL: 'bucket 对应的测试地址'
+      AK: "-xVS5bXcDRB6C6nqDeWSoPtjGLA4P9NPItgYaoiq",
+      SK: "k4B_UnooJE6reuiRNVlwcwnW8xvcGML3xmzkHFAr",
+      permanent_bucket: " weixin-permanent",
+      temporary_bucket: "weixin-temporary",
+      permanent_url: "p6syms5zu.bkt.clouddn.com",
+      temporary_url: "p6syg4m80.bkt.clouddn.com"
     }
   };
 

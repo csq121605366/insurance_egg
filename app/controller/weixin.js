@@ -328,76 +328,9 @@ class Weixin extends BaseController {
    * @param {*} permanent 是否为永久素材，如果存在permanent则为永久素材否则相反
    */
   async uploadMaterial() {
-    let type = "image";
-    const fs = require("fs");
-    const path = require("path");
-    const awaitWriteStream = require("await-stream-ready").write;
-    const sendToWormhole = require("stream-wormhole");
-    // let formstream = require('formstream');
-    // let form = new formstream();
-    let stream = await this.ctx.getFileStream();
-    const filename = "32432" + path.extname(stream.filename).toLowerCase();
-    console.log(filename);
-    const target = path.join(this.config.baseDir, "app/public", filename);
-    const writeStream = fs.createWriteStream(target);
-    try {
-      await awaitWriteStream(stream.pipe(writeStream));
-    } catch (err) {
-      await sendToWormhole(stream);
-      throw err;
-    }
-    let st = await fs.createReadStream(target);
-    console.log(st)
-    let res = await this.ctx.curl(
-      "https://api.weixin.qq.com/cgi-bin/media/upload?access_token=8_dzgF4oxuCsei5B6nRpUYEMe4XRCNS51ezHDadtkIc4ztHzww8igDYi3Z31VCB5fgMtEE_deliBmXtJoW2jg2Fj84rPJd33sg_qgN_ADy0NgtTDzNF9SbrIE0lxeG9ca5dQtse-iKonpY4r1CSYJbAHAFLW&type=image",
-      {
-        method: "POST",
-        stream: {
-          media: st
-        },
-        // 明确告诉 HttpClient 以 JSON 格式处理响应 body
-        dataType: "json"
-      }
-    );
-    console.log(res);
-    return;
-    // const defaults = {
-    //   flags: "r",
-    //   encoding: null,
-    //   fd: null,
-    //   mode: 0o666,
-    //   autoClose: true
-    // };
-    // Object.assign(stream, defaults);
-    // form.buffer('media',stream._readableState.buffer,stream.filename)
-    // await sendToWormhole(stream);
+    let data = this.ctx.getFileStream();
 
-    // const filename =
-    //   encodeURIComponent(stream.fields.name) +
-    //   path.extname(stream.filename).toLowerCase();
-    // const form = new FormStream();
-    // var fs = require("fs");
-    // let file = await fs.createReadStream('app.js');
-    // console.log(file);
-    // return
-    // // 设置普通的 key value
-    // form.field("foo", "bar");
-    // // 上传当前文件本身用于测试
-    // form.file("file", stream);
-    let data = await this.service.weixin.handle("uploadMaterial", type, stream);
-    if (data.errcode && data.errcode != 0) return this.error(data.errmsg);
-    this.success(data);
-    // const filename = encodeURIComponent(stream.fields.name) + path.extname(stream.filename).toLowerCase();
-    // const target = path.join(this.config.baseDir, 'app/public', filename);
-    // const writeStream = fs.createWriteStream(target);
-    // try {
-    //   await awaitWriteStream(stream.pipe(writeStream));
-    // } catch (err) {
-    //   await sendToWormhole(stream);
-    //   throw err;
-    // }
-
-    // this.ctx.body = { url: '/public/' + filename };
+    this.success();
   }
 
   /**
@@ -433,8 +366,97 @@ class Weixin extends BaseController {
     // });
     // await this.ctx.model.Weixinport.insertMany(data);
 
-    let data = this.service.weixin.test();
-    this.success(data);
+    // let data = this.service.weixin.test();
+
+    // const fs = require('fs');
+    // const _ = require('lodash');
+    // let data = JSON.parse(fs.readFileSync('app/doc/pca.json'));
+    // let ins = [];
+    // let i1 = 1;
+    // _.forEach(data, function (val, key) {
+    //   let tmp1 = {};
+    //   tmp1.name = key;
+    //   tmp1.pcaid = i1++;
+    //   tmp1.children = [];
+    //   if (val) {
+    //     let i2 = 1;
+    //     _.forEach(val, (a, b) => {
+    //       let tmp2 = {};
+    //       tmp2.name = b;
+    //       tmp2.pcaid = i1 + '-' + i2++;
+    //       tmp2.children = []
+    //       if (b) {
+    //         let i3 = 1;
+    //         _.forEach(a, (x, y) => {
+    //           let tmp3 = {};
+    //           tmp3.name = y;
+    //           tmp3.pcaid = i1 + '-' + i2 + '-' + i3++;
+    //           tmp3.children = [];
+    //           if (x) {
+    //             let i4 = 1;
+    //             _.forEach(x, (j, k) => {
+    //               let tmp4 = {};
+    //               tmp4.name = j;
+    //               tmp4.pcaid = i1 + '-' + i2 + '-' + i3 + '-' + i4++;
+    //               tmp3.children.push(tmp4)
+    //             })
+    //           }
+    //           tmp2.children.push(tmp3);
+    //         })
+    //       }
+    //       tmp1.children.push(tmp2);
+    //     })
+    //   }
+    //   ins.push(tmp1);
+    // })
+
+    // await this.ctx.model.Pca.insertMany(ins);
+    ///////////////////////////////////////////////////////////setion///////////////////////////////////////////////////////////////////
+    // const fs = require('fs');
+    // const _ = require('lodash');
+    // let data = JSON.parse(fs.readFileSync('app/doc/setion.json'));
+    // await this.ctx.model.Setion.insertMany(data);
+
+    // let Schema = this.app.mongoose.Schema;
+
+    // let newtitle = new this.ctx.model.Title({
+    //   name: '我是新title3',
+    // })
+
+    // let res = await newtitle.save((err, doc) => {
+    //   let newuser = new this.ctx.model.User({
+    //     openid: 333333,
+    //     title: newtitle._id
+    //   })
+    //   newuser.save()
+    // })
+    // var city = ["北京", "天津", "河北", "山西", "内蒙古", "辽宁", "吉林", "黑龙江", "上海", "江苏", "浙江", "安徽", "福建", "江西", "山东", "河南", "湖北", "湖南", "广东", "广西", "海南", "重庆", "四川", "贵州", "云南", "西藏", "陕西", "甘肃", "青海", "宁夏", "新疆", "台湾", "香港", "澳门"];
+    // const fs = require('fs');
+    // const _ = require('lodash');
+    // let i = this.ctx.request.body.index;
+    // let data = JSON.parse(fs.readFileSync(`app/doc/hospital/location${i}.json`));
+    // let res = {
+    //   city: city[i],
+    //   children: []
+    // };
+    // _.forEach(data, (val, item) => {
+    //   res.children.push({
+    //     trade: val.trade,
+    //     grade: val.grade,
+    //     location: val.location,
+    //     label: val.label,
+    //     sid: val.sid
+    //   })
+    // })
+    // // console.log(this.ctx.model)
+    // let res = await this.ctx.model.Hospital.aggregate([
+    //   { $project: { city: 1 } }
+    // ]).exec()
+
+ 
+
+    this.success();
+
   }
 }
 

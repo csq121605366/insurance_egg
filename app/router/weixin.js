@@ -42,9 +42,9 @@ module.exports = app => {
 
   // 素材
   router.post("/api/weixin/material/upload", "weixin.uploadMaterial");
-
+  
 
 
   // 测试接口
-  router.post("/api/weixin/test", "weixin.uploadMaterial");
+  router.all("/api/weixin/test", "weixin.test");
 };

@@ -7,3 +7,5 @@ export function qiniuTicket(data) {
     data
   });
 }
+
+

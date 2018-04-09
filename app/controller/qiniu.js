@@ -12,6 +12,9 @@ class QiniuController extends BaseController {
     let res = await this.service.qiniu.createTicket(permanent);
     this.success(res);
   }
+  async callback() {
+    console.log(this.ctx.request.body)
+  }
 }
 
 module.exports = QiniuController;

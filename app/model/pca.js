@@ -1,14 +1,15 @@
+
+
 /**
- * 微信token保存
+ * 省市区三级 pca
  */
 
 module.exports = app => {
   const mongoose = app.mongoose;
   const Schema = mongoose.Schema;
-  const WeixinSchema = new mongoose.Schema({
-    name: String,
-    data: String,
-    expires_in: Number,
+  const PcaSchema = new mongoose.Schema({
+    name: String,//省级
+    children: Schema.Types.Mixed,
     meta: {
       created: {
         type: Date,
@@ -20,7 +21,7 @@ module.exports = app => {
       }
     }
   });
-  WeixinSchema.pre("save", function(next) {
+  PcaSchema.pre("save", function (next) {
     if (this.isNew) {
       this.meta.created = this.meta.updated = new Date();
     } else {
@@ -28,5 +29,5 @@ module.exports = app => {
     }
     next();
   });
-  return mongoose.model("Weixin", WeixinSchema);
+  return mongoose.model("Pca", PcaSchema);
 };

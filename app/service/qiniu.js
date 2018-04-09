@@ -1,29 +1,63 @@
+
 "use strict";
 
 const BaseService = require("./base");
 const qiniu = require("qiniu");
+const _ = require('lodash');
 class QiniuService extends BaseService {
   constructor(ctx) {
     super(ctx);
   }
 
-  async createTicket(permanent) {
-    let config = this.config.myconfig.qiniu;
-    let mac = new qiniu.auth.digest.Mac(config.AK, config.SK);
-    let bucket;
-    if (permanent) bucket = config.permanent_bucket;
-    else bucket = config.temporary_bucket;
+  async createTicket() {
+    let config = this.config.myconfig;
+    let mac = new qiniu.auth.digest.Mac(config.qiniu.AK, config.qiniu.SK);
+    let bucket = config.qiniu.temporary_bucket;
     let options = {
       scope: bucket,
       expires: 7200,
-      callbackBodyType: "application/json",
-      returnBody:
-        '{"key":"$(key)","hash":"$(etag)","fsize":$(fsize),"bucket":"$(bucket)","name":"$(x:name)"}'
+      returnBody: '{"key":"$(key)","hash":"$(etag)","fsize":$(fsize),"bucket":"$(bucket)","name":"$(x:name)"}'
     };
     var putPolicy = new qiniu.rs.PutPolicy(options);
     var uploadToken = putPolicy.uploadToken(mac);
     return uploadToken;
   }
+  /**
+   * 注册后将图片数组转移到永久仓库
+   * @param {*} filenames 文件数组
+   */
+  async removeImage(filenames = []) {
+    let config = this.config.myconfig;
+    let srcBucket = config.qiniu.temporary_bucket;
+    let destBucket = config.qiniu.permanent_bucket;
+    let moveOperations = [];
+    let res = [];
+    _.forEach(filenames, (value, index) => {
+      let mkfilename = this.guid() + /\.[^\.]+$/.exec(value)[0];
+      let opt = qiniu.rs.moveOp(srcBucket, value, destBucket, mkfilename);
+      res.push(mkfilename);
+      moveOperations.push(opt);
+    });
+    let mac = new qiniu.auth.digest.Mac(config.qiniu.AK, config.qiniu.SK);
+    var conf = new qiniu.conf.Config();
+    var bucketManager = new qiniu.rs.BucketManager(mac, conf);
+    return new Promise((resolve, reject) => {
+      bucketManager.batch(moveOperations, function (err, respBody, respInfo) {
+        if (err) {
+          reject(err);
+        } else {
+          // 200 is success, 298 is part success
+          if (respInfo.statusCode !== 200) {
+            reject()
+          } else {
+            resolve(res);
+          }
+        }
+      });
+    })
+
+  }
+
 
   /**
    * 获取图片

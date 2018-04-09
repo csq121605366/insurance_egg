@@ -50,29 +50,6 @@ class WeixinService extends BaseService {
       await sendToWormhole(options.formData.media);
       console.error(error);
     }
-    // if (options.stream) {
-    //   options = Object.assign({}, options, {
-    //     dataType: "json"
-    //   });
-    // } else {
-    //   options = Object.assign({}, options, {
-    //     dataType: "json",
-    //     contentType: "json"
-    //   });
-    // }
-    // // 删除api
-    // delete options.api;
-    // console.log(options);
-    // try {
-    //   const response = await this.ctx.curl(options.url, options);
-    //   return response.data;
-    // } catch (e) {
-    //   console.log(e);
-    //   if (options.stream) {
-    //     await sendToWormhole(options.stream);
-    //   }
-    //   throw new Error("向微信发送请求失败!");
-    // }
   }
   /**
    * 获取token

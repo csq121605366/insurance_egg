@@ -1,14 +1,14 @@
+
 /**
- * 微信token保存
+ * 职称
  */
 
 module.exports = app => {
   const mongoose = app.mongoose;
   const Schema = mongoose.Schema;
-  const WeixinSchema = new mongoose.Schema({
-    name: String,
-    data: String,
-    expires_in: Number,
+  const TitleSchema = new mongoose.Schema({
+    name: String,//职称名称
+    description: String, //职称描述
     meta: {
       created: {
         type: Date,
@@ -20,7 +20,7 @@ module.exports = app => {
       }
     }
   });
-  WeixinSchema.pre("save", function(next) {
+  TitleSchema.pre("save", function (next) {
     if (this.isNew) {
       this.meta.created = this.meta.updated = new Date();
     } else {
@@ -28,5 +28,5 @@ module.exports = app => {
     }
     next();
   });
-  return mongoose.model("Weixin", WeixinSchema);
+  return mongoose.model("Title", TitleSchema);
 };

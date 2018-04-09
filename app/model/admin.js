@@ -51,18 +51,18 @@ module.exports = app => {
     meta: {
       createdAt: {
         type: Date,
-        default: Date.now()
+        default: new Date()
       },
       updatedAt: {
         type: Date,
-        default: Date.now()
+        default: new Date()
       }
     }
   });
 
   // 定义虚拟属性是否锁了
   AdminSchema.virtual('isLocked').get(function () {
-    return !!(this.lockUntil && this.lockUntil > Date.now());
+    return !!(this.lockUntil && this.lockUntil > new Date().getTime());
   });
 
   AdminSchema.pre('save', function (next) {
@@ -89,9 +89,9 @@ module.exports = app => {
       let avatar = new Identicon(hash + hash, options).toString();
       this.avatarUrl = 'data:image/png;base64,' + avatar;
       // 创建时间
-      this.meta.createdAt = this.meta.updatedAt = Date.now();
+      this.meta.createdAt = this.meta.updatedAt = new Date();
     } else {
-      this.meta.updatedAt = Date.now();
+      this.meta.updatedAt = new Date();
     }
     next();
   });
@@ -124,7 +124,7 @@ module.exports = app => {
       });
     },
     async incLoginAttempts() {
-      if (this.lockUntil && this.lockUntil < Date.now()) {
+      if (this.lockUntil && this.lockUntil < new Date().getTime()) {
         // 解锁
         return await this.update({
           $set: {
@@ -143,7 +143,7 @@ module.exports = app => {
       };
       if (this.loginAttempts + 1 >= config.MAX_LOGIN_ATTEMPTS && !this.isLocked) {
         updates.$set = {
-          lockUntil: Date.now() + config.LOCK_TIME
+          lockUntil: new Date().getTime() + config.LOCK_TIME
         };
       }
       return await this.update(updates);

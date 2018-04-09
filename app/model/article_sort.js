@@ -1,14 +1,14 @@
+// 文章分类
+
 /**
- * 微信token保存
+ * 文章分类
  */
 
 module.exports = app => {
   const mongoose = app.mongoose;
   const Schema = mongoose.Schema;
-  const WeixinSchema = new mongoose.Schema({
-    name: String,
-    data: String,
-    expires_in: Number,
+  const ArticleSortSchema = new mongoose.Schema({
+    name: String,//分类名称
     meta: {
       created: {
         type: Date,
@@ -20,7 +20,7 @@ module.exports = app => {
       }
     }
   });
-  WeixinSchema.pre("save", function(next) {
+  ArticleSortSchema.pre("save", function (next) {
     if (this.isNew) {
       this.meta.created = this.meta.updated = new Date();
     } else {
@@ -28,5 +28,5 @@ module.exports = app => {
     }
     next();
   });
-  return mongoose.model("Weixin", WeixinSchema);
+  return mongoose.model("ArticleSort", ArticleSortSchema);
 };

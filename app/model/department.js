@@ -1,14 +1,15 @@
+
 /**
- * 微信token保存
+ * 科室
  */
 
 module.exports = app => {
   const mongoose = app.mongoose;
   const Schema = mongoose.Schema;
-  const WeixinSchema = new mongoose.Schema({
-    name: String,
-    data: String,
-    expires_in: Number,
+  const DepartmentSchema = new mongoose.Schema({
+    key:Number, //科室关键字
+    label: String,//主科室名称
+    children:[], //小科室集合
     meta: {
       created: {
         type: Date,
@@ -20,7 +21,7 @@ module.exports = app => {
       }
     }
   });
-  WeixinSchema.pre("save", function(next) {
+  DepartmentSchema.pre("save", function (next) {
     if (this.isNew) {
       this.meta.created = this.meta.updated = new Date();
     } else {
@@ -28,5 +29,5 @@ module.exports = app => {
     }
     next();
   });
-  return mongoose.model("Weixin", WeixinSchema);
+  return mongoose.model("Department", DepartmentSchema);
 };

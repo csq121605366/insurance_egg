@@ -19,19 +19,19 @@ module.exports = app => {
     meta: {
       created: {
         type: Date,
-        default: Date.now()
+        default: new Date()
       },
       updated: {
         type: Date,
-        default: Date.now()
+        default: new Date()
       }
     }
   });
-  WeixinPortSchema.pre("save", function(next) {
+  WeixinPortSchema.pre("save", function (next) {
     if (this.isNew) {
-      this.meta.created = this.meta.updated = Date.now();
+      this.meta.created = this.meta.updated = new Date();
     } else {
-      this.meta.updated = Date.now();
+      this.meta.updated = new Date();
     }
     next();
   });

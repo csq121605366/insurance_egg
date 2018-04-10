@@ -16,6 +16,13 @@ exports.validate = {
   package: 'egg-validate',
 };
 
+// websocket
+// exports.io = {
+//   enable: false,
+//   package: "egg-socket.io"
+// };
+
+
 exports.mongoose = {
   enable: true,
   package: 'egg-mongoose',

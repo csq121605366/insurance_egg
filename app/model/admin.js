@@ -26,13 +26,13 @@ module.exports = app => {
     role: {
       type: String,
       enum: config.ADMIN_ROLE_TYPE,
-      default: config.ADMIN_ROLE_TYPE[0]
-    }, //后台管理员角色 root超级管理员 admin管理员 normal普通管理员
+      default: config.ADMIN_ROLE_TYPE[1]
+    }, //后台管理员角色 0保留  1普通管理员 2管理员 9超级管理员
     status: {
       type: Number,
       enum: config.ADMIN_ROLE_STATUS,
-      default: config.ADMIN_ROLE_STATUS[1]
-    }, // 用户账号状态 0未激活 1激活 2锁定 3已删除
+      default: config.ADMIN_ROLE_STATUS[2]
+    }, // 用户账号状态 0保留 1未激活 2已激活 3已锁定 9已删除
     email_code: {
       code: String,
       createdAt: Date

@@ -1,6 +1,7 @@
 module.exports = app => {
   const { router, controller } = app;
 
-  router.post("/api/app/register", "app.register"); // 用户注册
+  router.post("/api/app/login", "app.login"); // 用户注册
+  
 
 };

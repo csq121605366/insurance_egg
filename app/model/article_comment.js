@@ -1,7 +1,7 @@
 // 文章分类
 
 /**
- * 文章分类
+ * 文章
  */
 
 module.exports = app => {
@@ -10,7 +10,6 @@ module.exports = app => {
   const ArticleCommentSchema = new mongoose.Schema({
     user_id: { type: Schema.Types.ObjectId, ref: "User" },//评论人
     content: String, //评论内容
-    ip: String,//评论时的ip
     comments: [{ type: Schema.Types.ObjectId, ref: "ArticleComment" }], //评论的评论
     meta: {
       created: {

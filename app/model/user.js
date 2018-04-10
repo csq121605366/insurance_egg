@@ -10,7 +10,10 @@ module.exports = app => {
   const Schema = mongoose.Schema;
 
   const UserSchema = new Schema({
-    openid: String, // 微信的id
+    openid: {
+      type: String,
+      unique: true
+    }, // 微信的id
     username: {
       type: String,
       trim: true
@@ -18,7 +21,16 @@ module.exports = app => {
     name: String, // 姓名
     nickname: String, // 别名
     password: String, // 密码
-    role: String, // 角色
+    role: {
+      type: Number,
+      enum: config.USER_ROLE_TYPE,
+      default: config.USER_ROLE_STATUS[0]
+    },// 用户角色列表 0:游客 1:普通用户 2:医生 3:经理人 9:前台页面管理员
+    status: {
+      type: Number,
+      enum: config.ADMIN_ROLE_TYPE,
+      default: config.ADMIN_ROLE_TYPE[1]
+    },// 用户账号状态 0保留 1未激活 2已激活 3已锁定 9已删除
     phone: String, // 手机号
     idcard: String, //身份证号
     address: String, // 联系地址
@@ -41,13 +53,13 @@ module.exports = app => {
     setions: [
       {
         type: Schema.Types.ObjectId,
-        ref: "Setion"
+        ref: "Department"
       }
     ], // 关联科室 医生只能关联一个科室,患者可以关联最多三个 经理人代理三个科室
     friends: [
       {
         type: Schema.Types.ObjectId,
-        ref: "Setion"
+        ref: "User"
       }
     ], //关联用户 代理人关联医生
     title: {
@@ -63,11 +75,6 @@ module.exports = app => {
     fields: String, // 擅长领域
     description: String, // 简介
     email: String, //邮箱
-    status: {
-      type: Number,
-      enum: [0, 1, 2, 3],
-      default: 1
-    }, // 用户账号状态 0未激活 1激活 2锁定 3已删除
     gender: {
       type: Number,
       enum: [0, 1, 2] // 0代表女性 1代表男性 2代表未知
@@ -85,7 +92,7 @@ module.exports = app => {
     }
   });
 
-  UserSchema.pre("save", function(next) {
+  UserSchema.pre("save", function (next) {
     if (this.isNew) {
       this.meta.createdAt = this.meta.updatedAt = new Date();
     } else {

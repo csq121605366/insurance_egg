@@ -17,11 +17,6 @@ module.exports = app => {
     }
   };
 
-  // websocket
-  // exports.io = {
-  //   enable: true,
-  //   package: "egg-socket.io"
-  // };
 
   // cookie加密密钥
   Object.assign(exports, {
@@ -136,7 +131,7 @@ module.exports = app => {
 
   exports.jwt = {
     secret: "insurance:token", // token的加密密钥
-    exp: 2 * 60 * 60 //存在时间 单位位秒
+    exp: 6 * 60 * 60 //存在时间 单位位秒
     // match: '/jwt',
   };
 
@@ -149,8 +144,7 @@ module.exports = app => {
       token: "weixin",
       oauthUrl: "http://csq.weixin.caishangqing.com/api/weixin/oauth"
     },
-    wepy: {
-      refreshTime: { hour: [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23] }, // 每天定时更新access_token
+    wx: {
       appID: "wxb2ee3d2535d48e17",
       appSecret: "adf056cf199b8546191ebfc5170a2880",
       token: "weixin"
@@ -165,9 +159,10 @@ module.exports = app => {
       interval: 3 * 60 * 1000
     },
     dbconfig: {
-      ADMIN_ROLE_TYPE: ["normal", "admin", "root"], //后台管理员角色 root超级管理员 admin管理员 normal普通管理员
-      ADMIN_ROLE_STATUS: [0, 1, 2, 3], // 用户账号状态 0未激活 1激活 2锁定 3已删除
-      USER_ROLE_TYPE: ["user", "doctor", "agent", "admin"], // 用户角色列表 user普通用户 doctor医生 agent经理人 admin前台页面管理员
+      ADMIN_ROLE_TYPE: [0, 1, 2, 9], //后台管理员角色 0保留  1普通管理员 2管理员 9超级管理员
+      ADMIN_ROLE_STATUS: [0, 1, 2, 3], // 管理员账号状态 0保留 1未激活 2激活 3锁定 9已删除
+      USER_ROLE_TYPE: [0, 1, 2, 3, 4], // 用户角色列表 0:游客 1:普通用户 2:医生 3:经理人 9:前台页面管理员
+      USER_ROLE_STATUS: [0, 1, 2, 3, 9], // 用户账号状态 0保留 1未激活 2已激活 3已锁定 9已删除
       SALT_STRENGTH: 10, // 密码加密强度
       MAX_LOGIN_ATTEMPTS: 15, // 尝试登录次数
       LOCK_TIME: 10 * 1000 // 锁定时间

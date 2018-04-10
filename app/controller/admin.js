@@ -70,6 +70,8 @@ class Admin extends BaseController {
     const find = await service.admin.findbyusername(username);
     // 帐号不存在就返回错误
     if (!find) return this.error("账号未找到");
+    // 管理员状态检测
+    if (find.status !== 2) return this.error('帐号状态有误,请联系最高管理员');
     // 每次登录调用数据库方法增加一次登录次数
     find.incLoginAttempts();
     // 如果用户被锁就返回错误
@@ -84,7 +86,7 @@ class Admin extends BaseController {
     // 不匹配返回错误
     if (!isMatch) return this.error(`密码不正确,还有${count}次机会尝试`);
     // 得到token
-    let token = await service.actionsToken.apply(find);
+    let token = await service.actionsToken.adminToken(find);
     this.success({ token }, "成功获取token");
   }
 
@@ -106,7 +108,7 @@ class Admin extends BaseController {
     const find = await service.admin.findbyusername(username);
     if (find) return this.error("帐号已存在");
     let user = this.ctx.state.user;
-    if (!user || user.role !== "root") return this.error("您没有权限");
+    if (!user || user.role != 9) return this.error("您没有权限");
     const newOne = await ctx.model.Admin.create({ username, password, role });
     if (!newOne) return this.error("注册失败");
     this.success({ username: newOne.username }, "注册成功");
@@ -134,7 +136,7 @@ class Admin extends BaseController {
   }
 
   //=========================================修改管理员信息=====================================================
-  async resetUserinfo() {}
+  async resetUserinfo() { }
 
   async uploadByStream() {
     const { ctx } = this;
@@ -149,7 +151,6 @@ class Admin extends BaseController {
       // 以 stream 模式提交
       stream: fileStream
     });
-    console.log("result", result);
     ctx.status = result.status;
     ctx.set(result.headers);
     this.success(200, "请求成功", result);

@@ -17,6 +17,12 @@ module.exports = app => {
     }
   };
 
+  // websocket
+  // exports.io = {
+  //   enable: true,
+  //   package: "egg-socket.io"
+  // };
+
   // cookie加密密钥
   Object.assign(exports, {
     security: {
@@ -135,7 +141,7 @@ module.exports = app => {
   };
 
   exports.myconfig = {
-    SITE_ROOT_URL: "http://localhost:7001",//"http://csq.weixin.caishangqing.com"
+    SITE_ROOT_URL: "http://localhost:7001", //"http://csq.weixin.caishangqing.com"
     wechat: {
       refreshTime: { hour: [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23] }, // 每天定时更新access_token
       appID: "wxdb0b987716f5cc54",
@@ -143,7 +149,7 @@ module.exports = app => {
       token: "weixin",
       oauthUrl: "http://csq.weixin.caishangqing.com/api/weixin/oauth"
     },
-    wepy:{
+    wepy: {
       refreshTime: { hour: [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23] }, // 每天定时更新access_token
       appID: "wxb2ee3d2535d48e17",
       appSecret: "adf056cf199b8546191ebfc5170a2880",
@@ -174,7 +180,7 @@ module.exports = app => {
       insurance_bucket: "insurance",
       permanent_url: "p6syms5zu.bkt.clouddn.com",
       temporary_url: "p6syg4m80.bkt.clouddn.com",
-      insurance_url: 'p6ueajy31.bkt.clouddn.com'
+      insurance_url: "p6ueajy31.bkt.clouddn.com"
     }
   };
 

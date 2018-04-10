@@ -452,11 +452,9 @@ class Weixin extends BaseController {
     // let res = await this.ctx.model.Hospital.aggregate([
     //   { $project: { city: 1 } }
     // ]).exec()
+    let res = await this.ctx.getFileStream();
 
- 
-
-    this.success();
-
+    this.success(res);
   }
 }
 

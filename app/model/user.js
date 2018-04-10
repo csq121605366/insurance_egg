@@ -22,26 +22,44 @@ module.exports = app => {
     phone: String, // 手机号
     idcard: String, //身份证号
     address: String, // 联系地址
+    localtion: [
+      {
+        type: String, //默认为 wgs84 返回 gps 坐标，gcj02 返回可用于wx.openLocation的坐标
+        latitude: String, //纬度
+        longitude: String, //经度
+        speed: String, //速度
+        accuracy: String, //位置的精确度
+        altitude: String, //高度
+        verticalAccuracy: String, //垂直精度（Android 无法获取，返回 0）
+        horizontalAccuracy: String //水平精度
+      }
+    ], //存储用户使用地址
     hospital: {
       type: Schema.Types.ObjectId,
-      ref: 'Hospital'
+      ref: "Hospital"
     }, //医生就职医院ref
-    setions: [{
-      type: Schema.Types.ObjectId,
-      ref: "Setion"
-    }], // 关联科室 医生只能关联一个科室,患者可以关联最多三个 经理人代理三个科室
-    friends: [{
-      type: Schema.Types.ObjectId,
-      ref: "Setion"
-    }], //关联用户 代理人关联医生
+    setions: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Setion"
+      }
+    ], // 关联科室 医生只能关联一个科室,患者可以关联最多三个 经理人代理三个科室
+    friends: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Setion"
+      }
+    ], //关联用户 代理人关联医生
     title: {
       type: Schema.Types.ObjectId,
       ref: "Title"
     }, // 职称
-    treatment_info: [{
-      type: Schema.Types.ObjectId,
-      ref: 'Treatment'
-    }], //治疗信息
+    treatment_info: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Treatment"
+      }
+    ], //治疗信息
     fields: String, // 擅长领域
     description: String, // 简介
     email: String, //邮箱
@@ -67,8 +85,7 @@ module.exports = app => {
     }
   });
 
-
-  UserSchema.pre("save", function (next) {
+  UserSchema.pre("save", function(next) {
     if (this.isNew) {
       this.meta.createdAt = this.meta.updatedAt = new Date();
     } else {

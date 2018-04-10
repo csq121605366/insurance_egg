@@ -74,7 +74,7 @@ class Admin extends BaseController {
     find.incLoginAttempts();
     // 如果用户被锁就返回错误
     if (find.isLocked) {
-      let time = ((find.lockUntil - Date.now()) / 1000) | 0;
+      let time = ((new Date(find.lockUntil).getTime() - Date.now()) / 1000) | 0;
       return this.error(`尝试登录次数太多账号已被锁,解锁时间还有${time}秒`);
     }
     // 比较密码

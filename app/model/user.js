@@ -11,17 +11,14 @@ module.exports = app => {
   const Schema = mongoose.Schema;
 
   const UserSchema = new Schema({
-    openid: {
-      type: String,
-      unique: true
-    }, // 微信的id
+    openid: String, // 微信的id
     session_key: String, //用户登录获取的session_key
     username: {
       type: String,
       trim: true
     }, // 用户账号
     name: String, // 姓名
-    nickname: String, // 别名
+    nickName: String, // 别名
     password: String, // 密码
     role: {
       type: Number,
@@ -35,7 +32,10 @@ module.exports = app => {
     }, // 用户账号状态 0保留 1未激活 2已激活 3已锁定 9已删除
     phone: String, // 手机号
     idcard: String, //身份证号
-    address: String, // 联系地址
+    language: String,//用户的语言，简体中文为zh_CN
+    country: String, // 用户所在国家
+    province: String, // 用户所在省份
+    city: String, // 用户所在城市
     localtion: [
       {
         type: String, //默认为 wgs84 返回 gps 坐标，gcj02 返回可用于wx.openLocation的坐标
@@ -78,10 +78,11 @@ module.exports = app => {
     description: String, // 简介
     email: String, //邮箱
     gender: {
-      type: Number,
-      enum: [0, 1, 2] // 0代表女性 1代表男性 2代表未知
+      type: String,
+      enum: ["0", "1", "2"], // 0代表未知 1代表男性 2代表女性
+      default: "0",
     }, // 性别
-    avatar: String, // 头像地址
+    avatarUrl: String, // 头像地址
     meta: {
       createdAt: {
         type: Date,
@@ -94,9 +95,9 @@ module.exports = app => {
     }
   });
 
-  UserSchema.pre("save", function(next) {
+  UserSchema.pre("save", function (next) {
     if (this.isNew) {
-      if (!this.avatar) {
+      if (!this.avatarUrl && this.avatarUrl == '') {
         const options = {
           margin: 0.2,
           size: 200
@@ -106,7 +107,7 @@ module.exports = app => {
           .toString(16)
           .slice(4);
         let avatar = new Identicon(hash + this.openid, options).toString();
-        this.avatar = "data:image/png;base64," + avatar;
+        this.avatarUrl = "data:image/png;base64," + avatar;
       }
       // 创建时间
       this.meta.createdAt = this.meta.updatedAt = new Date();
@@ -115,6 +116,10 @@ module.exports = app => {
     }
     next();
   });
+
+
+
+
 
   return mongoose.model("User", UserSchema);
 };

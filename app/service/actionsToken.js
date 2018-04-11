@@ -8,10 +8,7 @@ class ActionTokenService extends BaseService {
     return app.jwt.sign(
       {
         _id: user._id,
-        role: user.role,
-        status: user.status,
-        createTime: Date.now(),
-        expires: app.config.jwt.exp
+        role: user.role
       },
       app.config.jwt.secret,
       {
@@ -21,14 +18,15 @@ class ActionTokenService extends BaseService {
     );
   }
   async userToken(user) {
+    console.log(user)
     const { app } = this;
     return app.jwt.sign(
       {
         _id: user._id,
         openid: user.openid,
-        role: uesr.role,
+        name: user.name,
         status: user.status,
-        session_key: user.session_key
+        role: user.role
       },
       app.config.jwt.secret,
       {

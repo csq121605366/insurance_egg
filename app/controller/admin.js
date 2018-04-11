@@ -90,7 +90,7 @@ class Admin extends BaseController {
     this.success({ token }, "成功获取token");
   }
 
-  //=========================================获取用户详情=====================================================
+  //获取用户详情
   async getUserinfo() {
     const { ctx } = this;
     let _id = this.ctx.state.user._id;
@@ -99,7 +99,7 @@ class Admin extends BaseController {
     return this.success(find._doc);
   }
 
-  //=========================================创建用户=====================================================
+  //创建用户
   async createUser() {
     const { ctx, service } = this;
     const { username, password, role } = ctx.request.body;
@@ -110,13 +110,15 @@ class Admin extends BaseController {
     let user = this.ctx.state.user;
     if (!user || user.role != 9) return this.error("您没有权限");
     let newOne = new ctx.model.Admin({ username, password, role });
-    await newOne.save((err, doc) => {
-      if (!newOne) return this.error("注册失败");
+    try {
+      await newOne.save();
       this.success({ username: newOne.username }, "注册成功");
-    });
+    } catch (e) {
+      return this.error();
+    }
   }
 
-  //=========================================登录状态更改密码=====================================================
+  //登录状态更改密码
   async resetPassword() {
     // 检验密码
     this.ctx.validate(this.AdminResetPswTransfer);
@@ -131,14 +133,61 @@ class Admin extends BaseController {
     if (!isMatch) return this.error(`密码不正确`);
     // 修改密码
     find.password = oldPassword;
-    await find.save((err, doc) => {
-      if (!err) return this.error("修改失败");
-      this.success();
-    });
+    try {
+      await find.save();
+      return this.success();
+    } catch (e) {
+      return this.error();
+    }
   }
 
-  //=========================================修改管理员信息=====================================================
-  async resetUserinfo() {}
+  async resetPasswordLoginType() {
+    // 检验密码
+    this.ctx.validate(this.AdminResetPswTransfer);
+    let { oldPassword, newPassword, reNewPassword } = this.ctx.request.body;
+    if (newPassword !== reNewPassword) return this.error("两次密码输入不一样!");
+    let user = this.ctx.state.user;
+    let find = await this.ctx.model.Admin.findOne({ _id: user._id }).exec();
+    if (!find) return this.error("未找到用户信息");
+    // 比较密码
+    let isMatch = await find.comparePassword(oldPassword, find.password);
+    // 不正确抛出错误
+    if (!isMatch) return this.error(`密码不正确`);
+    // 修改密码
+    find.password = oldPassword;
+    try {
+      await find.save()
+      return this.success();
+    } catch (e) {
+      return this.error();
+    }
+  }
+
+  //修改管理员信息
+  async resetUserinfo() { }
+
+  //审核用户
+  async auditUser() {
+    this.ctx.validate({ openid: 'string' });
+    let { role } = this.ctx.state.user;
+    let { openid } = this.ctx.request.body;
+    if (role < 2) return this.error('只有管理员可以审核!');
+    // 将已锁定和未激活的用户激活
+    let find = await this.ctx.model.User.findOne({ openid, status: { $in: [1, 3] } }).exec();
+    if (!find) return this.error('未找到该用户,或该用户已被删除');
+    // 激活用户账户
+    find.status = 2;
+    try {
+      await find.save();
+      return this.success()
+    } catch (e) {
+      return this.error();
+    }
+  }
+
+  
+
+
 
   async uploadByStream() {
     const { ctx } = this;
@@ -159,6 +208,11 @@ class Admin extends BaseController {
     // 响应最终会是类似以下的结果：
     // {"streamSize":574}
   }
+
+
+
+
+
 }
 
 module.exports = Admin;

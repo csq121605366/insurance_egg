@@ -3,8 +3,8 @@
  * 管理员信息
  *
  */
-const bcrypt = require('bcrypt');
-const Identicon = require('identicon.js');
+const bcrypt = require("bcrypt");
+const Identicon = require("identicon.js");
 
 module.exports = app => {
   const config = app.config.myconfig.dbconfig;
@@ -61,13 +61,13 @@ module.exports = app => {
   });
 
   // 定义虚拟属性是否锁了
-  AdminSchema.virtual('isLocked').get(function () {
+  AdminSchema.virtual("isLocked").get(function() {
     return !!(this.lockUntil && this.lockUntil > new Date().getTime());
   });
 
-  AdminSchema.pre('save', function (next) {
+  AdminSchema.pre("save", function(next) {
     const user = this;
-    if (!user.isModified('password')) return next();
+    if (!user.isModified("password")) return next();
     bcrypt.genSalt(config.SALT_STRENGTH, (err, salt) => {
       if (err) return next(err);
       bcrypt.hash(user.password, salt, (error, hash) => {
@@ -78,16 +78,20 @@ module.exports = app => {
     });
   });
 
-  AdminSchema.pre('save', function (next) {
+  AdminSchema.pre("save", function(next) {
     if (this.isNew) {
-      const options = {
-        margin: 0.2,
-        size: 120,
-      };
-      // 使用hash 生成初始化头像
-      let hash = Math.random().toString(16).slice(2);
-      let avatar = new Identicon(hash + hash, options).toString();
-      this.avatarUrl = 'data:image/png;base64,' + avatar;
+      if (!this.avatar) {
+        const options = {
+          margin: 0.2,
+          size: 200
+        };
+        // 使用hash 生成初始化头像
+        let hash = Math.random()
+          .toString(16)
+          .slice(4);
+        let avatar = new Identicon(hash + this._id, options).toString();
+        this.avatarUrl = "data:image/png;base64," + avatar;
+      }
       // 创建时间
       this.meta.createdAt = this.meta.updatedAt = new Date();
     } else {
@@ -96,27 +100,28 @@ module.exports = app => {
     next();
   });
 
-
-
   AdminSchema.methods = {
     // password要比较的密码, hash数据库里面的密码
     comparePassword(password, hash) {
       return new Promise((resolve, reject) => {
         bcrypt.compare(password, hash, async (err, isMatch) => {
-          if (err) reject('err');
+          if (err) reject("err");
           if (isMatch) {
             // 如果登录成功重置尝试登录次数为0;
-            await this.update({
-              $set: {
-                loginAttempts: 1
+            await this.update(
+              {
+                $set: {
+                  loginAttempts: 1
+                },
+                $unset: {
+                  lockUntil: 1
+                }
               },
-              $unset: {
-                lockUntil: 1
+              function(err, doc) {
+                if (!err) resolve(isMatch);
+                reject(err);
               }
-            }, function (err, doc) {
-              if (!err) resolve(isMatch);
-              reject(err);
-            });
+            );
           } else {
             resolve(isMatch);
           }
@@ -141,7 +146,10 @@ module.exports = app => {
           loginAttempts: 1
         }
       };
-      if (this.loginAttempts + 1 >= config.MAX_LOGIN_ATTEMPTS && !this.isLocked) {
+      if (
+        this.loginAttempts + 1 >= config.MAX_LOGIN_ATTEMPTS &&
+        !this.isLocked
+      ) {
         updates.$set = {
           lockUntil: new Date().getTime() + config.LOCK_TIME
         };
@@ -149,6 +157,5 @@ module.exports = app => {
       return await this.update(updates);
     }
   };
-  return mongoose.model('Admin', AdminSchema);
+  return mongoose.model("Admin", AdminSchema);
 };
-

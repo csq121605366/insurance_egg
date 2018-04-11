@@ -71,7 +71,7 @@ class Admin extends BaseController {
     // 帐号不存在就返回错误
     if (!find) return this.error("账号未找到");
     // 管理员状态检测
-    if (find.status !== 2) return this.error('帐号状态有误,请联系最高管理员');
+    if (find.status !== 2) return this.error("帐号状态有误,请联系最高管理员");
     // 每次登录调用数据库方法增加一次登录次数
     find.incLoginAttempts();
     // 如果用户被锁就返回错误
@@ -109,16 +109,18 @@ class Admin extends BaseController {
     if (find) return this.error("帐号已存在");
     let user = this.ctx.state.user;
     if (!user || user.role != 9) return this.error("您没有权限");
-    const newOne = await ctx.model.Admin.create({ username, password, role });
-    if (!newOne) return this.error("注册失败");
-    this.success({ username: newOne.username }, "注册成功");
+    let newOne = new ctx.model.Admin({ username, password, role });
+    await newOne.save((err, doc) => {
+      if (!newOne) return this.error("注册失败");
+      this.success({ username: newOne.username }, "注册成功");
+    });
   }
 
   //=========================================登录状态更改密码=====================================================
   async resetPassword() {
     // 检验密码
     this.ctx.validate(this.AdminResetPswTransfer);
-    const { oldPassword, newPassword, reNewPassword } = this.ctx.request.body;
+    let { oldPassword, newPassword, reNewPassword } = this.ctx.request.body;
     if (newPassword !== reNewPassword) return this.error("两次密码输入不一样!");
     let user = this.ctx.state.user;
     let find = await this.ctx.model.Admin.findOne({ _id: user._id }).exec();
@@ -129,14 +131,14 @@ class Admin extends BaseController {
     if (!isMatch) return this.error(`密码不正确`);
     // 修改密码
     find.password = oldPassword;
-    await find.save().then((err, doc) => {
+    await find.save((err, doc) => {
       if (!err) return this.error("修改失败");
       this.success();
     });
   }
 
   //=========================================修改管理员信息=====================================================
-  async resetUserinfo() { }
+  async resetUserinfo() {}
 
   async uploadByStream() {
     const { ctx } = this;

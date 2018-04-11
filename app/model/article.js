@@ -2,7 +2,6 @@
  * 文章
  */
 
-
 module.exports = app => {
   const mongoose = app.mongoose;
   const Schema = mongoose.Schema;
@@ -14,11 +13,11 @@ module.exports = app => {
     author: String, //作者
     time: Date, //发表时间
     ip: String, //发表ip
-    click: Number,//查看次数
+    click: Number, //查看次数
     sort: { type: Schema.Types.ObjectId, ref: "ArticleSort" }, //文章分类
     type: {
       type: Number,
-      enum: [0, 1, 2],
+      enum: [0, 1, 2]
     }, //文章展示模式 0私有 1公开 2仅好友查看
     up: {
       type: Number,
@@ -30,6 +29,8 @@ module.exports = app => {
       enum: [0, 1],
       default: 0
     }, //是否管理员推荐
+    like: Number, //喜欢
+    unlike: Number, //不喜欢
     comment: [{ type: Schema.Types.ObjectId, ref: "ArticleComment" }], //评论列表
     content: String, //内容
     meta: {
@@ -43,7 +44,7 @@ module.exports = app => {
       }
     }
   });
-  ArticleSchema.pre("save", function (next) {
+  ArticleSchema.pre("save", function(next) {
     if (this.isNew) {
       this.meta.created = this.meta.updated = new Date();
     } else {

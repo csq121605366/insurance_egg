@@ -3,6 +3,7 @@
  */
 
 const bcrypt = require("bcrypt");
+const Identicon = require("identicon.js");
 
 module.exports = app => {
   const config = app.config.myconfig.dbconfig;
@@ -14,6 +15,7 @@ module.exports = app => {
       type: String,
       unique: true
     }, // 微信的id
+    session_key: String, //用户登录获取的session_key
     username: {
       type: String,
       trim: true
@@ -24,13 +26,13 @@ module.exports = app => {
     role: {
       type: Number,
       enum: config.USER_ROLE_TYPE,
-      default: config.USER_ROLE_STATUS[0]
-    },// 用户角色列表 0:游客 1:普通用户 2:医生 3:经理人 9:前台页面管理员
+      default: config.USER_ROLE_TYPE[0]
+    }, // 用户角色列表 0:游客 1:普通用户 2:医生 3:经理人 9:前台页面管理员
     status: {
       type: Number,
-      enum: config.ADMIN_ROLE_TYPE,
-      default: config.ADMIN_ROLE_TYPE[1]
-    },// 用户账号状态 0保留 1未激活 2已激活 3已锁定 9已删除
+      enum: config.USER_ROLE_STATUS,
+      default: config.USER_ROLE_STATUS[1]
+    }, // 用户账号状态 0保留 1未激活 2已激活 3已锁定 9已删除
     phone: String, // 手机号
     idcard: String, //身份证号
     address: String, // 联系地址
@@ -92,8 +94,21 @@ module.exports = app => {
     }
   });
 
-  UserSchema.pre("save", function (next) {
+  UserSchema.pre("save", function(next) {
     if (this.isNew) {
+      if (!this.avatar) {
+        const options = {
+          margin: 0.2,
+          size: 200
+        };
+        // 使用hash 生成初始化头像
+        let hash = Math.random()
+          .toString(16)
+          .slice(4);
+        let avatar = new Identicon(hash + this.openid, options).toString();
+        this.avatar = "data:image/png;base64," + avatar;
+      }
+      // 创建时间
       this.meta.createdAt = this.meta.updatedAt = new Date();
     } else {
       this.meta.updatedAt = new Date();

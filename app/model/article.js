@@ -12,36 +12,38 @@ module.exports = app => {
     illness_begin: Date, //手术时间开始时间
     author: String, //作者
     ip: String, //发表ip
-    click: Number, //查看次数
+    click: String, //查看次数
+    section: {
+      type: Schema.Types.ObjectId,
+      ref: "Section"
+    },
     status: {
-      type: Number,
-      enum: [1, 2, 3],
-      default: 2
-    },//文章状态 0保留 1未审核 2已审核 3已删除
+      type: String,
+      enum: ["1", "2", "3"],
+      default: "2"
+    }, //文章状态 0保留 1未审核 2已审核 3已删除
     sort: {
-      type: Number,
-      enum: [1, 2, 3],
-      default: 1
+      type: String,
+      enum: ["1", "2", "3"],
+      default: "1"
     }, //文章分类 1日志 2手术记录 3科普文章
     type: {
-      type: Number,
-      enum: [ 1, 2]
+      type: String,
+      enum: ["1", "2"]
     }, //文章展示模式 0保留 1公开 2仅好友查看 3私有
     up: {
-      type: Number,
-      enum: [1, 2],
-      default: 1
+      type: String,
+      enum: ["1", "2"],
+      default: "1"
     }, // 置顶 1表示不置顶 2表示置顶
     support: {
-      type: Number,
-      enum: [1, 2],
-      default: 1
+      type: String,
+      enum: ["1", "2"],
+      default: "1"
     }, //是否管理员推荐 1不推荐 2推荐
-    like: Number, //喜欢
-    unlike: Number, //不喜欢
-    images: [
-      { type: Schema.Types.ObjectId, ref: "Asset" }
-    ], // 文章相关图片
+    like: String, //喜欢
+    unlike: String, //不喜欢
+    images: [{ type: Schema.Types.ObjectId, ref: "Asset" }], // 文章相关图片
     comment: [{ type: Schema.Types.ObjectId, ref: "ArticleComment" }], //评论列表
     pre_content: String, //预览内容
     content: String, //内容
@@ -56,7 +58,7 @@ module.exports = app => {
       }
     }
   });
-  ArticleSchema.pre("save", function (next) {
+  ArticleSchema.pre("save", function(next) {
     if (this.isNew) {
       this.meta.created = this.meta.updated = new Date();
     } else {

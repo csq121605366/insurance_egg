@@ -21,18 +21,18 @@ module.exports = app => {
     nickName: String, // 别名
     password: String, // 密码
     role: {
-      type: Number,
+      type: String,
       enum: config.USER_ROLE_TYPE,
       default: config.USER_ROLE_TYPE[0]
     }, // 用户角色列表 0:游客 1:普通用户 2:医生 3:经理人 9:前台页面管理员
     status: {
-      type: Number,
+      type: String,
       enum: config.USER_ROLE_STATUS,
       default: config.USER_ROLE_STATUS[1]
     }, // 用户账号状态 0保留 1未激活 2已激活 3已锁定 9已删除
     phone: String, // 手机号
     idcard: String, //身份证号
-    language: String,//用户的语言，简体中文为zh_CN
+    language: String, //用户的语言，简体中文为zh_CN
     country: String, // 用户所在国家
     province: String, // 用户所在省份
     city: String, // 用户所在城市
@@ -52,18 +52,47 @@ module.exports = app => {
       type: Schema.Types.ObjectId,
       ref: "Hospital"
     }, //医生就职医院ref
+    certificate: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Asset"
+      }
+    ], //医生证书
     setions: [
       {
         type: Schema.Types.ObjectId,
         ref: "Department"
       }
-    ], // 关联科室 医生只能关联一个科室,患者可以关联最多三个 经理人代理三个科室
+    ], // 关联科室 医生只能关联一个科室,患者可以关联最多三个 经理人关联三个
+    agency: [
+      {
+        setions: {
+          type: Schema.Types.ObjectId,
+          ref: "Department"
+        },
+        name: String
+      }
+    ], //经理人代理最多三个科室
     friends: [
       {
-        type: Schema.Types.ObjectId,
-        ref: "User"
+        name: "String",
+        gender: {
+          type: String,
+          enum: ["0", "1", "2"], // 0代表未知 1代表男性 2代表女性
+          default: "0"
+        },
+        phone: String,
+        hospital: {
+          type: Schema.Types.ObjectId,
+          ref: "Hospital"
+        }, //医生就职医院ref
+        title: {
+          type: Schema.Types.ObjectId,
+          ref: "Title"
+        },
+        description: String // 简介
       }
-    ], //关联用户 代理人关联医生
+    ], // 代理人的潜在客户
     title: {
       type: Schema.Types.ObjectId,
       ref: "Title"
@@ -80,7 +109,7 @@ module.exports = app => {
     gender: {
       type: String,
       enum: ["0", "1", "2"], // 0代表未知 1代表男性 2代表女性
-      default: "0",
+      default: "0"
     }, // 性别
     avatarUrl: String, // 头像地址
     meta: {
@@ -95,9 +124,9 @@ module.exports = app => {
     }
   });
 
-  UserSchema.pre("save", function (next) {
+  UserSchema.pre("save", function(next) {
     if (this.isNew) {
-      if (!this.avatarUrl && this.avatarUrl == '') {
+      if (!this.avatarUrl && this.avatarUrl == "") {
         const options = {
           margin: 0.2,
           size: 200
@@ -116,10 +145,6 @@ module.exports = app => {
     }
     next();
   });
-
-
-
-
 
   return mongoose.model("User", UserSchema);
 };

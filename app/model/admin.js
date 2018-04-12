@@ -13,6 +13,7 @@ module.exports = app => {
   const Schema = mongoose.Schema;
 
   const AdminSchema = new Schema({
+    phone: String, //手机号
     username: {
       type: String,
       trim: true,
@@ -38,7 +39,6 @@ module.exports = app => {
       createdAt: Date
     }, // {code:验证码,createdAt:发送时间}
     avatarUrl: String, // 头像地址 或者头像png
-    phone: String,
     loginAttempts: {
       type: Number,
       default: config.MAX_LOGIN_ATTEMPTS
@@ -61,11 +61,11 @@ module.exports = app => {
   });
 
   // 定义虚拟属性是否锁了
-  AdminSchema.virtual("isLocked").get(function() {
+  AdminSchema.virtual("isLocked").get(function () {
     return !!(this.lockUntil && this.lockUntil > new Date().getTime());
   });
 
-  AdminSchema.pre("save", function(next) {
+  AdminSchema.pre("save", function (next) {
     const user = this;
     if (!user.isModified("password")) return next();
     bcrypt.genSalt(config.SALT_STRENGTH, (err, salt) => {
@@ -78,7 +78,7 @@ module.exports = app => {
     });
   });
 
-  AdminSchema.pre("save", function(next) {
+  AdminSchema.pre("save", function (next) {
     if (this.isNew) {
       if (!this.avatar) {
         const options = {
@@ -117,7 +117,7 @@ module.exports = app => {
                   lockUntil: 1
                 }
               },
-              function(err, doc) {
+              function (err, doc) {
                 if (!err) resolve(isMatch);
                 reject(err);
               }

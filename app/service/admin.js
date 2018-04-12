@@ -19,7 +19,6 @@ class AdminService extends BaseService {
     return await this.ctx.model.Admin.findOne({ username }).exec();
   }
 
-
 }
 
 module.exports = AdminService;

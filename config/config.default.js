@@ -130,11 +130,17 @@ module.exports = app => {
 
   exports.jwt = {
     secret: "insurance:token", // token的加密密钥
-    exp: 6 * 60 * 60 //存在时间 单位位秒
+    exp: 6 * 24 * 60 * 60 //存在时间 单位位秒
     // match: '/jwt',
   };
 
   exports.myconfig = {
+    sms: {
+      SMS_KEY: "15670f04b6400d13e1cb85bbf27b5f77", //聚合数据的短信key
+      SMS_TYPE: [71545,71356, 71357, 71358], //聚合数据的短信类型 登录71358 找回密码71357 注册71356  71545解绑手机
+      SMS_URL: 'http://v.juhe.cn/sms/send', //聚合数据接口地址
+      SMS_EXPIRES: 1 * 60 * 60 * 1000, //验证码存活时间
+    },
     SITE_ROOT_URL: "http://localhost:7001", //"http://csq.weixin.caishangqing.com"
     wechat: {
       refreshTime: { hour: [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23] }, // 每天定时更新access_token

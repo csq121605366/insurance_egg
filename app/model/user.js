@@ -13,6 +13,8 @@ module.exports = app => {
   const UserSchema = new Schema({
     openid: String, // 微信的id
     session_key: String, //用户登录获取的session_key
+    phone: String, // 手机号 医生需要绑定手机号 使用手机号登录写文章
+    sms_code: String, //手机验证码
     username: {
       type: String,
       trim: true
@@ -30,7 +32,6 @@ module.exports = app => {
       enum: config.USER_ROLE_STATUS,
       default: config.USER_ROLE_STATUS[1]
     }, // 用户账号状态 0保留 1未激活 2已激活 3已锁定 9已删除
-    phone: String, // 手机号
     idcard: String, //身份证号
     language: String, //用户的语言，简体中文为zh_CN
     country: String, // 用户所在国家
@@ -103,7 +104,7 @@ module.exports = app => {
         ref: "Treatment"
       }
     ], //治疗信息
-    fields: String, // 擅长领域
+    fields: [String], // 擅长领域
     description: String, // 简介
     email: String, //邮箱
     gender: {
@@ -124,7 +125,7 @@ module.exports = app => {
     }
   });
 
-  UserSchema.pre("save", function(next) {
+  UserSchema.pre("save", function (next) {
     if (this.isNew) {
       if (!this.avatarUrl && this.avatarUrl == "") {
         const options = {

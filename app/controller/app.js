@@ -90,9 +90,11 @@ class AppController extends BaseController {
       gender: { type: "enum", values: ["0", "1", "2"], required: false },
       avatarUrl: { type: "string", format: reg.url, required: false }
     });
-    let { role, status, _id } = this.ctx.state.user;
+    let { role } = this.ctx.request.body;
+    let { status, _id } = this.ctx.state.user;
+    console.log('==================', role, status)
     // 如果role角色不为0表示非游客 账号状态1未激活
-    if (role != 0 || status == 1) return this.error("账号审核中...");
+    if (role != 0 && status == 1) return this.error("账号审核中...");
     // 二次验证(分角色)
     if (role == 1) {
       //普通用户 关注科室1-3个
@@ -107,9 +109,11 @@ class AppController extends BaseController {
         treatment_info: { type: "array", itemType: "object", required: false }
       });
     } else if (role == 2) {
-      //医生 一个科室一个医院
+      //医生 一个科室一个医院 还需要绑定手机号
       this.ctx.validate({
         hospital: { type: "string", required: true },
+        phone: { type: 'string', required: true },
+        sms_code: { type: 'string', required: true },
         setions: {
           type: "array",
           itemType: "string",
@@ -117,8 +121,19 @@ class AppController extends BaseController {
           max: 1,
           min: 1
         },
-        fields: { type: "string", required: true },
-        description: { type: "string", max: 200, min: 10, required: true }
+        fields: {
+          type: "array",
+          itemType: "string",
+          max: 6,
+          min: 1,
+          required: true
+        },
+        description: {
+          type: "string",
+          max: 200,
+          min: 10,
+          required: true
+        }
       });
     } else if (role == 3) {
       //经理人 1-3个科室和医生
@@ -154,12 +169,30 @@ class AppController extends BaseController {
       // 用户首次激活
       if (find.role == 1) {
         // 普通用户
-        
+
       }
     } else {
       // 非首次用户数据更新
     }
   }
+
+  async doctorSendSms() {
+    let reg = this.config.regexp;
+    this.ctx.validate({
+      phone: { type: 'string', format: reg.phone }
+    });
+    let { phone } = this.ctx.request.body;
+    let user = await this.ctx.model.User.findOne({ phone }).exec();
+    if (user) return this.error('该手机已注册');
+    let find = await this.ctx.model.Sms.find({ phone }).exec();
+    let last = find[find.length - 1];
+    if (last && new Date(last.created).getTime() + 60 * 1000 > Date.now()) return this.error('验证码已发送,60s后可重发');
+    let res = await this.service.sms.sendPhoneCode(phone, 71356);
+    if (!res) return this.error('发送失败,请重新发送');
+    else return this.success('验证码发送成功');
+  }
+
+
 
   //审核用户
   async auditUser() {
@@ -182,6 +215,8 @@ class AppController extends BaseController {
       return this.error();
     }
   }
+
+
 
   async wxGetUserInfo() {
     let { openid, role } = this.ctx.state.user;

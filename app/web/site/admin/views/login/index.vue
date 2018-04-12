@@ -5,13 +5,13 @@
       <h3 class="title">vue-element-admin</h3>
       <el-form-item prop="username">
         <span class="svg-container svg-container_login">
-          <svg-icon icon-class="user" />
+          <i class="iconfont icon-zhanghao"></i>
         </span>
         <el-input name="username" type="text" v-model="loginForm.username" autoComplete="on" placeholder="username" />
       </el-form-item>
       <el-form-item prop="password">
         <span class="svg-container">
-          <svg-icon icon-class="password"></svg-icon>
+          <i class="iconfont icon-zhanghaomima"></i>
         </span>
         <el-input name="password" :type="pwdType" @keyup.enter.native="handleLogin" v-model="loginForm.password" autoComplete="on"
           placeholder="password"></el-input>
@@ -19,13 +19,9 @@
       </el-form-item>
       <el-form-item>
         <el-button type="primary" style="width:100%;" :loading="loading" @click.native.prevent="handleLogin">
-          Sign in
+         登录
         </el-button>
       </el-form-item>
-      <div class="tips">
-        <span style="margin-right:20px;">username: admin</span>
-        <span> password: admin</span>
-      </div>
     </el-form>
   </div>
 </template>
@@ -52,7 +48,7 @@ export default {
     };
     return {
       loginForm: {
-        username: "csq123",
+        username: "15527076261",
         password: "csqcsq1214"
       },
       loginRules: {

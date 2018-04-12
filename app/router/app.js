@@ -3,13 +3,19 @@ module.exports = app => {
 
   router.post("/api/app/login", "app.login"); // 用户登录和注册
 
+  router.post("/api/app/sms/send", "app.doctorSendSms"); // 医生发送手机验证码
+
+
+  router.get('/api/app/getcitys', 'hospital.getCitys'); // 获取城市列表
+  router.get('/api/app/gethospitals', 'hospital.getHospitals'); // 获取医院列表
+
   router.post("/api/app/update", app.jwt, "app.update"); // 用户信息完善更新
 
   //目前不用
   router.post("/api/app/wxuserinfo", "app.wxGetUserInfo"); // getUserInfo信息解密
 
   //创建文章
-  router.put("/api/app/article/create", app.jwt, "article.create");
+  router.post("/api/app/article/create", app.jwt, "article.create");
   //查找文章列表 article_ids=>_id  数组 表示可以查很多也可以查单个
   router.post("/api/app/article/list", app.jwt, "article.getlist");
 };

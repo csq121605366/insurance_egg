@@ -3,7 +3,7 @@
         <el-row type="flex" justify="center">
             <el-col class="userinfo_wrap" :span="8">
                 <el-tabs v-model="activeName">
-                    <el-tab-pane label="个人信息" name="person">
+                    <el-tab-pane label="个人信息" name="info">
                         <el-form ref="infoForm" :model="info" label-width="100px">
                             <el-form-item label="头像 :">
                                 <div class="userinfo_avatar">
@@ -17,22 +17,14 @@
                                 <el-input :disabled="true" v-model="info.role"></el-input>
                             </el-form-item>
                             <el-form-item label="手机 :">
-                                <el-input :disabled="info.phone?true:false" v-model="info.phone"></el-input>
-                                <el-button v-if="!info.phone" @click="opendialog('bindPhone')" type="text">绑定手机</el-button>
-                                <el-button v-else @click="opendialog('updateEmail')" type="text">换绑手机</el-button>
-                            </el-form-item>
-                            <el-form-item label="邮箱 :">
-                                <el-input :disabled="info.email" v-model="info.email"></el-input>
-                                <el-button v-if="!info.email" @click="opendialog('bindEmail')" type="text">绑定邮箱</el-button>
-                                <el-button v-else @click="opendialog('updateEmail')" type="text">换绑邮箱</el-button>
+                                <el-input :disabled="true" v-model="info.phone"></el-input>
+                                <el-button v-if="!info.phone" @click="opendialog('bind')" type="text">绑定手机</el-button>
+                                <el-button v-else @click="opendialog('unbind')" type="text">换绑手机</el-button>
                                 <!--模态框-->
                                 <el-dialog :title="dialogForm.title"  status-icon width="500px" :close-on-click-modal="false" :visible.sync="showdialog" >
                                     <el-form class="dialogForm" :model="dialogForm" :rules="dialogRules" label-width="100px" ref="dialogForm">
-                                        <el-form-item v-if="dialogForm.type=='bindPhone'||dialogForm.type=='updatePhone'" label="手机 " prop="phone">
+                                        <el-form-item label="手机号码 " prop="phone">
                                             <el-input :disabled="info.phone?true:false" type="text" v-model="dialogForm.phone" auto-complete="off"></el-input>
-                                        </el-form-item>
-                                        <el-form-item v-else label="邮箱 " prop="email">
-                                            <el-input :disabled="info.email?true:false" type="text" v-model="dialogForm.email" auto-complete="off"></el-input>
                                         </el-form-item>
                                         <el-form-item label="验证码" prop="code">
                                             <el-input type="text" v-model="dialogForm.code" auto-complete="off"></el-input>
@@ -72,14 +64,7 @@
 <script>
 import vTimeBtn from "@/components/timeBtn";
 import { mapGetters } from "vuex";
-import {
-  sendEmail,
-  sendPhone,
-  unbindEmail,
-  bindEmail,
-  bindPhone,
-  unbindPhone
-} from "@/api/user";
+import { sendCode, bindPhone, unbindPhone } from "@/api/user";
 export default {
   components: {
     vTimeBtn
@@ -92,12 +77,13 @@ export default {
      * c:callback
      */
 
-    const validateEmail = (r, v, c) => {
+    const validatePhone = (r, v, c) => {
+      console.log(v);
       this.$refs.timeBtn.setDisabled(true);
       if (!authType.require.reg.test(v)) {
         c(new Error(authType.require.info));
-      } else if (!authType.email.reg.test(v)) {
-        c(new Error(authType.email.info));
+      } else if (!authType.phone.reg.test(v)) {
+        c(new Error(authType.phone.info));
       } else {
         this.$refs.timeBtn.setDisabled(false);
         c();
@@ -105,6 +91,7 @@ export default {
     };
     const validateCode = (r, v, c) => {
       this.cansubmit = true;
+      console.log(v);
       if (!authType.require.reg.test(v)) {
         c(new Error(authType.require.info));
       } else if (!authType.code.reg.test(v)) {
@@ -145,7 +132,7 @@ export default {
       }
     };
     return {
-      activeName: "person",
+      activeName: "info",
       showdialog: false,
       canSendCode: false,
       cansubmit: true,
@@ -155,9 +142,15 @@ export default {
         newPassword: "",
         reNewPassword: ""
       },
+      dialogForm: {
+        title: "",
+        type: "",
+        code: "",
+        phone: this.$store.getters.phone
+      },
       dialogRules: {
-        email: [{ validator: validateEmail, trigger: "blur,change" }],
-        code: [{ validator: validateCode, trigger: "blur,change" }]
+        phone: [{ validator: validatePhone, trigger: "blur" }],
+        code: [{ validator: validateCode, trigger: "blur" }]
       },
       passwordFormRules: {
         oldPassword: [{ validator: validateCurrentPassword, trigger: "blur" }],
@@ -172,48 +165,48 @@ export default {
         name: this.$store.getters.name,
         role: this.$store.getters.role,
         phone: this.$store.getters.phone,
-        email: this.$store.getters.email,
         avatar: this.$store.getters.avatar
       };
       return info;
-    },
-    dialogForm() {
-      let dialogForm = {
-        title: "",
-        type: "",
-        email: this.$store.getters.email,
-        phone: ""
-      };
-      return dialogForm;
     },
     ...mapGetters(["interval", "regexp"])
   },
   methods: {
     opendialog(type) {
-      return this.$message.error("功能开发中...");
       this.dialogForm.type = type;
       this.showdialog = true;
-      if (type === "bindPhone") {
+      if (type === "bind") {
         this.dialogForm.title = "绑定手机";
-      } else if (type === "updatePhone") {
-        this.dialogForm.title = "换绑手机";
-      } else if (type === "bindEmail") {
-        this.dialogForm.title = "绑定邮箱";
-      } else if (type === "updateEmail") {
-        this.dialogForm.title = "换绑邮箱";
+      } else if (type === "unbind") {
+        this.dialogForm.title = "解绑手机";
       }
     },
     submitdialog() {
+      //绑定手机和解绑手机
       this.$refs.dialogForm.validate(res => {
         if (res) {
-          subFun(this.dialogForm).then(res => {
-            this.$message.success("操作成功");
-            // 关闭窗口
-            this.showdialog = false;
-            setTimeout(() => {
-              location.reload();
-            }, 1000);
-          });
+          let { phone, code, type } = this.dialogForm;
+          if (type == "bind") {
+            bindPhone({ phone, code }).then(res => {
+              if (res.success) {
+                this.$message.success(res.message);
+                this.$store.dispatch("GetInfo");
+              } else {
+                this.$message.success(res.message);
+              }
+              this.showdialog = false;
+            });
+          } else if (type == "unbind") {
+            unbindPhone({ phone, code }).then(res => {
+              if (res.success) {
+                this.$message.success(res.message);
+                this.$store.dispatch("GetInfo");
+              } else {
+                this.$message.success(res.message);
+              }
+              this.showdialog = false;
+            });
+          }
         } else {
           this.$message.error("请正确填写后提交");
         }
@@ -221,18 +214,19 @@ export default {
     },
     sendCode() {
       // 发送邮箱验证码
-      if (this.dialogForm.email) {
-        let { email } = this.dialogForm;
-        let token = this.$store.getters.token;
+      if (this.dialogForm.phone) {
+        let { phone, type } = this.dialogForm;
         if (!this.$refs.timeBtn.disable) {
-          this.$refs.timeBtn.start();
           // 发送邮箱验证码
-          sendEmail({ email, token }).then(res => {
-            this.$message.success("邮件发送成功，请登录邮箱查看验证码");
+          sendCode({ phone, type }).then(res => {
+            if (res.success) {
+              this.$refs.timeBtn.start();
+              this.$message.success("验证码发送成功,请注意查看手机");
+            }
           });
         }
       } else {
-        this.$message.error("请正确输入邮箱后点击发送");
+        this.$message.error("请正确输入手机号");
       }
     },
     passwordFormSubmit() {
@@ -301,12 +295,6 @@ export default {
 
   .el-tab-pane {
     padding-left: 40px;
-  }
-
-  .dialogForm {
-    .el-form-item__error {
-      margin-left: 100px;
-    }
   }
 }
 </style>

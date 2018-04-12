@@ -34,6 +34,7 @@ service.interceptors.response.use(
      * code为非20000是抛错 可结合自己业务进行修改
      */
     const res = response.data;
+    console.log('====', response)
     if (!res.success) {
       Message({
         message: res.message,
@@ -72,12 +73,16 @@ service.interceptors.response.use(
     // }
   },
   error => {
-    console.log("err" + error); // for debug
-    Message({
-      message: error.message,
-      type: "error",
-      duration: 5 * 1000
-    });
+    console.dir('err', error); // for debug
+    let res = error.response;
+    let status = res.status;
+    if (status == 422) {
+      Message({
+        message: res.data.error,
+        type: "error",
+        duration: 5 * 1000
+      });
+    }
     return Promise.reject(error);
   }
 );

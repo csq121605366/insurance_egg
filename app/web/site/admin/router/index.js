@@ -99,7 +99,7 @@ export const constantRouterMap = [
     component: Layout,
     children: [
       {
-        path: "",
+        path: "index",
         name: "User",
         component: _import("info/userInfo"),
         meta: { title: "用户管理", icon: "form" }

@@ -30,8 +30,9 @@ module.exports = app => {
     status: {
       type: String,
       enum: config.USER_ROLE_STATUS,
+      enum: config.USER_ROLE_STATUS,
       default: config.USER_ROLE_STATUS[1]
-    }, // 用户账号状态 0保留 1未激活 2已激活 3已锁定 9已删除
+    }, // 用户账号状态 0保留 1未激活 2已激活 3已锁定(也叫审核未通过) 9已删除
     idcard: String, //身份证号
     language: String, //用户的语言，简体中文为zh_CN
     country: String, // 用户所在国家
@@ -59,10 +60,10 @@ module.exports = app => {
         ref: "Asset"
       }
     ], //医生证书
-    setions: [
+    department: [
       {
-        type: Schema.Types.ObjectId,
-        ref: "Department"
+        key: Number,
+        label: String
       }
     ], // 关联科室 医生只能关联一个科室,患者可以关联最多三个 经理人关联三个
     agency: [
@@ -113,6 +114,8 @@ module.exports = app => {
       default: "0"
     }, // 性别
     avatarUrl: String, // 头像地址
+    audit_create: Date, //审核提交日期
+    audit_end: Date, //审核结束日期
     meta: {
       createdAt: {
         type: Date,
@@ -125,7 +128,7 @@ module.exports = app => {
     }
   });
 
-  UserSchema.pre("save", function (next) {
+  UserSchema.pre("save", function(next) {
     if (this.isNew) {
       if (!this.avatarUrl && this.avatarUrl == "") {
         const options = {

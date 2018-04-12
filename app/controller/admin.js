@@ -154,7 +154,7 @@ class Admin extends BaseController {
     // 不正确抛出错误
     if (!isMatch) return this.error(`密码不正确`);
     // 修改密码
-    find.password = oldPassword;
+    find.password = newPassword;
     try {
       await find.save()
       return this.success();
@@ -162,12 +162,7 @@ class Admin extends BaseController {
       return this.error();
     }
   }
-
-  //修改管理员信息
-  async resetUserinfo() { 
-
-  }
-
+  
 
 
   //绑定手机
@@ -204,6 +199,9 @@ class Admin extends BaseController {
     await find.save();
     this.success('解绑成功')
   }
+
+ 
+
 
 
 

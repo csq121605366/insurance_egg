@@ -20,9 +20,10 @@ import Layout from "@/views/layout/Layout";
 * name:'router-name'             the name is used by <keep-alive> (must set!!!)
 * meta : {
     title: 'title'               the name show in submenu and breadcrumb (recommend set)
-    icon: 'svg-name'             the icon show in the sidebar,
+    icon: 'iconfont-'             the icon show in the sidebar,
   }
 **/
+
 export const constantRouterMap = [
   {
     path: "/login",
@@ -44,56 +45,76 @@ export const constantRouterMap = [
       {
         path: "",
         name: "home",
-        meta: { title: "首页", icon: "example" },
+        meta: { title: "首页", icon: "icon-tuandui" },
         component: _import("home/index")
       }
     ]
   },
   {
-    path: "/example",
+    path: "/doctor",
     component: Layout,
-    redirect: "/example/table",
-    name: "Example",
-    meta: { title: "Example", icon: "example" },
+    redirect: "/doctor/list",
     children: [
       {
-        path: "table",
-        name: "Table",
-        component: _import("table/index"),
-        meta: { title: "Table", icon: "table" }
-      },
-      {
-        path: "tree",
-        name: "Tree",
-        component: _import("tree/index"),
-        meta: { title: "Tree", icon: "tree" }
+        path: "list",
+        name: "doctor_list",
+        meta: { title: "医生管理", icon: "icon-zuzhi" },
+        component: _import("doctor/list"),
+        children: [
+          {
+            path: ":id",
+            hidden: true,
+            name: "doctor_Detail",
+            component: _import("doctor/detail")
+          }
+        ]
       }
     ]
   },
   {
-    path: "/form",
+    path: "/agent",
     component: Layout,
     children: [
       {
-        path: "index",
-        name: "Form",
-        component: _import("form/index"),
-        meta: { title: "Form", icon: "form" }
+        path: "list",
+        name: "agent_list",
+        component: _import("agent/list"),
+        meta: { title: "经理人", icon: "icon-zuzhi" },
+        children: [
+          {
+            path: ":id",
+            hidden: true,
+            name: "agent_Detail",
+            component: _import("agent/detail")
+          }
+        ]
       }
     ]
   },
   {
-    path: "/upload",
+    path: "/fw",
     component: Layout,
-    children: [
+    children:[
       {
-        path: "",
-        name: "Upload",
-        component: _import("upload/index"),
-        meta: { title: "上传素材", icon: "form" }
+        path:'index',
+        name: "fw",
+        component: _import("framework/index"),
+        meta: { title: "组织框架", icon: "icon-zuzhi" }
       }
     ]
   },
+  // {
+  //   path: "/upload",
+  //   component: Layout,
+  //   children: [
+  //     {
+  //       path: "",
+  //       name: "Upload",
+  //       component: _import("upload/index"),
+  //       meta: { title: "上传素材", icon: "icon-zuzhi" }
+  //     }
+  //   ]
+  // },
   {
     path: "/user",
     component: Layout,
@@ -102,7 +123,7 @@ export const constantRouterMap = [
         path: "index",
         name: "User",
         component: _import("info/userInfo"),
-        meta: { title: "用户管理", icon: "form" }
+        meta: { title: "用户管理", icon: "icon-zuzhi" }
       }
     ]
   },
@@ -113,5 +134,5 @@ export default new Router({
   mode: "history", //后端支持可开
   scrollBehavior: () => ({ y: 0 }),
   routes: constantRouterMap,
-  
+  base: "/admin"
 });

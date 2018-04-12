@@ -457,9 +457,9 @@ class Weixin extends BaseController {
     // console.log(this.ctx.helper.escape(str));
     // let res = await this.ctx.getFileStream();
 
-    this.service.base.sendPhoneCode(15527076261,71358);
+    let res = await this.service.department.children(1803, 180302);
 
-    this.success();
+    this.success(res);
   }
 }
 

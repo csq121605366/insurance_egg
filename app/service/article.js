@@ -49,7 +49,6 @@ class ArticleService extends BaseService {
       if (opts.sort != 0) tunlmatch.$match.sort = opts.sort;
       if (opts.type != 0) tunlmatch.$match.type = opts.type;
       if (opts.status != 0) tunlmatch.$match.status = opts.status;
-      console.log(tunlmatch);
       try {
         let res = await this.ctx.model.Article.aggregate([
           tunlmatch,
@@ -67,7 +66,6 @@ class ArticleService extends BaseService {
         if (opts.sort != 0) tunlmatch.$match.sort = opts.sort | 0;
         if (opts.type != 0) tunlmatch.$match.type = opts.type | 0;
         if (opts.status != 0) tunlmatch.$match.status = opts.status | 0;
-        console.log(tunlmatch);
         let res = await this.ctx.model.Article.aggregate([
           tunlmatch,
           tunlproject,

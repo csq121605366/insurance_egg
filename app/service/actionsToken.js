@@ -8,7 +8,8 @@ class ActionTokenService extends BaseService {
     return app.jwt.sign(
       {
         _id: user._id,
-        role: user.role
+        role: user.role,
+        type: 'admin'
       },
       app.config.jwt.secret,
       {
@@ -26,7 +27,8 @@ class ActionTokenService extends BaseService {
         openid: user.openid,
         name: user.name,
         status: user.status,
-        role: user.role
+        role: user.role,
+        type: 'user'
       },
       app.config.jwt.secret,
       {

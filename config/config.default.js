@@ -37,7 +37,7 @@ module.exports = app => {
       consoleLevel: "DEBUG", // ERROR  WARN  INFO DEBUG NONE
       dir: path.join(app.baseDir, "logs")
     },
-    middleware: ["access", "gzip", "errorHandler"],
+    middleware: ["access",  "gzip", "errorHandler"],
     gzip: { threshold: 1024 },
     static: {
       prefix: "/public/",
@@ -137,7 +137,7 @@ module.exports = app => {
   exports.myconfig = {
     sms: {
       SMS_KEY: "15670f04b6400d13e1cb85bbf27b5f77", //聚合数据的短信key
-      SMS_TYPE: [71545,71356, 71357, 71358], //聚合数据的短信类型 登录71358 找回密码71357 注册71356  71545解绑手机
+      SMS_TYPE: [71545, 71356, 71357, 71358], //聚合数据的短信类型 登录71358 找回密码71357 注册71356  71545解绑手机
       SMS_URL: 'http://v.juhe.cn/sms/send', //聚合数据接口地址
       SMS_EXPIRES: 1 * 60 * 60 * 1000, //验证码存活时间
     },

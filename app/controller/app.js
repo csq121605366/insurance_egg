@@ -4,6 +4,13 @@ class AppController extends BaseController {
     super(ctx);
   }
 
+  async index() {
+    // 后台管理员页面
+    const { ctx } = this;
+    await ctx.renderClient("app/app.js", { csrf: ctx.csrf, msg: "你好" });
+  }
+
+
   /**
    * 登录
    */

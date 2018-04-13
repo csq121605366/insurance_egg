@@ -12,14 +12,12 @@ import router from "./router";
 import store from "./store";
 import ElementUI from "element-ui";
 import "element-ui/lib/theme-chalk/index.css";
-import locale from "element-ui/lib/locale/lang/en";
 
 import "@/styles/index.scss"; // global css
 
-import "@/icons"; // icon
 import "./utils/permission"; // permission control
 
-Vue.use(ElementUI, { locale });
+Vue.use(ElementUI);
 
 Vue.config.productionTip = false;
 

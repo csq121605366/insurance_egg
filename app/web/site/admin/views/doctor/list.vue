@@ -1,14 +1,14 @@
 <template>
   <section class="doctor-list">
-    <el-tabs class="tabs" type="border-card">
-      <el-tab-pane label="待审核">
+    <el-tabs @tab-click="tabClick"  activeName="uncheckedTable" class="tabs" type="border-card">
+      <el-tab-pane name="uncheckedTable" label="待审核">
           <el-table
           :data="uncheckedData.list"
+          ref="uncheckedTable"
+          key="uncheckedTable"
           border
-          height="720"
-          style="width: 100%">
+          height="720">
           <el-table-column
-            fixed
             prop="name"
             label="姓名"
             width="120">
@@ -54,7 +54,6 @@
             width="120">
           </el-table-column>
           <el-table-column
-            fixed="right"
             label="操作"
             width="100">
           <template slot-scope="scope">
@@ -76,14 +75,14 @@
         </el-col>
         </el-row>
       </el-tab-pane>
-      <el-tab-pane label="已审核">
+      <el-tab-pane  name="checkedTable" label="已审核">
         <el-table
           :data="checkedData.list"
+          ref="checkedTable"
+          key="checkedTable"
           border
-          height="720"
-          style="width: 100%">
+          height="720">
           <el-table-column
-            fixed
             prop="name"
             label="姓名"
             width="120">
@@ -124,7 +123,6 @@
             width="120">
           </el-table-column>
           <el-table-column
-            fixed="right"
             prop="status"
             label="审核状态"
             width="120">
@@ -156,6 +154,9 @@ export default {
     };
   },
   methods: {
+    tabClick(e) {
+      this.$refs[e.name].doLayout();
+    },
     uncheckedDataPageChange(e) {
       console.log(e);
     },

@@ -2,7 +2,7 @@ const path = require('path');
 const util = require('util');
 
 module.exports = () => {
-  const skipExt = [ '.png', '.jpeg', '.jpg', '.ico', '.gif' ];
+  const skipExt = ['.png', '.jpeg', '.jpg', '.ico', '.gif'];
   return function* (next) {
     const start = new Date().getTime();
 

@@ -1,9 +1,12 @@
 module.exports = app => {
   const { router, controller } = app;
 
+  // const auth = app.middleware.auth(app);
+
+
   // 管理员接口
   router.post("/api/admin/token", "admin.getToken"); // 获取token
-  router.get("/api/admin", app.jwt, "admin.getUserinfo"); // 获取用户信息
+  router.get("/api/admin", app.jwt,  "admin.getUserinfo"); // 获取用户信息
   router.post("/api/admin", app.jwt, "admin.createUser"); // 创建用户
 
   router.post("/api/admin/phone/bind", app.jwt, "admin.bindPhone"); // 绑定手机

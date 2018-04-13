@@ -1,21 +1,46 @@
 <template>
-  <layout>
-    <transition name="fade" mode="out-in">
+  <div id="app">
       <router-view></router-view>
-    </transition>
-  </layout>
+ </div>
 </template>
-<script type="text/babel">
+
+<script>
 import Vue from "vue";
-import { sync } from "vuex-router-sync";
-import store from "store/app";
-import router from "./component/router";
-import Layout from "component/app";
-sync(store, router);
+import router from "./router";
+import store from "./store";
+import MintUI from "mint-ui";
+import "@@/style/reset.css";
+import "mint-ui/lib/style.css";
+// import "./utils/permission"; // permission control
+
+document.addEventListener(
+  "DOMContentLoaded",
+  function() {
+    if (window.FastClick) window.FastClick.attach(document.body);
+  },
+  false
+);
+
+Vue.use(MintUI);
+
+Vue.config.productionTip = false;
+
 export default {
-  router,
   store,
-  computed: {},
-  mounted() {}
+  router
 };
 </script>
+
+<style>
+html,
+body {
+  background-color: #fafafa;
+  -webkit-overflow-scrolling: touch;
+  user-select: none;
+}
+
+a {
+  color: inherit;
+}
+</style>
+

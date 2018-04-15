@@ -3,11 +3,12 @@ module.exports = app => {
 
   router.post("/api/app/login", "app.login"); // 用户登录和注册
 
-  router.post("/api/app/sms/send", "app.doctorSendSms"); // 医生发送手机验证码
+  router.get("/api/app/getuserinfo", app.jwt, "app.getuserinfo"); //获取用户信息
+  router.post("/api/app/updatebaseInfo", app.jwt, "app.updatebaseInfo"); //用户授权获取基本信息
 
 
-  router.get('/api/app/getcitys', 'hospital.getCitys'); // 获取城市列表
-  router.get('/api/app/gethospitals', 'hospital.getHospitals'); // 获取医院列表
+  router.get("/api/app/getcitys", "hospital.getCitys"); // 获取城市列表
+  router.get("/api/app/gethospitals", "hospital.getHospitals"); // 获取医院列表
 
   router.post("/api/app/update", app.jwt, "app.update"); // 用户信息完善更新
 

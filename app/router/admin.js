@@ -18,7 +18,7 @@ module.exports = app => {
 
 
   // 关于用户
-  router.post("/api/admin/audituser", app.jwt, "app.auditUser"); // 审核用户
+  router.post("/api/admin/audituser", app.jwt, "admin.auditUser"); // 审核用户
 
 
 

@@ -130,7 +130,7 @@ module.exports = app => {
 
   UserSchema.pre("save", function(next) {
     if (this.isNew) {
-      if (!this.avatarUrl && this.avatarUrl == "") {
+      if (!this.avatarUrl || this.avatarUrl == "") {
         const options = {
           margin: 0.2,
           size: 200

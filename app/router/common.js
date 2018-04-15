@@ -1,7 +1,7 @@
 module.exports = app => {
 	const { router, controller } = app;
 
-   // type:['regist','login','forgot']其中一个 phone手机号
+   // type:['bind','login','forgot','unbind']其中一个   phone手机号
    router.post("/api/sendcode","common.sendcode");
 
 

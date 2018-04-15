@@ -10,7 +10,6 @@ class AppController extends BaseController {
     await ctx.renderClient("app/app.js", { csrf: ctx.csrf, msg: "你好" });
   }
 
-
   /**
    * 登录
    */
@@ -74,6 +73,50 @@ class AppController extends BaseController {
     });
   }
 
+  async updatebaseInfo() {
+    let { openid, role } = this.ctx.state.user;
+    let {
+      nickName,
+      avatarUrl,
+      gender,
+      city,
+      province,
+      country,
+      language
+    } = this.ctx.request.body;
+    if (role != "0") return this.error("您已经授权过了");
+    let find = await this.ctx.model.User.findOne({ openid }).exec();
+    if (!find) return this.error("未找到该用户");
+    Object.assign(find, {
+      nickName,
+      name: nickName,
+      avatarUrl,
+      gender,
+      city,
+      province,
+      country,
+      language
+    });
+    try {
+      await find.save();
+      let user = await this.ctx.model.User.findOne({ openid })
+        .select("name role nickName status phone gender avatarUrl")
+        .exec();
+      this.success(user);
+    } catch (e) {
+      this.error("授权失败");
+    }
+  }
+
+  async getuserinfo() {
+    let { openid } = this.ctx.state.user;
+    let user = await this.ctx.model.User.findOne({ openid })
+      .select("name role nickName status phone gender avatarUrl")
+      .exec();
+    if (user) return this.success(user);
+    else this.error("未找到您的信息");
+  }
+
   async update() {
     let reg = this.config.regexp;
     this.ctx.validate({
@@ -99,7 +142,7 @@ class AppController extends BaseController {
     });
     let { role } = this.ctx.request.body;
     let { status, _id } = this.ctx.state.user;
-    console.log('==================', role, status)
+    console.log("==================", role, status);
     // 如果role角色不为0表示非游客 账号状态1未激活
     if (role != 0 && status == 1) return this.error("账号审核中...");
     // 二次验证(分角色)
@@ -119,8 +162,8 @@ class AppController extends BaseController {
       //医生 一个科室一个医院 还需要绑定手机号
       this.ctx.validate({
         hospital: { type: "string", required: true },
-        phone: { type: 'string', required: true },
-        sms_code: { type: 'string', required: true },
+        phone: { type: "string", required: true },
+        sms_code: { type: "string", required: true },
         setions: {
           type: "array",
           itemType: "string",
@@ -176,7 +219,6 @@ class AppController extends BaseController {
       // 用户首次激活
       if (find.role == 1) {
         // 普通用户
-
       }
     } else {
       // 非首次用户数据更新
@@ -186,44 +228,19 @@ class AppController extends BaseController {
   async doctorSendSms() {
     let reg = this.config.regexp;
     this.ctx.validate({
-      phone: { type: 'string', format: reg.phone }
+      phone: { type: "string", format: reg.phone }
     });
     let { phone } = this.ctx.request.body;
     let user = await this.ctx.model.User.findOne({ phone }).exec();
-    if (user) return this.error('该手机已注册');
+    if (user) return this.error("该手机已注册");
     let find = await this.ctx.model.Sms.find({ phone }).exec();
     let last = find[find.length - 1];
-    if (last && new Date(last.created).getTime() + 60 * 1000 > Date.now()) return this.error('验证码已发送,60s后可重发');
+    if (last && new Date(last.created).getTime() + 60 * 1000 > Date.now())
+      return this.error("验证码已发送,60s后可重发");
     let res = await this.service.sms.sendPhoneCode(phone, 71356);
-    if (!res) return this.error('发送失败,请重新发送');
-    else return this.success('验证码发送成功');
+    if (!res) return this.error("发送失败,请重新发送");
+    else return this.success("验证码发送成功");
   }
-
-
-
-  //审核用户
-  async auditUser() {
-    this.ctx.validate({ openid: "string" });
-    let { role } = this.ctx.state.user;
-    let { openid } = this.ctx.request.body;
-    if (role < 2) return this.error("只有管理员可以审核!");
-    // 将已锁定和未激活的用户激活
-    let find = await this.ctx.model.User.findOne({
-      openid,
-      status: { $in: [1, 3] }
-    }).exec();
-    if (!find) return this.error("未找到该用户,或该用户已被删除");
-    // 激活用户账户
-    find.status = 2;
-    try {
-      await find.save();
-      return this.success();
-    } catch (e) {
-      return this.error();
-    }
-  }
-
-
 
   async wxGetUserInfo() {
     let { openid, role } = this.ctx.state.user;

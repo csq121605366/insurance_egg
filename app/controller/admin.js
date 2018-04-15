@@ -226,6 +226,27 @@ class Admin extends BaseController {
     // {"streamSize":574}
   }
 
+  //审核用户
+  async auditUser() {
+    this.ctx.validate({ openid: "string" });
+    let { role } = this.ctx.state.user;
+    let { openid } = this.ctx.request.body;
+    if (role < 2) return this.error("只有管理员可以审核!");
+    // 将已锁定和未激活的用户激活
+    let find = await this.ctx.model.User.findOne({
+      openid,
+      status: { $in: [1, 3] }
+    }).exec();
+    if (!find) return this.error("未找到该用户,或该用户已被删除");
+    // 激活用户账户
+    find.status = 2;
+    try {
+      await find.save();
+      return this.success();
+    } catch (e) {
+      return this.error();
+    }
+  }
 
 
 

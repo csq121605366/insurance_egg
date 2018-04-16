@@ -225,22 +225,73 @@ class AppController extends BaseController {
     }
   }
 
-  async doctorSendSms() {
-    let reg = this.config.regexp;
-    this.ctx.validate({
-      phone: { type: "string", format: reg.phone }
-    });
-    let { phone } = this.ctx.request.body;
-    let user = await this.ctx.model.User.findOne({ phone }).exec();
-    if (user) return this.error("该手机已注册");
-    let find = await this.ctx.model.Sms.find({ phone }).exec();
-    let last = find[find.length - 1];
-    if (last && new Date(last.created).getTime() + 60 * 1000 > Date.now())
-      return this.error("验证码已发送,60s后可重发");
-    let res = await this.service.sms.sendPhoneCode(phone, 71356);
-    if (!res) return this.error("发送失败,请重新发送");
-    else return this.success("验证码发送成功");
+
+  //获取职称列表
+  async titleList(){
+    try {
+      let titles = await this.ctx.model.Title.find().select('name').exec();
+      this.success(titles)
+    } catch(e) {
+      // statements
+      console.log(e);
+    }
   }
+
+   //获取城市列表
+  async getCitys() {
+    try {
+      let citys = await this.ctx.model.Hospital.find().select('_id city').exec();
+      this.success(citys);
+    } catch (e) {
+      this.error('查找城市出错')
+    }
+  }
+  //根据城市返回医院列表
+  async getHospitals() {
+    let { _id } = this.ctx.query;
+    console.log(_id)
+    try {
+      let hospitals = await this.ctx.model.Hospital.findOne({ _id }).select('children.label children._id');
+      this.success(hospitals.children)
+    } catch (e) {
+      this.error()
+    }
+  }
+
+  //获取主科室列表
+  async mainDepartments(){
+    let list = await this.ctx.model.Department.find().select('label key').exec();
+    this.success(list);
+  }
+  // 获取次科室列表
+  async viceDepartments(){
+    let {_id} = this.ctx.request.query;
+    if(!_id) return this.error('缺少参数');
+    let list = await this.ctx.model.Department.findOne({_id}).select('children.label children.key').exec();
+    if(list)this.success(list.children);
+    else this.error('未找到')
+  }
+
+
+
+
+  //医生发送手机
+  // async doctorSendSms() {
+  //   let reg = this.config.regexp;
+  //   this.ctx.validate({
+  //     phone: { type: "string", format: reg.phone }
+  //   });
+  //   let { phone } = this.ctx.request.body;
+  //   let user = await this.ctx.model.User.findOne({ phone }).exec();
+  //   if (user) return this.error("该手机已注册");
+  //   let find = await this.ctx.model.Sms.find({ phone }).exec();
+  //   let last = find[find.length - 1];
+  //   if (last && new Date(last.created).getTime() + 60 * 1000 > Date.now())
+  //     return this.error("验证码已发送,60s后可重发");
+  //   let res = await this.service.sms.sendPhoneCode(phone, 71356);
+  //   if (!res) return this.error("发送失败,请重新发送");
+  //   else return this.success("验证码发送成功");
+  // }
 
   async wxGetUserInfo() {
     let { openid, role } = this.ctx.state.user;

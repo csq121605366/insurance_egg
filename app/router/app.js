@@ -7,8 +7,12 @@ module.exports = app => {
   router.post("/api/app/updatebaseInfo", app.jwt, "app.updatebaseInfo"); //用户授权获取基本信息
 
 
-  router.get("/api/app/getcitys", "hospital.getCitys"); // 获取城市列表
-  router.get("/api/app/gethospitals", "hospital.getHospitals"); // 获取医院列表
+
+  router.get("/api/app/titlelist", "app.titleList"); // 获取城市列表
+  router.get("/api/app/getcitys", "app.getCitys"); // 获取城市列表
+  router.get("/api/app/gethospitals", "app.getHospitals"); // 获取医院列表
+  router.get("/api/app/maindepartments", "app.mainDepartments"); // 获取主科室列表
+  router.get("/api/app/vicedepartments", "app.viceDepartments"); // 获取次科室列表
 
   router.post("/api/app/update", app.jwt, "app.update"); // 用户信息完善更新
 

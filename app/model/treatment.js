@@ -16,6 +16,8 @@ module.exports = app => {
         ref: "User"
       }
     ], //关联医生
+    doctor_name:String, //医生姓名
+    illness_name:String, //疾病名字
     begin_time: Date, //开始时间
     end_time: Date, //结束时间
     operation: {
@@ -25,7 +27,9 @@ module.exports = app => {
     }, //是否手术 1否 2已手术
     treatment_images: [
       {
-        url: String, //治疗相关上传图片
+        bucket:String,//上传时的图片文件夹
+        imageURL: String, //治疗相关上传图片地址
+        key:String,//图片名
         hash: String, //图片hash值
         describe: String //照片描述
       }

@@ -13,7 +13,7 @@ class AppController extends BaseController {
   /**
    * 登录
    */
-  async login() {
+   async login() {
     this.ctx.validate({
       code: "string"
     });
@@ -100,8 +100,8 @@ class AppController extends BaseController {
     try {
       await find.save();
       let user = await this.ctx.model.User.findOne({ openid })
-        .select("name role nickName status phone gender avatarUrl")
-        .exec();
+      .select("name role nickName status phone gender avatarUrl")
+      .exec();
       this.success(user);
     } catch (e) {
       this.error("授权失败");
@@ -111,60 +111,123 @@ class AppController extends BaseController {
   async getuserinfo() {
     let { openid } = this.ctx.state.user;
     let user = await this.ctx.model.User.findOne({ openid })
-      .select("name role nickName status phone gender avatarUrl")
-      .exec();
+    .select("name role nickName status phone gender avatarUrl")
+    .exec();
     if (user) return this.success(user);
     else this.error("未找到您的信息");
+  }
+
+  async canUpdate(){
+   let oInfo = this.ctx.state.user;
+    //判断用户是否可以更新内
+    let find = await this.ctx.model.User.findOne({_id:oInfo._id}).exec();
+    if(!find) return this.error('未找到帐号');
+    // 如果role角色不为0表示非游客 账号状态1未激活
+    if (find.role != '0' && find.status == '1') return this.error("账号审核中...");
+    else return this.success()
   }
 
   async update() {
     let reg = this.config.regexp;
     this.ctx.validate({
-      name: { type: "string", format: reg.name, required: false },
+      name: { type: "string", format: reg.name, required: true },
       role: { type: "enum", values: ["0", "1", "2", "3", "9"], required: true },
-      nickName: { type: "string", format: reg.name, required: false },
-      phone: { type: "string", format: reg.phone, required: false },
+      // nickName: { type: "string", format: reg.name, required: false },
+      phone: { type: "string", format: reg.phone, required: true },
+      code: { type: "string", required: true },
       idcard: { type: "string", format: reg.idcard, required: false },
-      country: { type: "string", required: false },
-      province: { type: "string", required: false },
-      city: { type: "string", required: false },
+      // country: { type: "string", required: false },
+      // province: { type: "string", required: false },
+      // city: { type: "string", required: false },
 
       // hospital: { type: "string", required: true },
-      // setions: { type: "array", itemType: "string", required: false },
+      // department: { type: "array", itemType: "string", required: false },
       // friends: { type: "array", itemType: "string", required: false },
       // title: { type: "string", required: false },
       // treatment_info: { type: "array", itemType: "string", required: false },
       // fields: { type: "string", required: false },
 
-      email: { type: "string", format: reg.email, required: false },
-      gender: { type: "enum", values: ["0", "1", "2"], required: false },
-      avatarUrl: { type: "string", format: reg.url, required: false }
-    });
-    let { role } = this.ctx.request.body;
-    let { status, _id } = this.ctx.state.user;
-    console.log("==================", role, status);
+      // email: { type: "string", format: reg.email, required: false },
+      gender: { type: "enum", values: ["0", "1", "2"], required: true },
+      avatar: { type: "object", required: false }
+    },this.ctx.request.body);
+     // 获取参数
+     let info = this.ctx.request.body;
+     let oInfo = this.ctx.state.user;
+     let { role } = this.ctx.request.body;
+    // 找到用户
+    let find = await this.ctx.model.User.findOne({_id:oInfo._id}).exec();
+    if(!find) return this.error('未找到帐号');
     // 如果role角色不为0表示非游客 账号状态1未激活
-    if (role != 0 && status == 1) return this.error("账号审核中...");
+    if (find.role != '0' && find.status == '1') return this.error("账号审核中...");
     // 二次验证(分角色)
-    if (role == 1) {
+    if (role == '1') {
       //普通用户 关注科室1-3个
       this.ctx.validate({
-        setions: {
+        department: {
           type: "array",
-          itemType: "string",
-          required: false,
+          required: true,
           max: 3,
           min: 1
         },
-        treatment_info: { type: "array", itemType: "object", required: false }
+        treatment_info: { type: "array", required: false }
       });
-    } else if (role == 2) {
+
+    // 检验验证码
+    let canBind = await this.service.sms.validate(info.phone,71356,info.code);
+    if(!canBind) return this.error('验证码不正确或者已失效');
+    // 转移头像资源地址
+    info.avatarUrl='';
+    let removeResp = await this.service.qiniu.removeImage([info.avatar]).then(res=>{
+      info.avatarUrl = res[0];
+    }).catch(()=>{
+      throw  new Error('头像设置失败');
+    });
+    //治疗信息
+    info.treatment_info = [];
+    if(info.treatment_images.length){
+      let treatment_images = [];
+      console.log(info)
+      //转移治疗信息的图片
+      await this.service.qiniu.removeImage(info.treatment_images).then(res=>{
+        treatment_images = res;
+      }).catch(()=>{
+        throw new Error('就诊资料上传失败');
+      });
+      //保存治疗信息
+      let newTreatInfo = new this.ctx.model.Treatment({
+        doctor_name:info.doctor_name,
+        illness_name:info.illness_name,
+        operation:info.operation,
+        treatment_images
+      });
+      await newTreatInfo.save();
+      //将生成的就诊资料_id 存储在治疗信息中
+      info.treatment_info.push(newTreatInfo['_id']);
+    }
+    // 存储信息
+    Object.assign(find,{
+      name:info.name,
+      role:info.role,
+      phone:info.phone,
+      idcard:info.idcard,
+      gender:info.gender,
+      avatarUrl:info.avatarUrl?info.avatarUrl:find.avatarUrl,
+      department:info.department,
+      treatment_info:info.treatment_info,
+      audit_create:new Date()
+    });
+    console.log(find)
+    await find.save();
+    this.success('更新成功');
+
+  } else if (role == '2') {
       //医生 一个科室一个医院 还需要绑定手机号
       this.ctx.validate({
         hospital: { type: "string", required: true },
         phone: { type: "string", required: true },
         sms_code: { type: "string", required: true },
-        setions: {
+        department: {
           type: "array",
           itemType: "string",
           required: true,
@@ -185,10 +248,10 @@ class AppController extends BaseController {
           required: true
         }
       });
-    } else if (role == 3) {
+    } else if (role == '3') {
       //经理人 1-3个科室和医生
       this.ctx.validate({
-        setions: {
+        department: {
           type: "array",
           itemType: "string",
           required: false,
@@ -209,20 +272,7 @@ class AppController extends BaseController {
         }
       });
     }
-    // 获取参数
-    let info = this.ctx.request.body;
-    let find = this.service.app.findUserByOpenId(_id);
 
-    // 用户角色列表 0:游客 1:普通用户 2:医生 3:经理人 9:前台页面管理员
-    // 用户账号状态 0保留 1未激活 2已激活 3已锁定 9已删除
-    if (find.role == 0 && find.status == 1) {
-      // 用户首次激活
-      if (find.role == 1) {
-        // 普通用户
-      }
-    } else {
-      // 非首次用户数据更新
-    }
   }
 
 
@@ -238,7 +288,7 @@ class AppController extends BaseController {
   }
 
    //获取城市列表
-  async getCitys() {
+   async getCitys() {
     try {
       let citys = await this.ctx.model.Hospital.find().select('_id city').exec();
       this.success(citys);

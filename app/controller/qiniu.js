@@ -7,8 +7,10 @@ class QiniuController extends BaseController {
     super(ctx);
   }
   async ticket() {
-    let res = await this.service.qiniu.createTicket();
-    this.success(res);
+    let qiniuDomain = 'http://'+this.config.myconfig.qiniu.temporary_url;
+    let qiniuRegion = this.config.myconfig.qiniu.temporary_region;
+    let qiniuTicket = await this.service.qiniu.createTicket();
+    this.success({qiniuTicket,qiniuDomain,qiniuRegion});
   }
   async callback() {
     console.log(this.ctx.request.body)

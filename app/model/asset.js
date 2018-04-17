@@ -9,10 +9,13 @@ module.exports = app => {
     type: {
       type: String,
       required: true,
-      enum: ["image", "video", "audio"]
+      enum: ["image", "video", "audio"],
+      default:'image'
     },
-    url: String, //存储地址
+    key:String, //文件名
     hash: String, //文件hash
+    fsize:Number,//文件大小
+    name:String,//
     meta: {
       created: {
         type: Date,

@@ -26,36 +26,39 @@ class QiniuService extends BaseService {
    * 注册后将图片数组转移到永久仓库
    * @param {*} filenames 文件数组
    */
-  async removeImage(filenames = []) {
+  async removeImage(file = []) {
     let config = this.config.myconfig;
     let srcBucket = config.qiniu.temporary_bucket;
     let destBucket = config.qiniu.permanent_bucket;
+    let destDomain = config.qiniu.permanent_url;
     let moveOperations = [];
     let res = [];
-    _.forEach(filenames, (value, index) => {
-      let mkfilename = this.guid() + /\.[^\.]+$/.exec(value)[0];
-      let opt = qiniu.rs.moveOp(srcBucket, value, destBucket, mkfilename);
-      res.push(mkfilename);
+    _.forEach(file, (item, index) => {
+      let mkfilename = this.guid() + /\.[^\.]+$/.exec(item.key)[0];
+      let opt = qiniu.rs.copyOp(srcBucket, item.key, destBucket, mkfilename);
+      res.push('http://'+destDomain+'/'+mkfilename);
       moveOperations.push(opt);
     });
     let mac = new qiniu.auth.digest.Mac(config.qiniu.AK, config.qiniu.SK);
     var conf = new qiniu.conf.Config();
     var bucketManager = new qiniu.rs.BucketManager(mac, conf);
+    let self = this;
     return new Promise((resolve, reject) => {
-      bucketManager.batch(moveOperations, function (err, respBody, respInfo) {
+      bucketManager.batch(moveOperations, async (err, respBody, respInfo)=>{
         if (err) {
           reject(err);
         } else {
+          console.log('qiniu',respInfo)
           // 200 is success, 298 is part success
-          if (respInfo.statusCode !== 200) {
+          if (respInfo.statusCode != 200) {
             reject()
           } else {
+            await self.ctx.model.Asset.insertMany(file);
             resolve(res);
           }
         }
       });
     })
-
   }
 
 

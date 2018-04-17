@@ -25,15 +25,7 @@ module.exports = app => {
       enum: ["1", "2"],
       default: "1"
     }, //是否手术 1否 2已手术
-    treatment_images: [
-      {
-        bucket:String,//上传时的图片文件夹
-        imageURL: String, //治疗相关上传图片地址
-        key:String,//图片名
-        hash: String, //图片hash值
-        describe: String //照片描述
-      }
-    ], // 就诊信息图片数组
+    treatment_images: [String], // 就诊信息图片数组
     describe: String, //描述
     meta: {
       created: {

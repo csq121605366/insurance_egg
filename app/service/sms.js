@@ -53,8 +53,8 @@ class SmsService extends BaseService {
   /**
    * 
    * @param {*} phone 手机号
-   * @param {*} type 模版id 登录71358 找回密码71357 注册71356
-   * @param {*} sms_code 模版id 登录71358 找回密码71357 注册71356
+   * @param {*} type 模版id 登录71358 找回密码71357 注册71356 解绑手机71545
+   * @param {*} sms_code 验证码
    */
   async validate(phone,type,sms_code){
     let smsConf = this.config.myconfig.sms

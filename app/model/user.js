@@ -61,10 +61,17 @@
     }
     ], //医生证书
     department: [{
-      type:Schema.Types.ObjectId,
-      ref:'Department'
+       label:String,
+       key:String
     }], // 关联科室 医生只能关联一个科室,患者可以关联最多三个 经理人关联三个
-    friends: [
+    agency:[{
+      name: String,
+      department:{
+        label:String,
+        key:String
+      }
+    }],
+    friend: [
     {
       name: "String",
       gender: {
@@ -78,21 +85,15 @@
         //   ref: "Hospital"
         // }, //医生就职医院ref
         department: [{
-          type:Schema.Types.ObjectId,
-          ref:'Department'
+          label:String,
+          key:String
         }],
         hospital:String,
-        title: {
-          type: Schema.Types.ObjectId,
-          ref: "Title"
-        },
+        title: String, //职称
         description: String // 简介
       }
     ], // 代理人的潜在客户
-    title: {
-      type: Schema.Types.ObjectId,
-      ref: "Title"
-    }, // 职称
+    title: String, // 职称
     treatment_info: [
     {
       type: Schema.Types.ObjectId,

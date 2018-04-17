@@ -180,7 +180,8 @@ module.exports = app => {
       insurance_bucket: "insurance",
       permanent_url: "p6syms5zu.bkt.clouddn.com",
       temporary_url: "p6syg4m80.bkt.clouddn.com",
-      insurance_url: "p6ueajy31.bkt.clouddn.com"
+      insurance_url: "p6ueajy31.bkt.clouddn.com",
+      temporary_region:"NCN"
     }
   };
 

@@ -2,10 +2,10 @@
  * 用户信息
  */
 
-const bcrypt = require("bcrypt");
-const Identicon = require("identicon.js");
+ const bcrypt = require("bcrypt");
+ const Identicon = require("identicon.js");
 
-module.exports = app => {
+ module.exports = app => {
   const config = app.config.myconfig.dbconfig;
   const mongoose = app.mongoose;
   const Schema = mongoose.Schema;
@@ -39,7 +39,7 @@ module.exports = app => {
     province: String, // 用户所在省份
     city: String, // 用户所在城市
     localtion: [
-      {
+    {
         type: String, //默认为 wgs84 返回 gps 坐标，gcj02 返回可用于wx.openLocation的坐标
         latitude: String, //纬度
         longitude: String, //经度
@@ -55,39 +55,33 @@ module.exports = app => {
       ref: "Hospital"
     }, //医生就职医院ref
     certificate: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Asset"
-      }
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Asset"
+    }
     ], //医生证书
-    department: [
-      {
-        key: Number,
-        label: String
-      }
-    ], // 关联科室 医生只能关联一个科室,患者可以关联最多三个 经理人关联三个
-    agency: [
-      {
-        setions: {
-          type: Schema.Types.ObjectId,
-          ref: "Department"
-        },
-        name: String
-      }
-    ], //经理人代理最多三个科室
+    department: [{
+      type:Schema.Types.ObjectId,
+      ref:'Department'
+    }], // 关联科室 医生只能关联一个科室,患者可以关联最多三个 经理人关联三个
     friends: [
-      {
-        name: "String",
-        gender: {
-          type: String,
+    {
+      name: "String",
+      gender: {
+        type: String,
           enum: ["0", "1", "2"], // 0代表未知 1代表男性 2代表女性
           default: "0"
         },
         phone: String,
-        hospital: {
-          type: Schema.Types.ObjectId,
-          ref: "Hospital"
-        }, //医生就职医院ref
+        // hospital: {
+        //   type: Schema.Types.ObjectId,
+        //   ref: "Hospital"
+        // }, //医生就职医院ref
+        department: [{
+          type:Schema.Types.ObjectId,
+          ref:'Department'
+        }],
+        hospital:String,
         title: {
           type: Schema.Types.ObjectId,
           ref: "Title"
@@ -100,10 +94,10 @@ module.exports = app => {
       ref: "Title"
     }, // 职称
     treatment_info: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Treatment"
-      }
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Treatment"
+    }
     ], //治疗信息
     fields: [String], // 擅长领域
     description: String, // 简介
@@ -137,8 +131,8 @@ module.exports = app => {
         };
         // 使用hash 生成初始化头像
         let hash = Math.random()
-          .toString(16)
-          .slice(4);
+        .toString(16)
+        .slice(4);
         let avatar = new Identicon(hash + this.openid, options).toString();
         this.avatarUrl = "data:image/png;base64," + avatar;
       }

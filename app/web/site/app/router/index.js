@@ -33,6 +33,17 @@ export const constantRouterMap = [
     hidden: true
   },
   {
+    path: "/article",
+    component: Layout,
+    children: [
+      {
+        path: "",
+        name: "article",
+        component: _import("article/index")
+      }
+    ]
+  },
+  {
     path: "/home",
     component: Layout,
     children: [

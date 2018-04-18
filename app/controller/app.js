@@ -127,11 +127,11 @@ class AppController extends BaseController {
     else return this.success()
   }
 
-  async update() {
-    let reg = this.config.regexp;
-    this.ctx.validate({
-      name: { type: "string", format: reg.name, required: true },
-      role: { type: "enum", values: ["0", "1", "2", "3", "9"], required: true },
+async update() {
+  let reg = this.config.regexp;
+  this.ctx.validate({
+    name: { type: "string", format: reg.name, required: true },
+    role: { type: "enum", values: ["0", "1", "2", "3", "9"], required: true },
       // nickName: { type: "string", format: reg.name, required: false },
       phone: { type: "string", format: reg.phone, required: true },
       code: { type: "string", required: true },
@@ -217,10 +217,8 @@ class AppController extends BaseController {
       treatment_info:info.treatment_info,
       audit_create:new Date()
     });
-    console.log(find)
     await find.save();
     this.success('更新成功');
-
   } else if (role == '2') {
       //医生 一个科室一个医院 还需要绑定手机号
       this.ctx.validate({
@@ -322,6 +320,13 @@ class AppController extends BaseController {
     else this.error('未找到')
   }
 
+
+  //搜索医院
+  async searchHospital(){
+    // let {key,last_id,limit} =;
+    let res = await this.service.hospital.search(this.ctx.request.body);
+    this.success(res)
+  }
 
 
 

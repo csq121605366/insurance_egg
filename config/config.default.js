@@ -130,6 +130,7 @@ module.exports = app => {
 
   exports.jwt = {
     secret: "insurance:token", // token的加密密钥
+    // exp: 6 * 24 * 60 * 60 //存在时间 单位位秒
     exp: 6 * 24 * 60 * 60 //存在时间 单位位秒
     // match: '/jwt',
   };

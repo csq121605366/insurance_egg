@@ -11,6 +11,8 @@ module.exports = app => {
 
 
   router.get("/api/app/titlelist", "app.titleList"); // 获取城市列表
+  // last_id: 0, limit: 10,key:''
+  router.post("/api/app/hospital", "app.searchHospital"); // 搜索医院
   router.get("/api/app/getcitys", "app.getCitys"); // 获取城市列表
   router.get("/api/app/gethospitals", "app.getHospitals"); // 获取医院列表
   router.get("/api/app/maindepartments", "app.mainDepartments"); // 获取主科室列表

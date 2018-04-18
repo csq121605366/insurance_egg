@@ -8,8 +8,9 @@ module.exports = app => {
     );
     // 初始化时首先从数据库拉去微信接口信息
     // 也可以通过以下方式来调用 Service
-    const ctx = app.createAnonymousContext();
-    app.weixinPort = await ctx.service.weixin.pullWeixinPort();
+    // const ctx = app.createAnonymousContext();
+    // app.weixinPort = await ctx.service.weixin.pullWeixinPort();
+
   });
   app.once("server", server => {
     // websocket

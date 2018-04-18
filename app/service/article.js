@@ -19,7 +19,6 @@ class ArticleService extends BaseService {
       { article_id: 0, limit: 10, sort: 0, type: 0, status: 0 },
       param
     );
-    console.log(opts);
     // 要展示的字段
     let tunlproject = {
       $project: {

@@ -8,14 +8,14 @@ module.exports = app => {
   const ArticleSchema = new mongoose.Schema({
     user_id: { type: Schema.Types.ObjectId, ref: "User" }, //发表用户id
     title: String, //标题（名称）
-    illness_type: String, //疾病类型
-    illness_begin: Date, //手术时间开始时间
+    illness_name: String, //疾病类型
+    illness_time: String, //手术时间进程
     author: String, //作者
     ip: String, //发表ip
     click: String, //查看次数
-    section: {
+    department: {
       type: Schema.Types.ObjectId,
-      ref: "Section"
+      ref: "Department"
     },
     status: {
       type: String,
@@ -44,6 +44,7 @@ module.exports = app => {
     like: String, //喜欢
     unlike: String, //不喜欢
     images: [{ type: Schema.Types.ObjectId, ref: "Asset" }], // 文章相关图片
+    videos:[{ type: Schema.Types.ObjectId, ref: "Asset" }],//视频资源
     comment: [{ type: Schema.Types.ObjectId, ref: "ArticleComment" }], //评论列表
     pre_content: String, //预览内容
     content: String, //内容

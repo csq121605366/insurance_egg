@@ -111,7 +111,10 @@ class AppController extends BaseController {
   async getuserinfo() {
     let { openid } = this.ctx.state.user;
     let user = await this.ctx.model.User.findOne({ openid })
-    .select("name role nickName status phone gender avatarUrl")
+    .select(`name role nickName status phone 
+      hospital certificate department agency 
+      friend title treatment_info description 
+      gender avatarUrl`)
     .exec();
     if (user) return this.success(user);
     else this.error("未找到您的信息");
@@ -160,6 +163,16 @@ async update() {
     if(!find) return this.error('未找到帐号');
     // 如果role角色不为0表示非游客 账号状态1未激活
     if (find.role != '0' && find.status == '1') return this.error("账号审核中...");
+    // 检验验证码
+    let canBind = await this.service.sms.validate(info.phone,71356,info.code);
+    if(!canBind) return this.error('验证码不正确或者已失效');
+    // 转移头像资源地址
+    info.avatarUrl='';
+    let removeResp = await this.service.qiniu.removeImage([info.avatar]).then(res=>{
+      info.avatarUrl = res[0];
+    }).catch(()=>{
+      throw  new Error('头像设置失败');
+    });
     // 二次验证(分角色)
     if (role == '1') {
       //普通用户 关注科室1-3个
@@ -172,22 +185,10 @@ async update() {
         },
         treatment_info: { type: "array", required: false }
       });
-
-    // 检验验证码
-    let canBind = await this.service.sms.validate(info.phone,71356,info.code);
-    if(!canBind) return this.error('验证码不正确或者已失效');
-    // 转移头像资源地址
-    info.avatarUrl='';
-    let removeResp = await this.service.qiniu.removeImage([info.avatar]).then(res=>{
-      info.avatarUrl = res[0];
-    }).catch(()=>{
-      throw  new Error('头像设置失败');
-    });
     //治疗信息
     info.treatment_info = [];
     if(info.treatment_images.length){
       let treatment_images = [];
-      console.log(info)
       //转移治疗信息的图片
       await this.service.qiniu.removeImage(info.treatment_images).then(res=>{
         treatment_images = res;
@@ -222,22 +223,12 @@ async update() {
   } else if (role == '2') {
       //医生 一个科室一个医院 还需要绑定手机号
       this.ctx.validate({
-        hospital: { type: "string", required: true },
-        phone: { type: "string", required: true },
-        sms_code: { type: "string", required: true },
+        hospital: { type: "object", required: true },
         department: {
           type: "array",
-          itemType: "string",
           required: true,
           max: 1,
           min: 1
-        },
-        fields: {
-          type: "array",
-          itemType: "string",
-          max: 6,
-          min: 1,
-          required: true
         },
         description: {
           type: "string",
@@ -246,12 +237,28 @@ async update() {
           required: true
         }
       });
+
+      info.hospital_id = info.hospital._id;
+      // 存储信息
+      Object.assign(find,{
+      name:info.name,
+      role:info.role,
+      phone:info.phone,
+      idcard:info.idcard,
+      gender:info.gender,
+      hospital:info.hospital_id,
+      avatarUrl:info.avatarUrl?info.avatarUrl:find.avatarUrl,
+      department:info.department,
+      description:info.description,
+      audit_create:new Date()
+    });
+    await find.save();
+    this.success('更新成功');
     } else if (role == '3') {
       //经理人 1-3个科室和医生
       this.ctx.validate({
         department: {
           type: "array",
-          itemType: "string",
           required: false,
           max: 3,
           min: 1
@@ -269,8 +276,22 @@ async update() {
           required: false
         }
       });
+      // 存储信息
+      Object.assign(find,{
+      name:info.name,
+      role:info.role,
+      phone:info.phone,
+      idcard:info.idcard,
+      gender:info.gender,
+      agency:info.agency,
+      friends:info.friends,
+      department:info.department,
+      avatarUrl:info.avatarUrl?info.avatarUrl:find.avatarUrl,
+      audit_create:new Date()
+    });
+      await find.save();
+      this.success('更新成功');
     }
-
   }
 
 
@@ -323,7 +344,6 @@ async update() {
 
   //搜索医院
   async searchHospital(){
-    // let {key,last_id,limit} =;
     let res = await this.service.hospital.search(this.ctx.request.body);
     this.success(res)
   }

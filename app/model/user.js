@@ -100,8 +100,8 @@
       ref: "Treatment"
     }
     ], //治疗信息
-    fields: [String], // 擅长领域
-    description: String, // 简介
+    fields: [String], // 
+    description: String, // 简介 擅长领域
     email: String, //邮箱
     gender: {
       type: String,

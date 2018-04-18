@@ -23,14 +23,14 @@ class HospitalService extends BaseService {
     let last_id='';
     if(opts.last_id){
       res = await this.ctx.model.Hospital.find({_id:{$gt:opts.last_id},label:{$regex:opts.key}}).select('city label').limit(opts.limit|0).exec();
-      if(res.length){
+    } else {
+      res = await this.ctx.model.Hospital.find({label:{$regex:opts.key}}).select('city label').limit(opts.limit|0).exec();
+    }
+    if(res.length){
         last_id = res[res.length-1]['_id'];
       }else {
         last_id=''
       }
-    } else {
-      res = await this.ctx.model.Hospital.find({label:{$regex:opts.key}}).select('city label').limit(opts.limit|0).exec();
-    }
     return {list:res,last_id};
   }
 }

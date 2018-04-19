@@ -92,8 +92,8 @@ class Weixin extends BaseController {
    */
   async signature() {
     let url = decodeURIComponent(this.ctx.query.url);
+    console.log(url)
     this.ctx.validate(this.urlValidate, { url });
-    console.log(this.getSignatureAsync);
     let params = await this.getSignatureAsync(url);
     this.success(params);
   }

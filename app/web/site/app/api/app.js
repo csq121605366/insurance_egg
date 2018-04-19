@@ -8,4 +8,10 @@ export function qiniuTicket(data) {
   });
 }
 
-
+export function jssdk(params) {
+  return request({
+    url: '/weixin/signature',
+    method: "get",
+    params
+  })
+}

@@ -25,7 +25,15 @@ Vue.use(MintUI);
 
 Vue.config.productionTip = false;
 
+
 export default {
+  beforeMount() {
+    //判断是不是小程序环境
+    
+  },
+  methods: {
+   
+  },
   store,
   router
 };

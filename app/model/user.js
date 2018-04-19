@@ -54,15 +54,10 @@
       type: Schema.Types.ObjectId,
       ref: "Hospital"
     }, //医生就职医院ref
-    certificate: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: "Asset"
-    }
-    ], //医生证书
+    certificate: [String], //医生证书
     department: [{
-       label:String,
-       key:String
+     label:String,
+     key:String
     }], // 关联科室 医生只能关联一个科室,患者可以关联最多三个 经理人关联三个
     agency:[{
       name: String,
@@ -100,7 +95,6 @@
       ref: "Treatment"
     }
     ], //治疗信息
-    fields: [String], // 
     description: String, // 简介 擅长领域
     email: String, //邮箱
     gender: {
@@ -108,7 +102,8 @@
       enum: ["0", "1", "2"], // 0代表未知 1代表男性 2代表女性
       default: "0"
     }, // 性别
-    avatarUrl: String, // 头像地址
+    avatar:Object,//用户头像
+    avatarUrl: String, // 初始化头像地址
     audit_create: Date, //审核提交日期
     audit_end: Date, //审核结束日期
     meta: {

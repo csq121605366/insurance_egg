@@ -111,11 +111,13 @@ class AppController extends BaseController {
   async getuserinfo() {
     let { openid } = this.ctx.state.user;
     let user = await this.ctx.model.User.findOne({ openid })
+    .populate('hospital','label')
     .select(`name role nickName status phone 
       hospital certificate department agency 
-      friend title treatment_info description 
+      friend title description 
       gender avatarUrl`)
     .exec();
+    //查询医院
     if (user) return this.success(user);
     else this.error("未找到您的信息");
   }
@@ -224,6 +226,8 @@ async update() {
       //医生 一个科室一个医院 还需要绑定手机号
       this.ctx.validate({
         hospital: { type: "object", required: true },
+        title:{type:'string'},
+        certificate:{type:'array'},
         department: {
           type: "array",
           required: true,
@@ -237,23 +241,35 @@ async update() {
           required: true
         }
       });
-
       info.hospital_id = info.hospital._id;
+
+      info.certificate_images = [];
+      if(info.certificate.length){
+        //转移治疗信息的图片
+        await this.service.qiniu.removeImage(info.certificate).then(res=>{
+          info.certificate_images = res;
+        }).catch(()=>{
+          throw new Error('就诊资料上传失败');
+        });
+      }
+
       // 存储信息
       Object.assign(find,{
-      name:info.name,
-      role:info.role,
-      phone:info.phone,
-      idcard:info.idcard,
-      gender:info.gender,
-      hospital:info.hospital_id,
-      avatarUrl:info.avatarUrl?info.avatarUrl:find.avatarUrl,
-      department:info.department,
-      description:info.description,
-      audit_create:new Date()
-    });
-    await find.save();
-    this.success('更新成功');
+        name:info.name,
+        role:info.role,
+        phone:info.phone,
+        idcard:info.idcard,
+        gender:info.gender,
+        hospital:info.hospital_id,
+        avatarUrl:info.avatarUrl?info.avatarUrl:find.avatarUrl,
+        title:info.title,
+        certificate:info.certificate_images,
+        department:info.department,
+        description:info.description,
+        audit_create:new Date()
+      });
+      await find.save();
+      this.success('更新成功');
     } else if (role == '3') {
       //经理人 1-3个科室和医生
       this.ctx.validate({
@@ -278,17 +294,17 @@ async update() {
       });
       // 存储信息
       Object.assign(find,{
-      name:info.name,
-      role:info.role,
-      phone:info.phone,
-      idcard:info.idcard,
-      gender:info.gender,
-      agency:info.agency,
-      friends:info.friends,
-      department:info.department,
-      avatarUrl:info.avatarUrl?info.avatarUrl:find.avatarUrl,
-      audit_create:new Date()
-    });
+        name:info.name,
+        role:info.role,
+        phone:info.phone,
+        idcard:info.idcard,
+        gender:info.gender,
+        agency:info.agency,
+        friends:info.friends,
+        department:info.department,
+        avatarUrl:info.avatarUrl?info.avatarUrl:find.avatarUrl,
+        audit_create:new Date()
+      });
       await find.save();
       this.success('更新成功');
     }
@@ -298,11 +314,11 @@ async update() {
   //获取职称列表
   async titleList(){
     try {
-      let titles = await this.ctx.model.Title.find().select('name').exec();
+      let titles = await this.ctx.model.Title.find().select('label').exec();
       this.success(titles)
     } catch(e) {
       // statements
-      console.log(e);
+       this.error()
     }
   }
 

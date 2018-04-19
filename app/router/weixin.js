@@ -3,7 +3,7 @@ module.exports = app => {
 
   // 微信接受消息
   router.all("/api/weixin/hear", "weixin.hear");
-  // 微信jssdk签名认证
+  // 微信jssdk签名认证  参数url
   router.get("/api/weixin/signature", "weixin.signature");
   // 微信跳转app页面接口 用于添加跳转数据
   router.get("/api/weixin/redirect", "weixin.redirect");

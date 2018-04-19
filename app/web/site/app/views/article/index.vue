@@ -6,21 +6,20 @@
         <!-- Add a bold button -->
         <button class="ql ql-bold">Bold</button>
         <button class="ql ql-italic">Italic</button>
-        <!-- Add font size dropdown -->
-        <select class="ql ql-size">
-          <option value="small"></option>
+        <button class="ql ql-list" value="ordered"></button>
+        <button class="ql ql-list" value="bullet"></button>
+        <select class="ql ql-header">
+          <option value="1">标题1</option>
           <!-- Note a missing, thus falsy value, is used to reset to default -->
-          <option selected></option>
-          <option value="large"></option>
-          <option value="huge"></option>
+          <option value="2">标题2</option>
+          <option value="3">标题3</option>
         </select>
         <!-- Add subscript and superscript buttons -->
         <button class="ql ql-script" value="sub"></button>
         <button class="ql ql-script" value="super"></button>
-        <!-- You can also add your own -->
-        <button id="custom-button" class="ql " @click="customButtonClick">
-          <i class="iconfont icon-tianjia01"></i>
-        </button>
+
+        <button class="ql ql-image" value="super"></button>
+        <button id="custom-button" class="ql ql-video" @click="customButtonClick"></button>
       </div>
     </quill-editor>
   </div>
@@ -44,12 +43,11 @@ export default {
     let self = this;
     console.log("wx:::::", wx);
     wx.miniProgram.getEnv(function(res) {
-      console.log(location);
-      jssdk({ url: "http://csq.weixin.caishangqing.com/app/article" }).then(
-        res => {
-          self.wxConfig(res.data);
-        }
-      );
+      let url = "http://csq.weixin.caishangqing.com/app/article";
+      // let url = "http://localhost:7001/app/article";
+      // jssdk({ url }).then(res => {
+      //   self.wxConfig(res.data);
+      // });
     });
   },
   data() {
@@ -60,7 +58,13 @@ export default {
         readOnly: true,
         theme: "snow",
         modules: {
-          toolbar: "#toolbar"
+          toolbar: {
+            container: "#toolbar",
+            handlers: {
+              image: this.imageUpload,
+              video: this.videoUpload
+            }
+          }
         }
       },
       content: ""
@@ -83,16 +87,24 @@ export default {
       });
     },
     onEditorBlur(quill) {
-      console.log("editor blur!", quill);
+      // console.log("editor blur!", quill);
     },
     onEditorFocus(quill) {
-      console.log("editor focus!", quill);
+      // console.log("editor focus!", quill);
     },
     onEditorReady(quill) {
-      console.log("editor ready!", quill);
+      // console.log("editor ready!", quill);
+    },
+    imageUpload(param) {
+      console.log("图片", param);
+    },
+    videoUpload(param) {
+      console.log("视频", this.editor);
+      this.editor.insertEmbed(10, 'image', 'https://avatars2.githubusercontent.com/u/6886061?v=4');
     },
     customButtonClick() {
-      wx.miniProgram.switchTab({ url: "/pages/my/main" });
+     
+      // wx.miniProgram.switchTab({ url: "/pages/my/main" });
       // wx.ready(function() {
       //   wx.chooseImage({
       //     count: 1, // 默认9

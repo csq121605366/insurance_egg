@@ -13,14 +13,6 @@ const reply = require("../extend/reply");
 class Weixin extends BaseController {
   constructor(ctx) {
     super(ctx);
-    this.urlValidate = {
-      url: {
-        type: "url",
-        required: true,
-        allowEmpty: false,
-        format: this.config.regexp.url
-      }
-    };
   }
 
   /**
@@ -92,8 +84,7 @@ class Weixin extends BaseController {
    */
   async signature() {
     let url = decodeURIComponent(this.ctx.query.url);
-    console.log(url)
-    this.ctx.validate(this.urlValidate, { url });
+    if (!this.config.regexp.url.test(url)) return this.error("缺少参数");
     let params = await this.getSignatureAsync(url);
     this.success(params);
   }
@@ -106,8 +97,7 @@ class Weixin extends BaseController {
     let data = await this.service.weixin.fetchToken();
     let token = data.data;
     // 获取ticket
-    let ticketData = await this.service.weixin.fetchToken("ticket");
-    let ticket = ticketData.data;
+    let ticket = await this.service.weixin.fetchToken("ticket");
     // 签名
     let params = this.service.weixin.sign(ticket, url);
     params.appId = this.config.myconfig.wechat.appID;

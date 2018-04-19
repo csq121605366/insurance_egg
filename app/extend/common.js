@@ -126,11 +126,11 @@ class Util {
    * @param {*} url
    */
   sign(ticket, url) {
-    let noncestr = this.createNonce();
+    let nonceStr = this.createNonce();
     let timestamp = this.createTimesstamp();
-    let signature = this.signIt(noncestr, ticket, timestamp, url);
+    let signature = this.signIt(nonceStr, ticket, timestamp, url);
     return {
-      noncestr,
+      nonceStr,
       timestamp,
       signature
     };

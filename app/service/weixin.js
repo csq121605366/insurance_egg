@@ -58,6 +58,7 @@ class WeixinService extends BaseService {
     // 获取token
     let data = await this.getToken(name);
     // 测试token是否可用
+    console.log("!this.isVaild(data)", !this.isVaild(data));
     if (!this.isVaild(data)) {
       console.log(
         "============================更新返回============================"
@@ -66,11 +67,16 @@ class WeixinService extends BaseService {
       data = await this.updateToken(name);
       await this.saveToken(data, name);
       // 返回更新了的token
-      return data.access_token;
+      if (name == "access_token") {
+        return data.access_token;
+      } else {
+        return data.ticket;
+      }
     } else {
       console.log(
         "============================正常返回============================"
       );
+      console.log(data);
       // 返回数据库查到的token
       return data.data;
     }
@@ -78,7 +84,7 @@ class WeixinService extends BaseService {
   /**
    * 更新Token
    */
-  async updateToken(name) {
+  async updateToken(name = "access_token") {
     let url;
     if (name == "access_token") {
       url =
@@ -115,15 +121,7 @@ class WeixinService extends BaseService {
    * @param {Object} data
    */
   async saveToken(data, name) {
-    let find;
-    await this.ctx.model.Weixin.findOne({ name })
-      .exec()
-      .then(doc => {
-        find = doc;
-      })
-      .catch(error => {
-        throw new Error(error);
-      });
+    let find = await this.ctx.model.Weixin.findOne({ name }).exec();
     if (find) {
       find.data = data[name] ? data[name] : data.data;
       find.expires_in = data.expires_in;
@@ -134,14 +132,7 @@ class WeixinService extends BaseService {
         expires_in: data.expires_in
       });
     }
-    await find
-      .save()
-      .then(doc => {
-        return doc;
-      })
-      .catch(error => {
-        throw new Error(error);
-      });
+    await find.save();
   }
 
   /**

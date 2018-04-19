@@ -37,7 +37,7 @@ module.exports = app => {
       consoleLevel: "DEBUG", // ERROR  WARN  INFO DEBUG NONE
       dir: path.join(app.baseDir, "logs")
     },
-    middleware: ["access",  "gzip", "errorHandler"],
+    middleware: ["access", "gzip", "errorHandler"],
     gzip: { threshold: 1024 },
     static: {
       prefix: "/public/",
@@ -82,7 +82,7 @@ module.exports = app => {
     phone: /^((13[0-9])|(14[5|7])|(15([0-3]|[5-9]))|(18[0,5-9]))\d{8}$/, //手机号正则
     name: /^[\u4E00-\u9FA5]{2,5}(?:·[\u4E00-\u9FA5]{2,5})*$/, //姓名正则
     idcard: /^[1-9]\d{5}(18|19|([23]\d))\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/, //18位身份证
-    url: /^(\w+:\/\/)?\w+(\.\w+)+.*$/, // url验证
+    url: /^(?:([A-Za-z]+):)?(\/{0,3})([0-9.\-A-Za-z]+)(?::(\d+))?(?:\/([^?#]*))?(?:\?([^#]*))?(?:#(.*))?$/, // url验证
     money: /^(([1-9][0-9]*)|(([0]\.\d{1,2}|[1-9][0-9]*\.\d{1,2})))$/ //金额
   };
 
@@ -139,8 +139,8 @@ module.exports = app => {
     sms: {
       SMS_KEY: "15670f04b6400d13e1cb85bbf27b5f77", //聚合数据的短信key
       SMS_TYPE: [71545, 71356, 71357, 71358], //聚合数据的短信类型 登录71358 找回密码71357 注册71356  71545解绑手机
-      SMS_URL: 'http://v.juhe.cn/sms/send', //聚合数据接口地址
-      SMS_EXPIRES: 1 * 60 * 60 * 1000, //验证码存活时间
+      SMS_URL: "http://v.juhe.cn/sms/send", //聚合数据接口地址
+      SMS_EXPIRES: 1 * 60 * 60 * 1000 //验证码存活时间
     },
     SITE_ROOT_URL: "http://localhost:7001", //"http://csq.weixin.caishangqing.com"
     wechat: {
@@ -182,7 +182,7 @@ module.exports = app => {
       permanent_url: "p6syms5zu.bkt.clouddn.com",
       temporary_url: "p6syg4m80.bkt.clouddn.com",
       insurance_url: "p6ueajy31.bkt.clouddn.com",
-      temporary_region:"NCN"
+      temporary_region: "NCN"
     }
   };
 

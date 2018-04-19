@@ -30,30 +30,42 @@ class QiniuService extends BaseService {
     let config = this.config.myconfig;
     let srcBucket = config.qiniu.temporary_bucket;
     let destBucket = config.qiniu.permanent_bucket;
-    let destDomain = config.qiniu.permanent_url;
+    let destUrl = config.qiniu.permanent_url;
     let moveOperations = [];
     let res = [];
     _.forEach(file, (item, index) => {
-      let mkfilename = this.guid() + /\.[^\.]+$/.exec(item.key)[0];
-      let opt = qiniu.rs.copyOp(srcBucket, item.key, destBucket, mkfilename);
-      res.push('http://'+destDomain+'/'+mkfilename);
-      moveOperations.push(opt);
+      let tmp;
+      if (item.bucket != destBucket) {
+        let mkfilename = this.guid() + /\.[^\.]+$/.exec(item.key)[0];
+        let opt = qiniu.rs.copyOp(srcBucket, item.key, destBucket, mkfilename);
+        moveOperations.push(opt);
+        // 组装生成的图片数据
+        tmp = {
+          hash: item.hash,
+          fsize: item.fsize,
+          bucket: destBucket,
+          imageURL: 'http://' + destUrl + '/' + mkfilename
+        }
+      } else {
+        tmp = item;
+      }
+      res.push(tmp);
     });
     let mac = new qiniu.auth.digest.Mac(config.qiniu.AK, config.qiniu.SK);
     var conf = new qiniu.conf.Config();
     var bucketManager = new qiniu.rs.BucketManager(mac, conf);
     let self = this;
     return new Promise((resolve, reject) => {
-      bucketManager.batch(moveOperations, async (err, respBody, respInfo)=>{
+      if (!moveOperations.length) resolve(res);
+      else bucketManager.batch(moveOperations, async (err, respBody, respInfo) => {
         if (err) {
           reject(err);
         } else {
-          console.log('qiniu',respInfo)
+          console.log(respBody, respInfo)
           // 200 is success, 298 is part success
           if (respInfo.statusCode != 200) {
             reject()
           } else {
-            await self.ctx.model.Asset.insertMany(file);
             resolve(res);
           }
         }

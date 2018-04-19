@@ -2,10 +2,10 @@
  * 用户信息
  */
 
- const bcrypt = require("bcrypt");
- const Identicon = require("identicon.js");
+const bcrypt = require("bcrypt");
+const Identicon = require("identicon.js");
 
- module.exports = app => {
+module.exports = app => {
   const config = app.config.myconfig.dbconfig;
   const mongoose = app.mongoose;
   const Schema = mongoose.Schema;
@@ -39,7 +39,7 @@
     province: String, // 用户所在省份
     city: String, // 用户所在城市
     localtion: [
-    {
+      {
         type: String, //默认为 wgs84 返回 gps 坐标，gcj02 返回可用于wx.openLocation的坐标
         latitude: String, //纬度
         longitude: String, //经度
@@ -50,51 +50,48 @@
         horizontalAccuracy: String //水平精度
       }
     ], //存储用户使用地址
-    hospital: {
-      type: Schema.Types.ObjectId,
-      ref: "Hospital"
-    }, //医生就职医院ref
-    certificate: [String], //医生证书
+    hospital: Object, //医生就职医院
+    certificate: Array, //医生证书
     department: [{
-     label:String,
-     key:String
+      label: String,
+      key: String
     }], // 关联科室 医生只能关联一个科室,患者可以关联最多三个 经理人关联三个
-    agency:[{
+    agency: [{
       name: String,
-      department:{
-        label:String,
-        key:String
+      department: {
+        label: String,
+        key: String
       }
     }],
     friend: [
-    {
-      name: "String",
-      gender: {
-        type: String,
+      {
+        name: "String",
+        gender: {
+          type: String,
           enum: ["0", "1", "2"], // 0代表未知 1代表男性 2代表女性
           default: "0"
         },
         phone: String,
-        // hospital: {
-        //   type: Schema.Types.ObjectId,
-        //   ref: "Hospital"
-        // }, //医生就职医院ref
         department: [{
-          label:String,
-          key:String
+          label: String,
+          key: String
         }],
-        hospital:String,
+        hospital: String,
         title: String, //职称
         description: String // 简介
       }
     ], // 代理人的潜在客户
     title: String, // 职称
-    treatment_info: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: "Treatment"
-    }
-    ], //治疗信息
+    treatment_info: {
+      doctor_name: String, //医生姓名
+      illness_name: String, //疾病名字
+      operation: {
+        type: String,
+        enum: ["0", "1", "2"],//是否手术 0保密 1否 2已手术
+        default: "0"
+      },
+      treatment_images: Array, // 就诊信息图片数组
+    }, //治疗信息
     description: String, // 简介 擅长领域
     email: String, //邮箱
     gender: {
@@ -102,8 +99,8 @@
       enum: ["0", "1", "2"], // 0代表未知 1代表男性 2代表女性
       default: "0"
     }, // 性别
-    avatar:Object,//用户头像
-    avatarUrl: String, // 初始化头像地址
+    avatar: Object,//用户头像
+    avatarUrl: String, // 头像地址
     audit_create: Date, //审核提交日期
     audit_end: Date, //审核结束日期
     meta: {
@@ -118,7 +115,7 @@
     }
   });
 
-  UserSchema.pre("save", function(next) {
+  UserSchema.pre("save", function (next) {
     if (this.isNew) {
       if (!this.avatarUrl || this.avatarUrl == "") {
         const options = {
@@ -127,8 +124,8 @@
         };
         // 使用hash 生成初始化头像
         let hash = Math.random()
-        .toString(16)
-        .slice(4);
+          .toString(16)
+          .slice(4);
         let avatar = new Identicon(hash + this.openid, options).toString();
         this.avatarUrl = "data:image/png;base64," + avatar;
       }
@@ -142,3 +139,4 @@
 
   return mongoose.model("User", UserSchema);
 };
+

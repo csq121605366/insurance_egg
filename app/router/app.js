@@ -1,7 +1,7 @@
 module.exports = app => {
   const { router, controller } = app;
 
-  router.post("/api/app/login", "app.login"); // 用户登录和注册
+  router.post("/api/app/login", "app.getToken"); // 用户登录和注册
 
   router.get("/api/app/getuserinfo", app.jwt, "app.getuserinfo"); //获取用户信息
   router.post("/api/app/updatebaseInfo", app.jwt, "app.updatebaseInfo"); //用户授权获取基本信息

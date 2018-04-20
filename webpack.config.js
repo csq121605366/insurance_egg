@@ -2,25 +2,18 @@ module.exports = {
   egg: true,
   framework: "vue", // 使用 easywebpack-vue 构建解决方案
   entry: {
-    include: ["app/web/site"], // 自动遍历 app/web/site 目录下的 js 文件入口
-    exclude: ["app/web/site/[a-z]+/component"],
+    include: ["app/web"], // 自动遍历 app/web 目录下的 js 文件入口
+    exclude: ["app/web/components"],
     loader: {
-      client: "app/web/framework/vue/entry/client-loader.js",
-      server: "app/web/framework/vue/entry/server-loader.js"
+      client: "app/web/framework/entry/client-loader.js",
+      server: "app/web/framework/entry/server-loader.js"
     }
   },
   alias: {
     "~": __dirname,
-    "@": "app/web/site/admin",
-    "@@": "app/web/site/app",
-    web: "app/web",
-    server: "app/web/framework/vue/entry/server.js",
-    client: "app/web/framework/vue/entry/client.js",
-    asset: "app/web/asset",
-    component: "app/web/component",
-    framework: "app/web/framework",
-    store: "app/web/store",
-    router: "app/web/router"
+    "@": "app/web",
+    server: "app/web/framework/entry/server.js",
+    client: "app/web/framework/entry/client.js"
   },
   dll: ["vue/dist/vue.common.js", "axios", "vue", "vuex", "vuex-router-sync"], // webpack dll 构建
   install: {
@@ -31,7 +24,9 @@ module.exports = {
     eslint: false,
     scss: true
   },
-  plugins: {},
+  plugins: {
+    serviceworker: false
+  },
   done() {
     // 编译完成回调
   }

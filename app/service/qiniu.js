@@ -39,12 +39,21 @@ class QiniuService extends BaseService {
         let mkfilename = this.guid() + /\.[^\.]+$/.exec(item.key)[0];
         let opt = qiniu.rs.copyOp(srcBucket, item.key, destBucket, mkfilename);
         moveOperations.push(opt);
-        // 组装生成的图片数据
-        tmp = {
-          hash: item.hash,
-          fsize: item.fsize,
-          bucket: destBucket,
-          imageURL: 'http://' + destUrl + '/' + mkfilename
+        // 组装生成的数据
+        if (/.(avi|rm|mov|wav|mp4|rmvb)$/i.test(item.key)) {
+          tmp = {
+            hash: item.hash,
+            fsize: item.fsize,
+            bucket: destBucket,
+            videoURL: 'http://' + destUrl + '/' + mkfilename
+          }
+        } else {
+          tmp = {
+            hash: item.hash,
+            fsize: item.fsize,
+            bucket: destBucket,
+            imageURL: 'http://' + destUrl + '/' + mkfilename
+          }
         }
       } else {
         tmp = item;
@@ -61,7 +70,6 @@ class QiniuService extends BaseService {
         if (err) {
           reject(err);
         } else {
-          console.log(respBody, respInfo)
           // 200 is success, 298 is part success
           if (respInfo.statusCode != 200) {
             reject()
@@ -93,6 +101,28 @@ class QiniuService extends BaseService {
       });
     });
   }
+
+
+  /**
+   * 视频ticket
+   */
+  async createVideoTicket() {
+    let config = this.config.myconfig;
+    let mac = new qiniu.auth.digest.Mac(config.qiniu.AK, config.qiniu.SK);
+    let bucket = config.qiniu.temporary_bucket;
+    let options = {
+      scope: bucket,
+      expires: 7200,
+      deadline: 7200,
+      persistentOps: '',
+      persistentNotifyUrl: config.SITE_ROOT_URL + '/qiniu/video/notify',
+      returnBody: '{"key":"$(key)","hash":"$(etag)","fsize":$(fsize),"bucket":"$(bucket)","name":"$(x:name)"}'
+    };
+    var putPolicy = new qiniu.rs.PutPolicy(options);
+    var uploadToken = putPolicy.uploadToken(mac);
+    return uploadToken;
+  }
+
 }
 
 module.exports = QiniuService;

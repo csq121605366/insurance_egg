@@ -3,11 +3,11 @@ module.exports = app => {
 
 
   // 管理员页面渲染
-  router.get("/app(/.+)?", "app.index");
+  // router.get("/app(/.+)?", "app.index");
 
   // 管理员页面渲染
-  router.get("/admin(/.+)?", "admin.index");
+  // router.get("/admin(/.+)?", "admin.index");
 
   // 网站首页直接转向管理员页面
-  // router.get("(/.+)?", "app.index");
+  router.get("(/.+)?", "admin.index");
 };

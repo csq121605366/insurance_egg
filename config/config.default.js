@@ -6,12 +6,12 @@ module.exports = app => {
 
   exports.siteFile = {
     "/favicon.ico": fs.readFileSync(
-      path.join(app.baseDir, "app/web/asset/images/favicon.ico")
+      path.join(app.baseDir, "app/web/assets/favicon.ico")
     )
   };
 
   exports.vuessr = {
-    layout: path.join(app.baseDir, "app/web/view/layout.html"),
+    layout: path.join(app.baseDir, "app/web/layout.html"),
     renderOptions: {
       basedir: path.join(app.baseDir, "app/view")
     }

@@ -55,9 +55,9 @@ class Admin extends BaseController {
   }
 
   async index() {
-    // 后台管理员页面
+    // 页面
     const { ctx } = this;
-    await ctx.renderClient("admin/app.js", { csrf: ctx.csrf, msg: "你好" });
+    await ctx.renderClient("app.js");
   }
 
   async getToken() {

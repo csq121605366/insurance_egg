@@ -198,31 +198,36 @@ class ArticleController extends BaseController {
    */
   async getDetail() {
     this.ctx.validate({ article_id: "string" });
+    let {_id} = this.ctx.state.user;
+    let user = await this.ctx.model.User.findOne({_id});
     let { article_id } = this.ctx.request.body;
-    let find = await this.ctx.model.Article.findOne(
+    let find = await this.ctx.model.Article.findOneAndUpdate(
       { _id: article_id },
-      {
+      {$addToSet:{looked:{user_id:user._id,avatar:user.avatar,name:user.name}}},{
+        fields:{
         title: 1,
+        user_id: 1,
         illness_name: 1,
         illness_time: 1,
-        anthor: 1,
-        click: 1,
+        author: 1,
+        looked: 1,
         department: 1,
         status: 1,
         sort: 1,
         type: 1,
+        content:1,
+        pre_content: 1,
         up: 1,
         support: 1,
         like: 1,
-        pre_content: 1,
         images: 1,
+        videos:1,
         meta: 1
       }
-    ).exec();
+    }).exec();
     if (!find) return this.error("未找到文章");
     return this.success(find);
   }
-
 
   /**
    * 实现分页功能
@@ -236,7 +241,7 @@ class ArticleController extends BaseController {
    */
   async paging() {
     this.ctx.validate({
-      user_id:{type:'string',required:false},
+      user_id: { type: "string", required: false },
       article_id: { type: "string", required: false, allowEmpty: true },
       department_key: { type: "string", required: false, allowEmpty: true },
       limit: { type: "string", required: false, allowEmpty: true },
@@ -245,7 +250,7 @@ class ArticleController extends BaseController {
       status: { type: "string", required: false, allowEmpty: true }
     });
     let reqParam = this.ctx.request.body;
-    let { role, status,_id } = this.ctx.state.user;
+    let { role, status, _id } = this.ctx.state.user;
     // 角色为游客 或者 状态不为激活的其他状态
     if (role == 0 || status != 2) {
       // 游客模式
@@ -257,8 +262,6 @@ class ArticleController extends BaseController {
       this.success(res);
     }
   }
-
-
 
   /**
    * 获取文章所上传的素材

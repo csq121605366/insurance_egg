@@ -2,7 +2,7 @@
  * 文章
  */
 
-module.exports = app => {
+ module.exports = app => {
   const mongoose = app.mongoose;
   const Schema = mongoose.Schema;
   const ArticleSchema = new mongoose.Schema({
@@ -12,10 +12,7 @@ module.exports = app => {
     illness_time: String, //手术时间进程
     author: String, //作者
     ip: String, //发表ip
-    click: {
-      type:Number,
-
-    }, //查看次数
+    looked: Array,//查看次数
     department: {
       label: String,
       key: String

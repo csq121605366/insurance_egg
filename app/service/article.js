@@ -37,7 +37,7 @@ class ArticleService extends BaseService {
         user_id:1,
         illness_name: 1,
         illness_time: 1,
-        anthor: 1,
+        author: 1,
         click: 1,
         department: 1,
         status: 1,
@@ -52,7 +52,7 @@ class ArticleService extends BaseService {
       }
     };
     // 限制个数
-    let tunllimit = { $limit: opts.limit };
+    let tunllimit = { $limit: opts.limit|0 };
     // 排序方式
     let tunlsort = { $sort: { _id: -1 } };
     if (opts.article_id) {

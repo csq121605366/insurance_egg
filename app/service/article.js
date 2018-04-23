@@ -8,6 +8,7 @@ class ArticleService extends BaseService {
   /**
    * 实现分页功能
    * @param {*} _id 文章id(如果不提供表示从头开始提供)
+   * @param {*} department_key 文章关联科室的key
    * @param {*} limit 文章间隔(默认为10条)
    * @param {*} sort //文章分类(默认为1)0全部 1日志 2手术记录 3科普文章
    * @param {*} type  //文章展示模式 0全部 1公开 2仅好友查看 3私有
@@ -16,7 +17,14 @@ class ArticleService extends BaseService {
   async paging(param) {
     let opts = Object.assign(
       {},
-      { article_id: 0, limit: 10, sort: 0, type: 0, status: 0 },
+      {
+        article_id: 0,
+        department_key: 0,
+        limit: 10,
+        sort: 0,
+        type: 0,
+        status: 0
+      },
       param
     );
     // 要展示的字段
@@ -24,7 +32,11 @@ class ArticleService extends BaseService {
       $project: {
         _id: 1,
         title: 1,
+        illness_name: 1,
+        illness_time: 1,
         anthor: 1,
+        click: 1,
+        department: 1,
         status: 1,
         sort: 1,
         type: 1,
@@ -32,6 +44,7 @@ class ArticleService extends BaseService {
         support: 1,
         like: 1,
         pre_content: 1,
+        images: 1,
         meta: 1
       }
     };
@@ -39,12 +52,15 @@ class ArticleService extends BaseService {
     let tunllimit = { $limit: opts.limit };
     // 排序方式
     let tunlsort = { $sort: { _id: -1 } };
+
     if (opts.article_id) {
       let findlast = await this.ctx.model.Article.findOne({
         _id: opts.article_id
       }).exec();
       // 匹配
       let tunlmatch = { $match: { _id: { $gt: findlast["_id"] } } };
+      if (opts.department_key != 0)
+        tunlmatch.$match["department.key"] = opts.department_key;
       if (opts.sort != 0) tunlmatch.$match.sort = opts.sort;
       if (opts.type != 0) tunlmatch.$match.type = opts.type;
       if (opts.status != 0) tunlmatch.$match.status = opts.status;
@@ -62,9 +78,11 @@ class ArticleService extends BaseService {
     } else {
       try {
         let tunlmatch = { $match: {} };
-        if (opts.sort != 0) tunlmatch.$match.sort = opts.sort | 0;
-        if (opts.type != 0) tunlmatch.$match.type = opts.type | 0;
-        if (opts.status != 0) tunlmatch.$match.status = opts.status | 0;
+        if (opts.department_key != 0)
+          tunlmatch.$match["department.key"] = opts.department_key;
+        if (opts.sort !== 0) tunlmatch.$match.sort = opts.sort | 0;
+        if (opts.type !== 0) tunlmatch.$match.type = opts.type | 0;
+        if (opts.status !== 0) tunlmatch.$match.status = opts.status | 0;
         let res = await this.ctx.model.Article.aggregate([
           tunlmatch,
           tunlproject,

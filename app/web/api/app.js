@@ -8,4 +8,26 @@ export function qiniuTicket(data) {
   });
 }
 
+//获取文章中的资源列表
+export function getArticleAssets(data) {
+  return request({
+    url: "app/article/getArticleAssets",
+    headers: {
+      Authorization: data.Authorization
+    },
+    method: "post",
+    data
+  });
+}
 
+//获取文章中的资源列表
+export function addContent(data) {
+  return request({
+    url: "app/article/addcontent",
+    headers: {
+      Authorization: data.Authorization
+    },
+    method: "post",
+    data
+  });
+}

@@ -7,17 +7,19 @@ module.exports = app => {
   const Schema = mongoose.Schema;
   const ArticleSchema = new mongoose.Schema({
     user_id: { type: Schema.Types.ObjectId, ref: "User" }, //发表用户id
-    author: String,
     title: String, //标题（名称）
     illness_name: String, //疾病类型
     illness_time: String, //手术时间进程
     author: String, //作者
     ip: String, //发表ip
-    click: String, //查看次数
+    click: {
+      type:Number,
+
+    }, //查看次数
     department: {
       label: String,
       key: String
-    },
+    }, //科室
     status: {
       type: String,
       enum: ["0", "1", "2", "3"],
@@ -45,8 +47,8 @@ module.exports = app => {
     }, //是否管理员推荐 1不推荐 2推荐
     like: String, //喜欢
     unlike: String, //不喜欢
-    images: [Object], // 文章相关图片
-    videos: [Object],//视频资源
+    images: Array, // 文章相关图片
+    videos: Array,//视频资源
     comment: [{ type: Schema.Types.ObjectId, ref: "ArticleComment" }], //评论列表
     pre_content: String, //预览内容
     content: String, //内容
@@ -67,8 +69,6 @@ module.exports = app => {
     } else {
       this.meta.updated = new Date();
     }
-    // 设置预览内容
-    this.pre_content = this.content.trim().substr(0, 160);
     next();
   });
   return mongoose.model("Article", ArticleSchema);

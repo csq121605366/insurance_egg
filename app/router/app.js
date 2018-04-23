@@ -35,7 +35,17 @@ module.exports = app => {
   //发表 article_id(文章id)
   router.post("/api/app/article/publish", app.jwt, "article.publish");
 
-  //查找文章列表 article_ids=>_id  数组 表示可以查很多也可以查单个
-  router.post("/api/app/article/list", app.jwt, "article.list");
+  /**
+   * 实现分页功能
+   * @param {*} _id 文章id(如果不提供表示从头开始提供)
+   * @param {*} user_id 用户id
+   * @param {*} department_key 文章关联科室的key
+   * @param {*} limit 文章间隔(默认为10条)
+   * @param {*} sort //文章分类(默认为1)0全部 1日志 2手术记录 3科普文章
+   * @param {*} type  //文章展示模式 0全部 1公开 2仅好友查看 3私有
+   * @param {*} status //文章状态(默认为2) 0全部 1未审核 2已审核 3已删除
+   */
+  router.post("/api/app/article/paging", app.jwt, "article.paging");
+
   
 };

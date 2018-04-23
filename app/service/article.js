@@ -8,6 +8,7 @@ class ArticleService extends BaseService {
   /**
    * 实现分页功能
    * @param {*} _id 文章id(如果不提供表示从头开始提供)
+   * @param {*} user_id 用户id
    * @param {*} department_key 文章关联科室的key
    * @param {*} limit 文章间隔(默认为10条)
    * @param {*} sort //文章分类(默认为1)0全部 1日志 2手术记录 3科普文章
@@ -18,12 +19,13 @@ class ArticleService extends BaseService {
     let opts = Object.assign(
       {},
       {
+        user_id:0,
         article_id: 0,
         department_key: 0,
         limit: 10,
         sort: 0,
         type: 0,
-        status: 0
+        status: "2"
       },
       param
     );
@@ -32,6 +34,7 @@ class ArticleService extends BaseService {
       $project: {
         _id: 1,
         title: 1,
+        user_id:1,
         illness_name: 1,
         illness_time: 1,
         anthor: 1,
@@ -52,25 +55,23 @@ class ArticleService extends BaseService {
     let tunllimit = { $limit: opts.limit };
     // 排序方式
     let tunlsort = { $sort: { _id: -1 } };
-
     if (opts.article_id) {
-      let findlast = await this.ctx.model.Article.findOne({
-        _id: opts.article_id
-      }).exec();
       // 匹配
-      let tunlmatch = { $match: { _id: { $gt: findlast["_id"] } } };
-      if (opts.department_key != 0)
+      let tunlmatch = { $match: { _id: { $gt: this.app.mongoose.Types.ObjectId(opts.article_id) } } };
+      if (opts.department_key)
         tunlmatch.$match["department.key"] = opts.department_key;
+      if (opts.user_id != 0) tunlmatch.$match.user_id = this.app.mongoose.Types.ObjectId(opts.user_id);
       if (opts.sort != 0) tunlmatch.$match.sort = opts.sort;
       if (opts.type != 0) tunlmatch.$match.type = opts.type;
-      if (opts.status != 0) tunlmatch.$match.status = opts.status;
+      if (opts.status !== 0) tunlmatch.$match.status = opts.status;
       try {
-        let res = await this.ctx.model.Article.aggregate([
+        let doc = await this.ctx.model.Article.aggregate([
           tunlmatch,
           tunlproject,
           tunllimit,
           tunlsort
         ]).exec();
+        let res = await this.ctx.model.User.populate(doc,{path:'user_id',select:'name avatar'});
         return res;
       } catch (e) {
         throw new Error();
@@ -80,21 +81,24 @@ class ArticleService extends BaseService {
         let tunlmatch = { $match: {} };
         if (opts.department_key != 0)
           tunlmatch.$match["department.key"] = opts.department_key;
-        if (opts.sort !== 0) tunlmatch.$match.sort = opts.sort | 0;
-        if (opts.type !== 0) tunlmatch.$match.type = opts.type | 0;
-        if (opts.status !== 0) tunlmatch.$match.status = opts.status | 0;
-        let res = await this.ctx.model.Article.aggregate([
+        if (opts.user_id != 0) tunlmatch.$match.user_id = this.app.mongoose.Types.ObjectId(opts.user_id);
+        if (opts.sort != 0) tunlmatch.$match.sort = opts.sort;
+        if (opts.type != 0) tunlmatch.$match.type = opts.type;
+        if (opts.status !== 0) tunlmatch.$match.status = opts.status;
+        let doc = await this.ctx.model.Article.aggregate([
           tunlmatch,
           tunlproject,
           tunllimit,
           tunlsort
-        ]).exec();
+          ]).exec();
+        let res = await this.ctx.model.User.populate(doc,{path:'user_id',select:'name avatar'});
         return res;
       } catch (e) {
         throw new Error();
       }
     }
   }
+
 }
 
 module.exports = ArticleService;

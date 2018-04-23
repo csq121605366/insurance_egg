@@ -7,11 +7,6 @@ class HospitalService extends BaseService {
   }
   /**
    * 实现分页功能
-   * @param {*} _id 文章id(如果不提供表示从头开始提供)
-   * @param {*} limit 文章间隔(默认为10条)
-   * @param {*} sort //文章分类(默认为1)0全部 1日志 2手术记录 3科普文章
-   * @param {*} type  //文章展示模式 0全部 1公开 2仅好友查看 3私有
-   * @param {*} status //文章状态(默认为2) 0全部 1未审核 2已审核 3已删除
    */
   async search(param) {
     let opts = Object.assign(

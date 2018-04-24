@@ -3,7 +3,6 @@
 
 const BaseService = require("./base");
 const qiniu = require("qiniu");
-const _ = require('lodash');
 class QiniuService extends BaseService {
   constructor(ctx) {
     super(ctx);
@@ -33,7 +32,7 @@ class QiniuService extends BaseService {
     let destUrl = config.qiniu.permanent_url;
     let moveOperations = [];
     let res = [];
-    _.forEach(file, (item, index) => {
+    file.forEach((item, index) => {
       let tmp;
       if (item.bucket != destBucket) {
         let mkfilename = this.guid() + /\.[^\.]+$/.exec(item.key)[0];

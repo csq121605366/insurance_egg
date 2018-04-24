@@ -49,7 +49,7 @@ class ArticleController extends BaseController {
     //获取用户信息
     let { name, role, _id, status } = this.ctx.state.user;
     //只有医生可以发文章
-    // if (role != "2" && status != "2") return this.error("没有发表权限");
+    if (role != "2" && status != "2") return this.error("没有发表权限");
     if (article_id) {
       /**
        * 更新

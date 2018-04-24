@@ -284,7 +284,8 @@ class AppController extends BaseController {
       audit_create: new Date()
     });
     await find.save();
-    this.success("更新成功");
+    let token = await this.service.actionsToken.userToken(find);
+    this.success({ token });
   }
 
   //获取职称列表

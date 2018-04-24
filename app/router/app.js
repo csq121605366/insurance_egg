@@ -47,5 +47,9 @@ module.exports = app => {
    */
   router.post("/api/app/article/paging", app.jwt, "article.paging");
 
-  
+  //提问问题
+  router.post("/api/app/qa/create", app.jwt, "qa.qaCreate");
+  //问题列表 user_id相关用户_id limit(限制返回几个) last_id(最后一个_id)
+  router.post("/api/app/qa/list", app.jwt, "qa.qaList");
+
 };

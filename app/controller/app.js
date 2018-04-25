@@ -203,7 +203,8 @@ class AppController extends BaseController {
       // 存储信息
       Object.assign(find, {
         treatment_info: info.treatment_info,
-        department: info.department
+        department: info.department,
+        status: "2" //用户不需要审核
       });
     } else if (role == "2") {
       //医生 一个科室一个医院 还需要绑定手机号
@@ -325,24 +326,6 @@ class AppController extends BaseController {
     }
   }
 
-  //获取主科室列表
-  async mainDepartments() {
-    let list = await this.ctx.model.Department.find()
-      .select("label key")
-      .exec();
-    this.success(list);
-  }
-  // 获取次科室列表
-  async viceDepartments() {
-    let { _id } = this.ctx.request.query;
-    if (!_id) return this.error("缺少参数");
-    let list = await this.ctx.model.Department.findOne({ _id })
-      .select("children.label children.key")
-      .exec();
-    if (list) this.success(list.children);
-    else this.error("未找到");
-  }
-
   //搜索医院
   async searchHospital() {
     let res = await this.service.hospital.search(this.ctx.request.body);
@@ -350,8 +333,56 @@ class AppController extends BaseController {
   }
 
   // 获取科室人员列表
-  async departmentList() {
-    let res = await this.ctx.model.User.find();
+  async userListBydepartment() {
+    let { role, status } = this.ctx.state.user;
+    //鉴权
+    if (role == "0" || ((role == "2" || role == "3") && status != "2"))
+      return this.error("没有权限");
+    this.ctx.validate({
+      department: {
+        type: "array",
+        required: true
+      }
+    });
+    let { department } = this.ctx.request.body;
+    let res = { user: [], doctor: [], agent: [] };
+    // 角色搜索
+
+    let selectParam = {
+      name: 1,
+      role: 1,
+      status: 1,
+      hospital: 1,
+      title: 1,
+      department: 1,
+      description: 1,
+      gender: 1,
+      avatar: 1
+    };
+    if (role == "1") {
+      await this.ctx.model.User.aggregate()
+        .project(selectParam)
+        .match({
+          status: "2",
+          role: { $in: ["2", "3"] },
+          department: { $in: department }
+        })
+        .exec((err, doc) => {
+          if (doc.length) {
+            doc.forEach(item => {
+              if (item.role == "1") {
+                res.user.push(item);
+              } else if (item.role == "2") {
+                res.doctor.push(item);
+              } else if (item.role == "3") {
+                res.agent.push(item);
+              }
+            });
+          }
+        });
+    }
+
+    this.success(res);
   }
 
   //医生发送手机

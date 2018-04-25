@@ -52,17 +52,21 @@ module.exports = app => {
     ], //存储用户使用地址
     hospital: Object, //医生就职医院
     certificate: Array, //医生证书
-    department: [{
-      label: String,
-      key: String
-    }], // 关联科室 医生只能关联一个科室,患者可以关联最多三个 经理人关联三个
-    agency: [{
-      name: String,
-      department: {
+    department: [
+      {
         label: String,
         key: String
       }
-    }],
+    ], // 关联科室 医生只能关联一个科室,患者可以关联最多三个 经理人关联三个
+    agency: [
+      {
+        name: String,
+        department: {
+          label: String,
+          key: String
+        }
+      }
+    ],
     friend: [
       {
         name: "String",
@@ -72,10 +76,12 @@ module.exports = app => {
           default: "0"
         },
         phone: String,
-        department: [{
-          label: String,
-          key: String
-        }],
+        department: [
+          {
+            label: String,
+            key: String
+          }
+        ],
         hospital: String,
         title: String, //职称
         description: String // 简介
@@ -87,10 +93,10 @@ module.exports = app => {
       illness_name: String, //疾病名字
       operation: {
         type: String,
-        enum: ["0", "1", "2"],//是否手术 0保密 1否 2已手术
+        enum: ["0", "1", "2"], //是否手术 0保密 1否 2已手术
         default: "0"
       },
-      treatment_images: Array, // 就诊信息图片数组
+      treatment_images: Array // 就诊信息图片数组
     }, //治疗信息
     description: String, // 简介 擅长领域
     email: String, //邮箱
@@ -99,7 +105,7 @@ module.exports = app => {
       enum: ["0", "1", "2"], // 0代表未知 1代表男性 2代表女性
       default: "0"
     }, // 性别
-    avatar: Object,//用户头像
+    avatar: Object, //用户头像
     avatarUrl: String, // 头像地址
     audit_create: Date, //审核提交日期
     audit_end: Date, //审核结束日期
@@ -115,20 +121,8 @@ module.exports = app => {
     }
   });
 
-  UserSchema.pre("save", function (next) {
+  UserSchema.pre("save", function(next) {
     if (this.isNew) {
-      if (!this.avatarUrl || this.avatarUrl == "") {
-        const options = {
-          margin: 0.2,
-          size: 200
-        };
-        // 使用hash 生成初始化头像
-        let hash = Math.random()
-          .toString(16)
-          .slice(4);
-        let avatar = new Identicon(hash + this.openid, options).toString();
-        this.avatarUrl = "data:image/png;base64," + avatar;
-      }
       // 创建时间
       this.meta.createdAt = this.meta.updatedAt = new Date();
     } else {
@@ -136,7 +130,23 @@ module.exports = app => {
     }
     next();
   });
+  UserSchema.pre("save", function(next) {
+    if (this.avatar) {
+      this.avatarUrl = "";
+    } else {
+      const options = {
+        margin: 0.2,
+        size: 200
+      };
+      // 使用hash 生成初始化头像
+      let hash = Math.random()
+        .toString(16)
+        .slice(4);
+      let avatar = new Identicon(hash + this.openid, options).toString();
+      this.avatarUrl = "data:image/png;base64," + avatar;
+    }
+    next();
+  });
 
   return mongoose.model("User", UserSchema);
 };
-

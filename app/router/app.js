@@ -9,13 +9,19 @@ module.exports = app => {
   router.get("/api/app/canupdate", app.jwt, "app.canUpdate"); // 用户信息完善更新
   router.post("/api/app/update", app.jwt, "app.update"); // 用户信息完善更新
 
-  router.get("/api/app/titlelist", "app.titleList"); // 获取城市列表
+  router.post("/api/app/user/department", app.jwt, "app.userListBydepartment"); // 获取次科室成员列表
+
+  router.get("/api/app/titlelist", "app.titleList"); // 获取职称列表
   // last_id: 0, limit: 10,key:''
   router.post("/api/app/hospital", "app.searchHospital"); // 搜索医院
   router.get("/api/app/getcitys", "app.getCitys"); // 获取城市列表
   router.get("/api/app/gethospitals", "app.getHospitals"); // 获取医院列表
-  router.get("/api/app/maindepartments", "app.mainDepartments"); // 获取主科室列表
-  router.get("/api/app/vicedepartments", "app.viceDepartments"); // 获取次科室列表
+  //department
+  router.get("/api/app/department/main", "department.departmentMain"); // 获取主科室列表
+  //_id(主科室id)
+  router.get("/api/app/department/vice", "department.departmentVice"); // 获取次科室列表
+
+
 
   //目前不用
   router.post("/api/app/wxuserinfo", "app.wxGetUserInfo"); // getUserInfo信息解密
@@ -51,5 +57,4 @@ module.exports = app => {
   router.post("/api/app/qa/create", app.jwt, "qa.qaCreate");
   //问题列表 user_id相关用户_id limit(限制返回几个) last_id(最后一个_id)
   router.post("/api/app/qa/list", app.jwt, "qa.qaList");
-
 };

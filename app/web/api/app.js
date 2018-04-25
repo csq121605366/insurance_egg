@@ -31,3 +31,23 @@ export function addContent(data) {
     data
   });
 }
+
+
+// 获取医生列表
+export function userList(data) {
+  return request({
+    url: "admin/user/list",
+    method: "post",
+    data
+  });
+}
+
+
+
+// 审核用户
+export function userAudit() {
+  return request({
+    url: "admin/user/audit",
+    method: "get"
+  });
+}

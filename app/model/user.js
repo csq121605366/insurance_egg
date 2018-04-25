@@ -52,12 +52,7 @@ module.exports = app => {
     ], //存储用户使用地址
     hospital: Object, //医生就职医院
     certificate: Array, //医生证书
-    department: [
-      {
-        label: String,
-        key: String
-      }
-    ], // 关联科室 医生只能关联一个科室,患者可以关联最多三个 经理人关联三个
+    department: Array, // 关联科室 医生只能关联一个科室,患者可以关联最多三个 经理人关联三个
     agency: [
       {
         name: String,
@@ -121,7 +116,7 @@ module.exports = app => {
     }
   });
 
-  UserSchema.pre("save", function(next) {
+  UserSchema.pre("save", function (next) {
     if (this.isNew) {
       // 创建时间
       this.meta.createdAt = this.meta.updatedAt = new Date();
@@ -130,7 +125,7 @@ module.exports = app => {
     }
     next();
   });
-  UserSchema.pre("save", function(next) {
+  UserSchema.pre("save", function (next) {
     if (this.avatar) {
       this.avatarUrl = "";
     } else {

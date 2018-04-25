@@ -21,6 +21,8 @@ class DepartmentController extends BaseController {
     else this.error("未找到");
   }
 
+  
+
 
 }
 

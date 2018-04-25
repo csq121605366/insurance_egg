@@ -335,9 +335,6 @@ class AppController extends BaseController {
   // 获取科室人员列表
   async userListBydepartment() {
     let { role, status } = this.ctx.state.user;
-    //鉴权
-    if (role == "0" || ((role == "2" || role == "3") && status != "2"))
-      return this.error("没有权限");
     this.ctx.validate({
       department: {
         type: "array",
@@ -347,7 +344,6 @@ class AppController extends BaseController {
     let { department } = this.ctx.request.body;
     let res = { user: [], doctor: [], agent: [] };
     // 角色搜索
-
     let selectParam = {
       name: 1,
       role: 1,
@@ -360,29 +356,63 @@ class AppController extends BaseController {
       avatar: 1
     };
     if (role == "1") {
-      await this.ctx.model.User.aggregate()
+      res = await this.ctx.model.User.aggregate()
         .project(selectParam)
         .match({
           status: "2",
           role: { $in: ["2", "3"] },
-          department: { $in: department }
+          'department.key': { $in: department }
         })
-        .exec((err, doc) => {
-          if (doc.length) {
-            doc.forEach(item => {
-              if (item.role == "1") {
-                res.user.push(item);
-              } else if (item.role == "2") {
-                res.doctor.push(item);
-              } else if (item.role == "3") {
-                res.agent.push(item);
-              }
-            });
-          }
-        });
+        .unwind('department')
+        .match({
+          'department.key': { $in: department }
+        })
+        .exec();
+    } else {
+      let res1 = await this.ctx.model.User.aggregate()
+        .project(selectParam)
+        .match({
+          status: { $in: ['1', '2'] }, //用户不需要激活
+          role: '1',
+          'department.key': { $in: department }
+        })
+        .unwind('department')
+        .match({
+          'department.key': { $in: department }
+        })
+        .exec();
+      let res2 = await this.ctx.model.User.aggregate()
+        .project(selectParam)
+        .match({
+          status: '2', //用户不需要激活
+          role: { $in: ['1', '2'] },
+          'department.key': { $in: department }
+        })
+        .unwind('department')
+        .match({
+          'department.key': { $in: department }
+        })
+        .exec();
+      res = [...res1, ...res2];
     }
-
     this.success(res);
+  }
+  /**
+   * 获取用户详细信息
+   */
+  async userDetail() {
+    this.ctx.validate({
+      user_id: 'string'
+    });
+    let { user_id } = this.ctx.request.body;
+    let find = await this.ctx.model.User.findOne({ _id: user_id }).select(
+      `name phone hospital department role title description gender avatarUrl avatar`
+    );
+    //文章筛选 已审核 公开和仅科室查看
+    let article = await this.ctx.model.Article.find({ user_id, status: '2', type: { $in: ['1', '2'] } }).exec();
+    let res = { userinfo: find, article };
+    if (find) return this.success(res);
+    return this.error('未找到');
   }
 
   //医生发送手机

@@ -69,6 +69,8 @@ class SmsService extends BaseService {
     // 防止重复 找到最新的一条
     let last = find[find.length - 1];
     // 如果存在 并且不超过保质期 表示通过 否则false
+    console.log(last,
+      new Date(last.created).getTime() + smsConf.SMS_EXPIRES, Date.now())
     if (
       last &&
       new Date(last.created).getTime() + smsConf.SMS_EXPIRES > Date.now()

@@ -65,9 +65,9 @@ class Admin extends BaseController {
     let myconfig = this.app.config.myconfig;
     // 验证参数
     ctx.validate(this.AdminTransfer);
-    const { username, password  } = ctx.request.body;
+    const { username, password } = ctx.request.body;
     // 使用admin基础服务获取用户信息
-    let find = await this.ctx.model.Admin.find({$or:[{username},{phone:username}]}).exec();
+    let find = await this.ctx.model.Admin.find({ $or: [{ username }, { phone: username }] }).exec();
     find = find[0];
     // 帐号不存在就返回错误
     if (!find) return this.error("账号未找到");
@@ -162,22 +162,22 @@ class Admin extends BaseController {
       return this.error();
     }
   }
-  
+
 
 
   //绑定手机
   async bindPhone() {
-    this.ctx.validate({phone:{type:'string',format:this.reg.phone},code:'string'});
-    let {_id} = this.ctx.state.user;
-    let {phone,code} = this.ctx.request.body;
+    this.ctx.validate({ phone: { type: 'string', format: this.reg.phone }, code: 'string' });
+    let { _id } = this.ctx.state.user;
+    let { phone, code } = this.ctx.request.body;
     // 查找是否有绑定该手机号的
-    let one =  await this.ctx.model.Admin.findOne({phone}).exec();
-    if(one) return this.error('该手机已绑定');
+    let one = await this.ctx.model.Admin.findOne({ phone }).exec();
+    if (one) return this.error('该手机已绑定');
     //找到要绑定的帐号
-    let find = await this.ctx.model.Admin.findOne({_id}).exec();
+    let find = await this.ctx.model.Admin.findOne({ _id }).exec();
     // 检验验证码是否正确
-    let validate = await this.service.sms.validate(phone,71356,code);
-    if(!validate) return this.error('验证码不正确');
+    let validate = await this.service.sms.validate(phone, 71356, code);
+    if (!validate) return this.error('验证码不正确');
     //绑定手机号
     find.phone = phone;
     await find.save();
@@ -185,22 +185,22 @@ class Admin extends BaseController {
   }
   //解绑手机
   async unbindPhone() {
-   this.ctx.validate({phone:{type:'string',format:this.reg.phone},code:'string'});
-    let {_id} = this.ctx.state.user;
-    let {phone,code} = this.ctx.request.body;
+    this.ctx.validate({ phone: { type: 'string', format: this.reg.phone }, code: 'string' });
+    let { _id } = this.ctx.state.user;
+    let { phone, code } = this.ctx.request.body;
     //找到要绑定的帐号
-    let find =  await this.ctx.model.Admin.findOne({_id}).exec();
-    if(find.phone!=phone) return this.error('不是该账户绑定的手机号');
+    let find = await this.ctx.model.Admin.findOne({ _id }).exec();
+    if (find.phone != phone) return this.error('不是该账户绑定的手机号');
     // 检验验证码是否正确
-    let validate = await this.service.sms.validate(phone,71545,code);
-    if(!validate) return this.error('验证码不正确');
+    let validate = await this.service.sms.validate(phone, 71545, code);
+    if (!validate) return this.error('验证码不正确');
     //绑定手机号
     find.phone = '';
     await find.save();
     this.success('解绑成功')
   }
 
- 
+
 
 
 
@@ -226,20 +226,47 @@ class Admin extends BaseController {
     // {"streamSize":574}
   }
 
+  //获取用户列表
+  async geUserList() {
+    this.ctx.validate({
+      role: 'string',
+      status: 'string',
+      currentPage: 'number',
+      limit: 'number'
+    });
+    let { role, status, currentPage, limit } = this.ctx.request.body;
+    let selectParam = {
+      name: 1,
+      gender: 1,
+      hospital: 1,
+      title: 1,
+      description: 1,
+      certificate: 1,
+      meta: 1,
+      audit_create: 1,
+      audit_end: 1,
+      status: 1
+    }
+    let find = await this.ctx.model.User.find({ role: role, status: status }).skip((currentPage - 1) * limit | 0).limit(limit | 0).select(selectParam).exec()
+    let amount = await this.ctx.model.User.find({ role: role, status: status }).count().exec();
+    this.success({ list: find, amount, currentPage: currentPage | 0 });
+  }
+
+
   //审核用户
   async auditUser() {
-    this.ctx.validate({ openid: "string" });
+    this.ctx.validate({ user_id: "string" });
     let { role } = this.ctx.state.user;
-    let { openid } = this.ctx.request.body;
-    if (role < 2) return this.error("只有管理员可以审核!");
+    let { user_id } = this.ctx.request.body;
+    if (role != '2' || role != '9') return this.error("只有管理员可以审核!");
     // 将已锁定和未激活的用户激活
     let find = await this.ctx.model.User.findOne({
-      openid,
-      status: { $in: [1, 3] }
+      _id: user_id,
+      status: { $in: ['1', '3'] }
     }).exec();
     if (!find) return this.error("未找到该用户,或该用户已被删除");
     // 激活用户账户
-    find.status = 2;
+    find.status = '2';
     try {
       await find.save();
       return this.success();

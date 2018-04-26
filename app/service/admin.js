@@ -8,7 +8,7 @@ class AdminService extends BaseService {
   }
   async show(_id) {
     if (!_id) return false;
-    return await await this.ctx.model.Admin.findOne({ _id }).select('-_id -__v -password -loginAttempts -lockUntil').exec();
+    return await this.ctx.model.Admin.findOne({ _id }).select('-_id -__v -password -loginAttempts -lockUntil').exec();
   }
   async findbyid(_id) {
     if (!_id) return false;

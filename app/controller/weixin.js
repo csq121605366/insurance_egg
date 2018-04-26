@@ -39,7 +39,7 @@ class Weixin extends BaseController {
       }
     } else if (this.ctx.method === "POST") {
       if (sha !== signature) {
-        throw new Error("签名不正确");
+        ctx.throw(403,"签名不正确");
       }
     }
     // 解析请求参数
@@ -53,7 +53,7 @@ class Weixin extends BaseController {
         data = string;
       })
       .catch(err => {
-        throw new Error("raw-body解析错误");
+        ctx.throw(403,"raw-body解析错误");
       });
     // 解析xml
     let content;
@@ -64,7 +64,7 @@ class Weixin extends BaseController {
         content = res;
       })
       .catch(err => {
-        throw new Error("util.parseXML方法错误");
+        ctx.throw(403,"util.parseXML方法错误");
       });
     // 格式化信息
     let message = util.formatMessage(content.xml);

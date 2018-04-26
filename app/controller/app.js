@@ -36,7 +36,7 @@ class AppController extends BaseController {
         try {
           await find.save();
         } catch (e) {
-          throw new Error();
+          ctx.throw(403,);
         }
       }
     } else {
@@ -64,7 +64,7 @@ class AppController extends BaseController {
       try {
         await find.save();
       } catch (e) {
-        throw new Error();
+        ctx.throw(403,);
       }
     }
     let token = await this.service.actionsToken.userToken(find);
@@ -173,7 +173,7 @@ class AppController extends BaseController {
           info.avatar = res[0];
         })
         .catch(() => {
-          throw new Error("头像设置失败");
+          ctx.throw(403,"头像设置失败");
         });
     }
     // 二次验证(分角色)
@@ -197,7 +197,7 @@ class AppController extends BaseController {
             info.treatment_info.treatment_images = res;
           })
           .catch(() => {
-            throw new Error("就诊资料上传失败");
+            ctx.throw(403,"就诊资料上传失败");
           });
       }
       // 存储信息
@@ -233,7 +233,7 @@ class AppController extends BaseController {
             info.certificate = res;
           })
           .catch(() => {
-            throw new Error("就诊资料上传失败");
+            ctx.throw(403,"就诊资料上传失败");
           });
       }
       // 存储信息
@@ -372,21 +372,19 @@ class AppController extends BaseController {
       let res1 = await this.ctx.model.User.aggregate()
         .project(selectParam)
         .match({
-          status: { $in: ['1', '2'] }, //用户不需要激活
-          role: '1',
-          'department.key': { $in: department }
+          role: '1'
         })
         .unwind('department')
         .match({
           'department.key': { $in: department }
         })
         .exec();
+        console.log(department)
       let res2 = await this.ctx.model.User.aggregate()
         .project(selectParam)
         .match({
-          status: '2', //用户不需要激活
-          role: { $in: ['1', '2'] },
-          'department.key': { $in: department }
+          status: '2', //医生和代理商需要激活
+          role: { $in: ['2', '3'] }
         })
         .unwind('department')
         .match({

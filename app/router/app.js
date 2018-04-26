@@ -31,7 +31,7 @@ module.exports = app => {
   router.post("/api/app/wxuserinfo", "app.wxGetUserInfo"); // getUserInfo信息解密
 
   //创建文章
-  router.post("/api/app/article/create", app.jwt, "article.createAndUpdate");
+  router.post("/api/app/article/createandupdate", app.jwt, "article.createAndUpdate");
   //获取单个文章内容 article_id(文章id)
   router.post("/api/app/article/getdetail", app.jwt, "article.getDetail");
   //获取新建文章的资源列表 article_id(文章id)
@@ -55,10 +55,17 @@ module.exports = app => {
    * @param {*} type  //文章展示模式 0全部 1公开 2仅好友查看 3私有
    * @param {*} status //文章状态(默认为2) 0全部 1未审核 2已审核 3已删除
    */
+  // 游客进入首页的分页
   router.post("/api/app/article/paging", "article.paging");
+  // 用户文章分页
+  router.post("/api/app/article/list", app.jwt, "article.list");
 
   //提问问题
   router.post("/api/app/qa/create", app.jwt, "qa.qaCreate");
+  //回答问题
+  router.post('/api/app/qa/answer', app.jwt, 'qa.qaAnswer');
   //问题列表 user_id相关用户_id limit(限制返回几个) last_id(最后一个_id)
   router.post("/api/app/qa/list", app.jwt, "qa.qaList");
+  //问题详情
+  router.post("/api/app/qa/detail", app.jwt, "qa.qaDetail");
 };

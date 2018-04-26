@@ -13,8 +13,8 @@ module.exports = app => {
     title: String,//问题标题
     illness_name: String,//疾病名称
     type: {
-      type: Number,
-      enum: ['1', '2','3'],
+      type: String,
+      enum: ['1', '2', '3'],
       default: '1'
     }, //回复人类型 1用户 2医生 3经理人
     department: {
@@ -27,12 +27,25 @@ module.exports = app => {
       enum: ["0", "1", "2"],//是否手术 0保密 1否 2已手术
       default: "0"
     },
-    qa_id: [
+    answer: [
       {
-        type: Schema.Types.ObjectId,
-        ref: "Qa"
+        user_id: {
+          type: Schema.Types.ObjectId,
+          ref: "User"
+        },
+        name: String,
+        phone: String,
+        role: String,
+        hospital: Object,
+        department: Array,
+        title: String,
+        gender: String,
+        avatar: Object,
+        avatarUrl: String,
+        content: String,
+        images: Array
       }
-    ], //问题关联的回答id
+    ], //问题关联内容
     content: String,
     like: Number, //喜欢
     unlike: Number, //不喜欢

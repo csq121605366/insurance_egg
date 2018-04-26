@@ -65,7 +65,6 @@ const user = {
     },
 
     LoginResetPassword({ commit, state }, data) {
-      console.log(data);
       return new Promise((resolve, reject) => {
         loginTypePassword(data)
           .then(response => {

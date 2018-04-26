@@ -45,9 +45,10 @@ export function userList(data) {
 
 
 // 审核用户
-export function userAudit() {
+export function userAudit(data) {
   return request({
     url: "admin/user/audit",
-    method: "get"
+    method: "post",
+    data
   });
 }

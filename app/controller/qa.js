@@ -11,10 +11,6 @@ class QaController extends BaseController {
    */
   async qaCreate() {
     this.ctx.validate({
-      qa_id: {
-        type: 'string',
-        required: false
-      },
       title: {
         type: 'string',
         required: false
@@ -25,7 +21,8 @@ class QaController extends BaseController {
       },
       illness_name: {
         type: "string",
-        required: false
+        required: false,
+        allowEmpty: true
       },
       operation: {
         type: "string",
@@ -39,17 +36,6 @@ class QaController extends BaseController {
     });
     let info = this.ctx.request.body;
     let { role, status, _id } = this.ctx.state.user;
-    if (role == '1') {
-      info.type = '1'; //类型为问题
-    } else {
-      //查看帐号状态
-      if (status != '2') return this.error("帐号未激活或已被锁定");
-      //如果不存在问题id就报错
-      if ((role == '2' || role == '3') && !qa_id) {
-        return this.error('参数不正确')
-      }
-      info.type = '2'; //回答类型
-    }
     if (info.images && info.images.length) {
       //转移治疗信息的图片
       await this.service.qiniu
@@ -58,14 +44,12 @@ class QaController extends BaseController {
           info.images = res;
         })
         .catch(() => {
-          throw new Error("问题资料上传失败");
+          ctx.throw(403, "问题资料上传失败");
         });
     }
     let newOne = new this.ctx.model.Qa({
       user_id: this.app.mongoose.Types.ObjectId(_id),
       title: info.title,
-      type: info.type,
-      // qa_id: { $addToSet: this.app.mongoose.Types.ObjectId(qa_id) },
       department: info.department,
       illness_name: info.illness_name,
       operation: info.operation,
@@ -74,6 +58,53 @@ class QaController extends BaseController {
     });
     try {
       await newOne.save();
+      return this.success()
+    } catch (e) {
+      return this.error()
+    }
+  }
+
+  async qaAnswer() {
+    this.ctx.validate({
+      qa_id: {
+        type: 'string'
+      },
+      images: {
+        type: 'array',
+        required: false
+      },
+      content: "string"
+    });
+    let info = this.ctx.request.body;
+    let { role, status, _id } = this.ctx.state.user;
+    if (info.images && info.images.length) {
+      //转移治疗信息的图片
+      await this.service.qiniu
+        .removeImage(info.images)
+        .then(res => {
+          info.images = res;
+        })
+        .catch(() => {
+          ctx.throw(403, "问题资料上传失败");
+        });
+    }
+    let find = await this.ctx.model.User.findOne({ _id });
+    let newOne = {
+      user_id: find._id,
+      name: find.name,
+      phone: find.phone,
+      role: find.role,
+      hospital: find.hospital,
+      department: find.department,
+      title: find.title,
+      gender: find.gender,
+      avatar: find.avatar,
+      avatarUrl: find.avatarUrl,
+      content: info.content,
+      images: info.images
+    };
+    try {
+      await this.ctx.model.Qa.findOneAndUpdate({ _id: info.qa_id }, { $push: newOne }).exec();
       return this.success()
     } catch (e) {
       return this.error()
@@ -101,12 +132,25 @@ class QaController extends BaseController {
       }
     })
     let { _id, role } = this.ctx.state.user;
-    let { limit, user_id, last_id, key } = this.ctx.request.body;
-    if (user_id && _id !== user_id) return this.error('没有权限');
-    let find = await this.service.qa.search({ limit, user_id, last_id, key });
+    let { limit, user_id, last_id, key, type } = this.ctx.request.body;
+    let { department } = await this.ctx.model.User.findOne({ _id });
+    let find;
+    let departmentList = [];
+    department.forEach(element => {
+      departmentList.push(element.key);
+    });
+    find = await this.service.qa.search({ limit, user_id, departmentList, last_id, key });
     this.success(find);
   }
 
+  async qaDetail() {
+    this.ctx.validate({
+      qa_id: 'string'
+    });
+    let { qa_id } = this.ctx.request.body;
+    let find = await this.ctx.model.Qa.findOne({ _id: qa_id }).populate({ path: 'qa_id', populate: { path: 'user_id', select: 'name hospital title avatar avatarUrl' } }).exec();
+    this.success(find)
+  }
 
 }
 

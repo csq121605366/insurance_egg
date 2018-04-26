@@ -17,7 +17,10 @@ class ArticleController extends BaseController {
         required: false
       },
       title: "string",
-      illness_name: "string",
+      illness_name: {
+        type: "string",
+        required: false
+      },
       illness_time: "string",
       sort: "string",
       type: "string",
@@ -54,7 +57,6 @@ class ArticleController extends BaseController {
       /**
        * 更新
        */
-      //限制1分钟内只能发一条
       let findArticle = await this.ctx.model.Article.findOne({
         _id: article_id
       }).exec();
@@ -65,7 +67,7 @@ class ArticleController extends BaseController {
             images = res;
           })
           .catch(() => {
-            throw new Error("资讯图片上传云端失败");
+            ctx.throw(403, "资讯图片上传云端失败");
           });
       }
       if (videos.length) {
@@ -75,7 +77,7 @@ class ArticleController extends BaseController {
             videos = res;
           })
           .catch(() => {
-            throw new Error("资讯视频上传云端失败");
+            ctx.throw(403, "资讯视频上传云端失败");
           });
       }
       try {
@@ -99,18 +101,18 @@ class ArticleController extends BaseController {
        * 新建
        */
       let find = await this.ctx.model.User.findOne({ _id }).exec();
-      //限制1分钟内只能发一条
-      let findArticle = await this.ctx.model.Article.find({ user_id: _id })
-        .sort({ "meta.updated": 1 })
-        .exec();
-      // 找到最后一篇文章
-      let last = findArticle[findArticle.length - 1];
-      // 小于1分钟不可以发表
-      if (
-        last &&
-        new Date(last.meta.updated).getTime() + 60 * 1000 > Date.now()
-      )
-        return this.error("1分钟内只允许操作一次");
+      // //限制1分钟内只能发一条
+      // let findArticle = await this.ctx.model.Article.find({ user_id: _id })
+      //   .sort({ "meta.updated": 1 })
+      //   .exec();
+      // // 找到最后一篇文章
+      // let last = findArticle[findArticle.length - 1];
+      // // 小于1分钟不可以发表
+      // if (
+      //   last &&
+      //   new Date(last.meta.updated).getTime() + 60 * 1000 > Date.now()
+      // )
+      //   return this.error("1分钟内只允许操作一次");
       if (images.length) {
         await this.service.qiniu
           .removeImage(images)
@@ -118,7 +120,7 @@ class ArticleController extends BaseController {
             images = res;
           })
           .catch(() => {
-            throw new Error("资讯图片上传云端失败");
+            ctx.throw(403, "资讯图片上传云端失败");
           });
       }
       if (videos.length) {
@@ -128,7 +130,7 @@ class ArticleController extends BaseController {
             videos = res;
           })
           .catch(() => {
-            throw new Error("资讯视频上传云端失败");
+            ctx.throw(403, "资讯视频上传云端失败");
           });
       }
       try {
@@ -193,6 +195,8 @@ class ArticleController extends BaseController {
       return this.error("发布失败");
     }
   }
+
+
   /**
    * 获取文章内容
    */
@@ -203,7 +207,7 @@ class ArticleController extends BaseController {
     let { article_id } = this.ctx.request.body;
     let find = await this.ctx.model.Article.findOneAndUpdate(
       { _id: article_id },
-      { $addToSet: { looked: { user_id: user._id, avatar: user.avatar, name: user.name } } }, {
+      { $addToSet: { looked: { user_id: user._id, avatar: user.avatar, avatarUrl: user.avatarUrl, name: user.name } } }, {
         fields: {
           title: 1,
           user_id: 1,
@@ -240,6 +244,15 @@ class ArticleController extends BaseController {
    * @param {*} status //文章状态(默认为2) 0全部 1未审核 2已审核 3已删除
    */
   async paging() {
+    let param = this.ctx.request.body;
+    let limit = param.limit || 10;
+    let sort = param.sort || '1';
+    let article_id = param.article_id || '';
+    let res = await this.service.article.paging({ limit, sort, article_id });
+    this.success(res);
+  }
+
+  async list() {
     this.ctx.validate({
       user_id: { type: "string", required: false },
       article_id: { type: "string", required: false, allowEmpty: true },
@@ -247,20 +260,13 @@ class ArticleController extends BaseController {
       limit: { type: "string", required: false, allowEmpty: true },
       sort: { type: "string", required: false, allowEmpty: true },
       type: { type: "string", required: false, allowEmpty: true },
-      status: { type: "string", required: false, allowEmpty: true }
+      status: { type: "array", required: false, allowEmpty: true }
     });
     let reqParam = this.ctx.request.body;
-    let user = this.ctx.state.user;
-    // 角色为游客 或者 状态不为激活的其他状态
-    if (user && (user.role == 0 || user.status != 2)) {
-      // 游客模式
-      let res = await this.service.article.paging(this.ctx.request.body);
-      this.success(res);
-    } else {
-      // 非游客模式
-      let res = await this.service.article.paging(this.ctx.request.body);
-      this.success(res);
-    }
+    let { _id } = this.ctx.state.user;
+    if (reqParam.user_id != _id) this.ctx.throw(401);
+    let res = await this.service.article.paging(this.ctx.request.body);
+    this.success(res);
   }
 
   /**

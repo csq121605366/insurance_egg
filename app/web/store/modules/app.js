@@ -35,7 +35,10 @@ const app = {
         info: "网址格式不正确"
       } // url验证
     },
-    qiniuTicket: ""
+    qiniuTicket: "",
+    statusList: { '1': '待审核', '2': '已审核' },
+    sortList: { "1": '日志', "2": '手术记录', "3": '科普文章' },
+    genderList:{0:'未知',1:'男性',2:'女性'},//0代表未知 1代表男性 2代表女性
   },
   mutations: {
     TOGGLE_SIDEBAR: state => {

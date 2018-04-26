@@ -94,9 +94,9 @@ class Admin extends BaseController {
   //获取用户详情
   async getUserinfo() {
     let _id = this.ctx.state.user._id;
-    let find = await this.service.admin.show(_id);
+    let find = await this.ctx.model.Admin.findOne({ _id }).select('-_id -__v -password -loginAttempts -lockUntil').exec();
     if (!find) return this.error("未找到");
-    return this.success(find._doc);
+    return this.success(find);
   }
 
   //创建用户
@@ -231,25 +231,33 @@ class Admin extends BaseController {
     this.ctx.validate({
       role: 'string',
       status: 'string',
-      currentPage: 'number',
+      currentPage: {
+        type: 'number',
+        required: false
+      },
       limit: 'number'
     });
-    let { role, status, currentPage, limit } = this.ctx.request.body;
-    let selectParam = {
-      name: 1,
-      gender: 1,
-      hospital: 1,
-      title: 1,
-      description: 1,
-      certificate: 1,
-      meta: 1,
-      audit_create: 1,
-      audit_end: 1,
-      status: 1
+    let { role, status, currentPage, limit } = Object.assign({}, { currentPage: 1 }, this.ctx.request.body);
+    try {
+      let selectParam = {
+        name: 1,
+        phone: 1,
+        gender: 1,
+        hospital: 1,
+        title: 1,
+        description: 1,
+        certificate: 1,
+        meta: 1,
+        audit_create: 1,
+        audit_end: 1,
+        status: 1
+      }
+      let find = await this.ctx.model.User.find({ role: role, status: status }).skip((currentPage - 1) * limit | 0).limit(limit | 0).select(selectParam).exec()
+      let amount = await this.ctx.model.User.find({ role: role, status: status }).count().exec();
+      this.success({ list: find, amount, currentPage: currentPage | 0 });
+    } catch (e) {
+      ctx.throw(500, '服务器错误')
     }
-    let find = await this.ctx.model.User.find({ role: role, status: status }).skip((currentPage - 1) * limit | 0).limit(limit | 0).select(selectParam).exec()
-    let amount = await this.ctx.model.User.find({ role: role, status: status }).count().exec();
-    this.success({ list: find, amount, currentPage: currentPage | 0 });
   }
 
 
@@ -258,7 +266,8 @@ class Admin extends BaseController {
     this.ctx.validate({ user_id: "string" });
     let { role } = this.ctx.state.user;
     let { user_id } = this.ctx.request.body;
-    if (role != '2' || role != '9') return this.error("只有管理员可以审核!");
+    console.log(role)
+    if (role != '2' && role != '9') return this.error("只有管理员可以审核!");
     // 将已锁定和未激活的用户激活
     let find = await this.ctx.model.User.findOne({
       _id: user_id,
@@ -271,7 +280,7 @@ class Admin extends BaseController {
       await find.save();
       return this.success();
     } catch (e) {
-      return this.error();
+      ctx.throw(500, '服务器错误')
     }
   }
 

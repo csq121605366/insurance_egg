@@ -98,12 +98,13 @@ class QaController extends BaseController {
       avatar: find.avatar,
       avatarUrl: find.avatarUrl,
       content: info.content,
-      images: info.images
+      images: info.images,
+      type: '1'
     };
     try {
       await this.ctx.model.Qa.update(
         { _id: info.qa_id },
-        { $push: { answer: newOne } }
+        { $push: { answer: newOne }, $inc: { answer_count: 1 } }
       ).exec();
       return this.success();
     } catch (e) {
@@ -111,14 +112,11 @@ class QaController extends BaseController {
     }
   }
 
-  async qaList() {
+
+  async qaSearch() {
     this.ctx.validate({
       limit: {
-        type: "string",
-        required: false
-      },
-      user_id: {
-        type: "string",
+        type: "number",
         required: false
       },
       last_id: {
@@ -128,25 +126,59 @@ class QaController extends BaseController {
       key: {
         type: "string",
         required: false,
-        allowEmpty: true
       }
     });
     let { _id, role } = this.ctx.state.user;
-    let { limit, user_id, last_id, key, type } = this.ctx.request.body;
-    let { department } = await this.ctx.model.User.findOne({ _id });
-    let find;
-    let departmentList = [];
-    department.forEach(element => {
-      departmentList.push(element.key);
-    });
-    find = await this.service.qa.search({
-      limit,
-      user_id,
-      departmentList,
-      last_id,
-      key
-    });
-    this.success(find);
+    let { limit, user_id, last_id, key } = this.ctx.request.body;
+    let finder = await this.ctx.model.User.findOne({ _id });
+    let res;
+    let oFindParam = {};
+    if (user_id) {
+      this.ctx.validate({
+        user_id: "string"
+      })
+      //如果指定user_id则表示 只查该用户问答
+      //验证用户权限
+      if (user_id != finder._id) this.ctx.throw(401, '没有权限');
+      if (last_id) oFindParam._id = { $gt: last_id };
+      //如果为医生和经理人则查找回答
+      if (finder.role == '2' || finder.role == '3') {
+        let findParam = Object.assign({}, oFindParam, {
+          'answer.user_id': { $in: [finder._id] }
+        })
+        if (key) {
+          //如果存在搜索则加上筛选
+          Object.assign(findParam, { $text: { $search: key } });
+        }
+        res = await this.ctx.model.Qa.find(findParam).select('title illness_name department answer_count content meta').limit(limit ? limit | 0 : 10).exec();
+      } else {
+        let findParam = Object.assign({}, oFindParam, {
+          'user_id': finder._id
+        })
+        if (key) {
+          //如果存在搜索则加上筛选
+          Object.assign(findParam, { $text: { $search: key } });
+        }
+        res = await this.ctx.model.Qa.find(findParam).select('title illness_name department answer_count content meta').limit(limit ? limit | 0 : 10).exec();
+      }
+    } else {
+      let departmentList = [];
+      finder.department.forEach(element => {
+        departmentList.push(element.key);
+      });
+      if (last_id) oFindParam._id = { $gt: last_id };
+      //首先搜索问题
+      let findParam = Object.assign({}, oFindParam, {
+        'department.key': { $in: departmentList },//只能搜索跟自己相关的问题
+      })
+      if (key) {
+        //如果存在搜索则加上筛选
+        Object.assign(findParam, { $text: { $search: key } });
+      }
+      res = await this.ctx.model.Qa.find(findParam)
+        .select('title illness_name department answer_count content meta').limit(limit ? limit | 0 : 10).exec();
+    }
+    this.success(res);
   }
 
   async qaDetail() {
@@ -157,6 +189,8 @@ class QaController extends BaseController {
     let find = await this.ctx.model.Qa.findOne({ _id: qa_id });
     this.success(find);
   }
+
+
 }
 
 module.exports = QaController;

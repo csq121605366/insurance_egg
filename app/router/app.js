@@ -28,22 +28,22 @@ module.exports = app => {
 
 
   //目前不用
-  router.post("/api/app/wxuserinfo", "app.wxGetUserInfo"); // getUserInfo信息解密
+  router.post("/api/app/wxuserinfo", app.jwt, auth, "app.wxGetUserInfo"); // getUserInfo信息解密
 
   //创建文章
-  router.post("/api/app/article/createandupdate", app.jwt, "article.createAndUpdate");
+  router.post("/api/app/article/createandupdate", app.jwt, auth, "article.createAndUpdate");
   //获取单个文章内容 article_id(文章id)
-  router.post("/api/app/article/getdetail", app.jwt, "article.getDetail");
+  router.post("/api/app/article/getdetail", app.jwt, auth, "article.getDetail");
   //获取新建文章的资源列表 article_id(文章id)
   router.post(
     "/api/app/article/getArticleAssets",
-    app.jwt,
+    app.jwt, auth,
     "article.getArticleAssets"
   );
   //增加主文 article_id(文章id)
-  router.post("/api/app/article/addcontent", app.jwt, "article.addContent");
+  router.post("/api/app/article/addcontent", app.jwt, auth, "article.addContent");
   //发表 article_id(文章id)
-  router.post("/api/app/article/publish", app.jwt, "article.publish");
+  router.post("/api/app/article/publish", app.jwt, auth, "article.publish");
 
   /**
    * 实现分页功能
@@ -58,14 +58,17 @@ module.exports = app => {
   // 游客进入首页的分页
   router.post("/api/app/article/paging", "article.paging");
   // 用户文章分页
-  router.post("/api/app/article/list", app.jwt, "article.list");
+  router.post("/api/app/article/list", app.jwt, auth, "article.list");
 
   //提问问题
-  router.post("/api/app/qa/create", app.jwt, "qa.qaCreate");
+  router.post("/api/app/qa/create", app.jwt, auth, "qa.qaCreate");
   //回答问题
-  router.post('/api/app/qa/answer', app.jwt, 'qa.qaAnswer');
+  router.post('/api/app/qa/answer', app.jwt, auth, 'qa.qaAnswer');
   //问题列表 user_id相关用户_id limit(限制返回几个) last_id(最后一个_id)
-  router.post("/api/app/qa/list", app.jwt, "qa.qaList");
+  router.post("/api/app/qa/search", app.jwt, auth, "qa.qaSearch");
   //问题详情
-  router.post("/api/app/qa/detail", app.jwt, "qa.qaDetail");
+  router.post("/api/app/qa/detail", app.jwt, auth, "qa.qaDetail");
+
+  //混合搜索
+  router.post('/api/app/search', app.jwt, auth, "app.search");
 };

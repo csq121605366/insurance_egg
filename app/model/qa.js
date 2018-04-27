@@ -12,15 +12,12 @@ module.exports = app => {
     }, //提问问题用户
     title: String,//问题标题
     illness_name: String,//疾病名称
-    type: {
-      type: String,
-      enum: ['1', '2', '3'],
-      default: '1'
-    }, //回复人类型 1用户 2医生 3经理人
-    department: {
-      label: String,
-      key: String
-    }, //关联科室
+    // type: {
+    //   type: String,
+    //   enum: ['1', '2', '3'],
+    //   default: '1'
+    // }, //回复人类型 1用户 2医生 3经理人
+    department: Object, //关联科室
     images: Array, //问题相关图片
     operation: {
       type: String,
@@ -43,9 +40,18 @@ module.exports = app => {
         avatar: Object,
         avatarUrl: String,
         content: String,
-        images: Array
+        images: Array,
+        type: {
+          type: String,
+          enum: ['1', '2'],
+          default: '1'
+        }, //该回答是医生回答 还是患者补充提问
       }
     ], //问题关联内容
+    answer_count: {
+      type: Number,
+      default: 0
+    },
     content: String,
     like: Number, //喜欢
     unlike: Number, //不喜欢
@@ -68,5 +74,19 @@ module.exports = app => {
     }
     next();
   });
+
+  QaSchema.index({
+    title: 'text',
+    illness_name: 'text',
+    content: 'text'
+  }, {
+      weights: {
+        title: 10,
+        illness_name: 9,
+        content: 1
+      }
+    })
+
   return mongoose.model("Qa", QaSchema);
+
 };

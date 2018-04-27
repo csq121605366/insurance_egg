@@ -15,20 +15,7 @@ class ArticleService extends BaseService {
    * @param {*} type  //文章展示模式 0全部 1公开 2仅好友查看 3私有
    * @param {*} status //文章状态(默认为2) 0全部 1未审核 2已审核 3已删除
    */
-  async paging(param) {
-    let opts = Object.assign(
-      {},
-      {
-        user_id: 0,
-        article_id: 0,
-        department_key: 0,
-        limit: 10,
-        sort: 0,
-        type: '1',
-        status: ["2"]
-      },
-      param
-    );
+  async paging(opts) {
     // 要展示的字段
     let tunlproject = {
       $project: {
@@ -59,12 +46,11 @@ class ArticleService extends BaseService {
       // 匹配
       let tunlmatch = { $match: { _id: { $gt: this.app.mongoose.Types.ObjectId(opts.article_id) } } };
       if (opts.department_key)
-        tunlmatch.$match["department.key"] = opts.department_key;
+        tunlmatch.$match["department.key"] =  { $in: opts.department_key };
       if (opts.user_id) tunlmatch.$match.user_id = this.app.mongoose.Types.ObjectId(opts.user_id);
       if (opts.sort) tunlmatch.$match.sort = opts.sort;
       if (opts.type) tunlmatch.$match.type = opts.type;
-      if (opts.status && opts.status.length) tunlmatch.$match.status = { $in: opts.status };
-      console.log(opts, tunlmatch)
+      tunlmatch.$match.status = { $in: opts.status };
       try {
         let doc = await this.ctx.model.Article.aggregate([
           tunlmatch,
@@ -81,12 +67,11 @@ class ArticleService extends BaseService {
       try {
         let tunlmatch = { $match: {} };
         if (opts.department_key)
-          tunlmatch.$match["department.key"] = opts.department_key;
+          tunlmatch.$match["department.key"] = { $in: opts.department_key };
         if (opts.user_id) tunlmatch.$match.user_id = this.app.mongoose.Types.ObjectId(opts.user_id);
         if (opts.sort) tunlmatch.$match.sort = opts.sort;
-        if (opts.type) tunlmatch.$match.type = opts.type;
-        if (opts.status && opts.status.length) tunlmatch.$match.status = { $in: opts.status };
-        console.log(opts, tunlmatch)
+        if (opts.type) tunlmatch.$match.type = { $in: opts.type };
+        tunlmatch.$match.status = { $in: opts.status };
         let doc = await this.ctx.model.Article.aggregate([
           tunlmatch,
           tunlproject,

@@ -36,7 +36,7 @@ class AppController extends BaseController {
         try {
           await find.save();
         } catch (e) {
-          ctx.throw(403,);
+          ctx.throw(403, );
         }
       }
     } else {
@@ -64,7 +64,7 @@ class AppController extends BaseController {
       try {
         await find.save();
       } catch (e) {
-        ctx.throw(403,);
+        ctx.throw(403, );
       }
     }
     let token = await this.service.actionsToken.userToken(find);
@@ -173,7 +173,7 @@ class AppController extends BaseController {
           info.avatar = res[0];
         })
         .catch(() => {
-          ctx.throw(403,"头像设置失败");
+          ctx.throw(403, "头像设置失败");
         });
     }
     // 二次验证(分角色)
@@ -197,7 +197,7 @@ class AppController extends BaseController {
             info.treatment_info.treatment_images = res;
           })
           .catch(() => {
-            ctx.throw(403,"就诊资料上传失败");
+            ctx.throw(403, "就诊资料上传失败");
           });
       }
       // 存储信息
@@ -233,7 +233,7 @@ class AppController extends BaseController {
             info.certificate = res;
           })
           .catch(() => {
-            ctx.throw(403,"就诊资料上传失败");
+            ctx.throw(403, "就诊资料上传失败");
           });
       }
       // 存储信息
@@ -379,7 +379,7 @@ class AppController extends BaseController {
           'department.key': { $in: department }
         })
         .exec();
-        console.log(department)
+      console.log(department)
       let res2 = await this.ctx.model.User.aggregate()
         .project(selectParam)
         .match({
@@ -412,6 +412,84 @@ class AppController extends BaseController {
     if (find) return this.success(res);
     return this.error('未找到');
   }
+
+  //混合搜索 医生 问题 资讯
+  async search() {
+    this.ctx.validate({
+      key: 'string',
+      last_id: {
+        type: 'string',
+        required: false,
+        allowEmpty: true
+      },
+      limit: {
+        type: 'number',
+        required: false
+      }
+    })
+    let param = this.ctx.request.body;
+    let user = this.ctx.state.user;
+    let opts = Object.assign(
+      {},
+      { last_id: 0, limit: 10, key: '' },
+      param
+    );
+    let res = '';
+    let oFindParam = {};
+    let findParam = {};
+    let type = '';
+    let last_id = '';
+    // 下拉加载
+    if (opts.last_id) oFindParam._id = { $gt: opts.last_id };
+    let finder = await this.ctx.model.User.findOne({ _id: user._id });
+    let finder_department = [];
+    finder.department.forEach(element => {
+      finder_department.push(element.key)
+    });
+    //首先搜索问题
+    findParam = Object.assign({}, oFindParam, {
+      'department.key': { $in: finder_department },//只能搜索跟自己相关的问题
+      $text: { $search: param.key }
+    })
+    res = await this.ctx.model.Qa.find(findParam)
+      .select('title illness_name department content answer meta').limit(opts.limit ? opts.limit | 0 : 10).exec();
+    type = "qa";
+    if (!res.length) {
+      //没有的话再搜索资讯
+      findParam = Object.assign({}, oFindParam, {
+        $or: [
+          { 'department.key': { $in: finder_department }, type: '2' },//只能搜索跟自己相关的资讯
+          { type: '1' },//或者文章是公开的
+        ],
+        $text: { $search: param.key },//根据索引搜索关键词
+      })
+      res = await this.ctx.model.Article.find(findParam).populate({ path: 'user_id', select: 'name avatar' })
+        .select('title author illness_name department pre_content illness_time illness_name images meta').limit(opts.limit ? opts.limit | 0 : 10).exec();
+      type = 'article'
+    }
+    if (!res.length) {
+      //没有的话再搜索医生
+      findParam = Object.assign({}, oFindParam, {
+        status: '2',
+        role: { $in: ['2'] }, //只能搜索医生和经理人
+        'department.key': { $in: finder_department }, //只能搜索跟自己相关的科室
+        $text: { $search: param.key }, //根据索引搜索关键词
+      })
+      res = await this.ctx.model.User.find(findParam)
+        .select('name avatar avatarUrl hospital title department description meta').limit(opts.limit ? opts.limit | 0 : 10).exec();
+      type = 'user'
+    }
+    if (!res.length) type = ''
+    if (res.length) {
+      last_id = res[res.length - 1]['_id'];
+    } else {
+      last_id = ''
+    }
+    // res = await this.ctx.model.Hospital.find(findParam).select('city label').limit(opts.limit ? opts.limit | 0 : 10).exec();
+    this.success({ list: res, type, last_id })
+  }
+
+
 
   //医生发送手机
   // async doctorSendSms() {

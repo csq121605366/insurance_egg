@@ -28,5 +28,7 @@ module.exports = app => {
     }
     next();
   });
+
+
   return mongoose.model("Department", DepartmentSchema);
 };

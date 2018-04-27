@@ -19,7 +19,8 @@ class ArticleController extends BaseController {
       title: "string",
       illness_name: {
         type: "string",
-        required: false
+        required: false,
+        allowEmpty: true,
       },
       illness_time: "string",
       sort: "string",
@@ -254,30 +255,81 @@ class ArticleController extends BaseController {
    * @param {*} status //文章状态(默认为2) 0全部 1未审核 2已审核 3已删除
    */
   async paging() {
-    let param = this.ctx.request.body;
-    let limit = param.limit || 10;
-    let sort = param.sort || "1";
-    let article_id = param.article_id || "";
-    let res = await this.service.article.paging({ limit, sort, article_id });
+    let reqParam = this.ctx.request.body;
+    let limit = reqParam.limit || 10;
+    let sort = reqParam.sort || "1";
+    let article_id = reqParam.article_id || "";
+    let opts = {
+      article_id: reqParam.article_id || 0,
+      limit: reqParam.limit || 10,
+      sort: reqParam.sort || 0,
+      type: ['1'],
+      status: ['2']
+    }
+    let res = await this.service.article.paging(opts);
     this.success(res);
   }
-
+  /**
+   * 实现分页功能
+   * @param {*} _id 文章id(如果不提供表示从头开始提供)
+   * @param {*} user_id 用户id
+   * @param {*} department_key 文章关联科室的key
+   * @param {*} limit 文章间隔(默认为10条)
+   * @param {*} sort //文章分类(默认为1)0全部 1日志 2手术记录 3科普文章
+   * @param {*} type  //文章展示模式 0全部 1公开 2仅好友查看 3私有
+   * @param {*} status //文章状态(默认为2) 0全部 1未审核 2已审核 3已删除
+   */
   async list() {
     this.ctx.validate({
       user_id: { type: "string", required: false },
       article_id: { type: "string", required: false, allowEmpty: true },
-      department_key: { type: "string", required: false, allowEmpty: true },
       limit: { type: "string", required: false, allowEmpty: true },
       sort: { type: "string", required: false, allowEmpty: true },
-      type: { type: "string", required: false, allowEmpty: true },
+      type: { type: "array", required: false, allowEmpty: true },
       status: { type: "array", required: false, allowEmpty: true }
     });
     let reqParam = this.ctx.request.body;
     let { _id } = this.ctx.state.user;
-    if (reqParam.user_id != _id) this.ctx.request.body.status = ["1", "2"];
-    let res = await this.service.article.paging(this.ctx.request.body);
+
+    let opts;
+    //首先 用户自己查找自己
+    if (_id == reqParam.user_id) {
+      opts = {
+        user_id: reqParam.user_id || 0,
+        article_id: reqParam.article_id || 0,
+        limit: reqParam.limit || 10,
+        sort: reqParam.sort || 0,
+        type: reqParam.type || ['1', '2', '3'],
+        status: reqParam.status || ['0', '1', "2"]
+      }
+    } else {
+      //非本人查找
+      //查找的用户
+      let finder = await this.ctx.model.User.findOne({ _id });
+      //查找的用户的科室列表
+      let finder_department = [];
+      finder.department.forEach(element => {
+        finder_department.push(element.key)
+      });
+      if (reqParam.user_id) {
+        //搜索该医生是否在相关科室
+        let doctor = await this.ctx.model.User.findOne({ _id: reqParam.user_id, 'department.key': { $in: finder_department } });
+        if (!doctor) return this.error('该医生不在您关注的科室');
+      }
+      opts = {
+        user_id: reqParam.user_id || 0,
+        article_id: reqParam.article_id || 0,
+        department_key: finder_department,
+        limit: reqParam.limit || 10,
+        sort: reqParam.sort || 0,
+        type: ['1', '2'],
+        status: ['2']
+      }
+    }
+    let res = await this.service.article.paging(opts);
     this.success(res);
   }
+
 
   /**
    * 获取文章所上传的素材
@@ -297,13 +349,13 @@ class ArticleController extends BaseController {
   }
 
   // 修改文章
-  async update() {}
+  async update() { }
 
   //删除文章(可批量删除)
-  async delete() {}
+  async delete() { }
 
   // 审核文章(可批量审核)
-  async audit() {}
+  async audit() { }
 }
 
 module.exports = ArticleController;

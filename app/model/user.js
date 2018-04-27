@@ -143,5 +143,17 @@ module.exports = app => {
     next();
   });
 
+  UserSchema.index({
+    name: 'text',
+    'department.label': 'text',
+    'hospital.label': 'text'
+  }, {
+      weights: {
+        name: 10,
+        'department.label': 9,
+        'hospital.label': 8
+      }
+    })
+
   return mongoose.model("User", UserSchema);
 };

@@ -2,7 +2,7 @@
  * 文章
  */
 
- module.exports = app => {
+module.exports = app => {
   const mongoose = app.mongoose;
   const Schema = mongoose.Schema;
   const ArticleSchema = new mongoose.Schema({
@@ -15,7 +15,7 @@
     looked: Array,//查看次数
     department: {
       label: String,
-      key: String
+      key: Number
     }, //科室
     status: {
       type: String,
@@ -68,5 +68,18 @@
     }
     next();
   });
+
+  ArticleSchema.index({
+    title: 'text',
+    illness_name: 'text',
+    content: 'text'
+  }, {  
+      weights: {
+        title: 10,
+        illness_name: 9,
+        content: 1
+      }
+    })
+
   return mongoose.model("Article", ArticleSchema);
 };

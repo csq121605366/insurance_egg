@@ -15,7 +15,6 @@ let whiteList = ["/login"];
 let wxList = [];
 router.beforeEach((to, from, next) => {
   NProgress.start();
-  console.log(location)
   if (!checkminiProgram()) {
     if (getToken()) {
       if (to.path === "/login" || wxList.indexOf(to.path) > -1) {

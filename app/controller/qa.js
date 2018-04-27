@@ -1,18 +1,15 @@
+"use strict";
 
-'use strict';
-
-const BaseController = require('./base');
+const BaseController = require("./base");
 
 class QaController extends BaseController {
-
-
   /**
    * 创建问题
    */
   async qaCreate() {
     this.ctx.validate({
       title: {
-        type: 'string',
+        type: "string",
         required: false
       },
       department: {
@@ -29,7 +26,7 @@ class QaController extends BaseController {
         required: false
       },
       images: {
-        type: 'array',
+        type: "array",
         required: false
       },
       content: "string"
@@ -58,19 +55,19 @@ class QaController extends BaseController {
     });
     try {
       await newOne.save();
-      return this.success()
+      return this.success();
     } catch (e) {
-      return this.error()
+      return this.error();
     }
   }
 
   async qaAnswer() {
     this.ctx.validate({
       qa_id: {
-        type: 'string'
+        type: "string"
       },
       images: {
-        type: 'array',
+        type: "array",
         required: false
       },
       content: "string"
@@ -104,33 +101,36 @@ class QaController extends BaseController {
       images: info.images
     };
     try {
-      await this.ctx.model.Qa.findOneAndUpdate({ _id: info.qa_id }, { $push: newOne }).exec();
-      return this.success()
+      await this.ctx.model.Qa.update(
+        { _id: info.qa_id },
+        { $push: { answer: newOne } }
+      ).exec();
+      return this.success();
     } catch (e) {
-      return this.error()
+      return this.error();
     }
   }
 
   async qaList() {
     this.ctx.validate({
       limit: {
-        type: 'string',
+        type: "string",
         required: false
       },
       user_id: {
-        type: 'string',
+        type: "string",
         required: false
       },
       last_id: {
-        type: 'string',
+        type: "string",
         required: false
       },
       key: {
-        type: 'string',
+        type: "string",
         required: false,
         allowEmpty: true
       }
-    })
+    });
     let { _id, role } = this.ctx.state.user;
     let { limit, user_id, last_id, key, type } = this.ctx.request.body;
     let { department } = await this.ctx.model.User.findOne({ _id });
@@ -139,19 +139,24 @@ class QaController extends BaseController {
     department.forEach(element => {
       departmentList.push(element.key);
     });
-    find = await this.service.qa.search({ limit, user_id, departmentList, last_id, key });
+    find = await this.service.qa.search({
+      limit,
+      user_id,
+      departmentList,
+      last_id,
+      key
+    });
     this.success(find);
   }
 
   async qaDetail() {
     this.ctx.validate({
-      qa_id: 'string'
+      qa_id: "string"
     });
     let { qa_id } = this.ctx.request.body;
-    let find = await this.ctx.model.Qa.findOne({ _id: qa_id }).populate({ path: 'qa_id', populate: { path: 'user_id', select: 'name hospital title avatar avatarUrl' } }).exec();
-    this.success(find)
+    let find = await this.ctx.model.Qa.findOne({ _id: qa_id });
+    this.success(find);
   }
-
 }
 
 module.exports = QaController;

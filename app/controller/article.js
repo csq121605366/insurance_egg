@@ -196,7 +196,6 @@ class ArticleController extends BaseController {
     }
   }
 
-
   /**
    * 获取文章内容
    */
@@ -207,7 +206,17 @@ class ArticleController extends BaseController {
     let { article_id } = this.ctx.request.body;
     let find = await this.ctx.model.Article.findOneAndUpdate(
       { _id: article_id },
-      { $addToSet: { looked: { user_id: user._id, avatar: user.avatar, avatarUrl: user.avatarUrl, name: user.name } } }, {
+      {
+        $addToSet: {
+          looked: {
+            user_id: user._id,
+            avatar: user.avatar,
+            avatarUrl: user.avatarUrl,
+            name: user.name
+          }
+        }
+      },
+      {
         fields: {
           title: 1,
           user_id: 1,
@@ -228,7 +237,8 @@ class ArticleController extends BaseController {
           videos: 1,
           meta: 1
         }
-      }).exec();
+      }
+    ).exec();
     if (!find) return this.error("未找到文章");
     return this.success(find);
   }
@@ -246,8 +256,8 @@ class ArticleController extends BaseController {
   async paging() {
     let param = this.ctx.request.body;
     let limit = param.limit || 10;
-    let sort = param.sort || '1';
-    let article_id = param.article_id || '';
+    let sort = param.sort || "1";
+    let article_id = param.article_id || "";
     let res = await this.service.article.paging({ limit, sort, article_id });
     this.success(res);
   }
@@ -264,7 +274,7 @@ class ArticleController extends BaseController {
     });
     let reqParam = this.ctx.request.body;
     let { _id } = this.ctx.state.user;
-    if (reqParam.user_id != _id) this.ctx.throw(401);
+    if (reqParam.user_id != _id) this.ctx.request.body.status = ["1", "2"];
     let res = await this.service.article.paging(this.ctx.request.body);
     this.success(res);
   }
@@ -287,13 +297,13 @@ class ArticleController extends BaseController {
   }
 
   // 修改文章
-  async update() { }
+  async update() {}
 
   //删除文章(可批量删除)
-  async delete() { }
+  async delete() {}
 
   // 审核文章(可批量审核)
-  async audit() { }
+  async audit() {}
 }
 
 module.exports = ArticleController;

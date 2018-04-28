@@ -20,7 +20,7 @@ class ArticleController extends BaseController {
       illness_name: {
         type: "string",
         required: false,
-        allowEmpty: true,
+        allowEmpty: true
       },
       illness_time: "string",
       sort: "string",
@@ -203,45 +203,69 @@ class ArticleController extends BaseController {
   async getDetail() {
     this.ctx.validate({ article_id: "string" });
     let { _id } = this.ctx.state.user;
-    let user = await this.ctx.model.User.findOne({ _id });
     let { article_id } = this.ctx.request.body;
-    let find = await this.ctx.model.Article.findOneAndUpdate(
-      { _id: article_id },
-      {
-        $addToSet: {
-          looked: {
-            user_id: user._id,
-            avatar: user.avatar,
-            avatarUrl: user.avatarUrl,
-            name: user.name
-          }
-        }
-      },
-      {
-        fields: {
-          title: 1,
-          user_id: 1,
-          illness_name: 1,
-          illness_time: 1,
-          author: 1,
-          looked: 1,
-          department: 1,
-          status: 1,
-          sort: 1,
-          type: 1,
-          content: 1,
-          pre_content: 1,
-          up: 1,
-          support: 1,
-          like: 1,
-          images: 1,
-          videos: 1,
-          meta: 1
+    //查找的用户
+    let finder = await this.ctx.model.User.findOne({ _id });
+    if (!finder) return this.error("未找到用户");
+    let res;
+    let selectParam = {
+      fields: {
+        title: 1,
+        user_id: 1,
+        illness_name: 1,
+        illness_time: 1,
+        author: 1,
+        looked: 1,
+        department: 1,
+        status: 1,
+        sort: 1,
+        type: 1,
+        content: 1,
+        pre_content: 1,
+        up: 1,
+        support: 1,
+        like: 1,
+        images: 1,
+        videos: 1,
+        meta: 1
+      }
+    };
+    let setParam = {
+      $addToSet: {
+        looked: {
+          user_id: finder._id,
+          avatar: finder.avatar,
+          avatarUrl: finder.avatarUrl,
+          name: finder.name
         }
       }
-    ).exec();
-    if (!find) return this.error("未找到文章");
-    return this.success(find);
+    };
+    if (finder.role == "0") {
+      res = await this.ctx.model.Article.findOneAndUpdate(
+        {
+          _id: article_id,
+          type: "1"
+        },
+        setParam,
+        selectParam
+      ).exec();
+    } else {
+      //查找的用户的科室列表
+      let finder_department = [];
+      finder.department.forEach(element => {
+        finder_department.push(element.key);
+      });
+      res = await this.ctx.model.Article.findOneAndUpdate(
+        {
+          _id: article_id,
+          "department.key": { $in: finder_department }
+        },
+        setParam,
+        selectParam
+      ).exec();
+    }
+    if (!res) return this.error("未找到文章");
+    return this.success(res);
   }
 
   /**
@@ -263,9 +287,9 @@ class ArticleController extends BaseController {
       article_id: reqParam.article_id || 0,
       limit: reqParam.limit || 10,
       sort: reqParam.sort || 0,
-      type: ['1'],
-      status: ['2']
-    }
+      type: ["1"],
+      status: ["2"]
+    };
     let res = await this.service.article.paging(opts);
     this.success(res);
   }
@@ -299,9 +323,9 @@ class ArticleController extends BaseController {
         article_id: reqParam.article_id || 0,
         limit: reqParam.limit || 10,
         sort: reqParam.sort || 0,
-        type: reqParam.type || ['1', '2', '3'],
-        status: reqParam.status || ['0', '1', "2"]
-      }
+        type: reqParam.type || ["1", "2", "3"],
+        status: reqParam.status || ["0", "1", "2"]
+      };
     } else {
       //非本人查找
       //查找的用户
@@ -309,27 +333,29 @@ class ArticleController extends BaseController {
       //查找的用户的科室列表
       let finder_department = [];
       finder.department.forEach(element => {
-        finder_department.push(element.key)
+        finder_department.push(element.key);
       });
-      if (reqParam.user_id) {
-        //搜索该医生是否在相关科室
-        let doctor = await this.ctx.model.User.findOne({ _id: reqParam.user_id, 'department.key': { $in: finder_department } });
-        if (!doctor) return this.error('该医生不在您关注的科室');
-      }
+      // if (reqParam.user_id) {
+      //   //搜索该医生是否在相关科室
+      //   let doctor = await this.ctx.model.User.findOne({
+      //     _id: reqParam.user_id,
+      //     "department.key": { $in: finder_department }
+      //   });
+      //   if (!doctor) return this.error("该医生不在您关注的科室");
+      // }
       opts = {
         user_id: reqParam.user_id || 0,
         article_id: reqParam.article_id || 0,
         department_key: finder_department,
         limit: reqParam.limit || 10,
         sort: reqParam.sort || 0,
-        type: ['1', '2'],
-        status: ['2']
-      }
+        type: ["1", "2"],
+        status: ["2"]
+      };
     }
     let res = await this.service.article.paging(opts);
     this.success(res);
   }
-
 
   /**
    * 获取文章所上传的素材
@@ -347,15 +373,6 @@ class ArticleController extends BaseController {
       content: find.content
     });
   }
-
-  // 修改文章
-  async update() { }
-
-  //删除文章(可批量删除)
-  async delete() { }
-
-  // 审核文章(可批量审核)
-  async audit() { }
 }
 
 module.exports = ArticleController;

@@ -44,7 +44,7 @@ class ArticleService extends BaseService {
     let tunlsort = { $sort: { _id: -1 } };
     if (opts.article_id) {
       // 匹配
-      let tunlmatch = { $match: { _id: { $gt: this.app.mongoose.Types.ObjectId(opts.article_id) } } };
+      let tunlmatch = { $match: { _id: { $lt: this.app.mongoose.Types.ObjectId(opts.article_id) } } };
       if (opts.department_key)
         tunlmatch.$match["department.key"] =  { $in: opts.department_key };
       if (opts.user_id) tunlmatch.$match.user_id = this.app.mongoose.Types.ObjectId(opts.user_id);

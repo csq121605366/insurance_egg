@@ -36,7 +36,7 @@ class AppController extends BaseController {
         try {
           await find.save();
         } catch (e) {
-          ctx.throw(403, );
+          ctx.throw(403);
         }
       }
     } else {
@@ -64,7 +64,7 @@ class AppController extends BaseController {
       try {
         await find.save();
       } catch (e) {
-        ctx.throw(403, );
+        ctx.throw(403);
       }
     }
     let token = await this.service.actionsToken.userToken(find);
@@ -121,6 +121,22 @@ class AppController extends BaseController {
     //查询医院
     if (user) return this.success(user);
     else this.error("未找到您的信息");
+  }
+  //经理人获取潜在客户
+  async getFriend() {
+    this.ctx.validate({
+      friend_id: "string"
+    });
+    let { friend_id } = this.ctx.request.body;
+    let { _id } = this.ctx.state.user;
+    let finder = await this.ctx.model.User.findOne({ _id });
+    if (!finder) this.ctx.throw(404, "未找到");
+    if (finder.role != "3") this.ctx.throw(401, "没有权限");
+    if (!finder.friend || !finder.friend.length)
+      this.ctx.throw(403, "没有找到潜在客户");
+    let res = finder.friend.find(item => item._id == friend_id);
+    if (!res) return this.error("未找到");
+    this.success(res);
   }
 
   async canUpdate() {
@@ -260,7 +276,7 @@ class AppController extends BaseController {
           max: 3,
           min: 1
         },
-        friends: {
+        friend: {
           type: "array",
           itemType: "object",
           required: false
@@ -269,7 +285,7 @@ class AppController extends BaseController {
       // 存储信息
       Object.assign(find, {
         agency: info.agency,
-        friends: info.friends,
+        friend: info.friend,
         department: info.department
       });
     }
@@ -361,34 +377,34 @@ class AppController extends BaseController {
         .match({
           status: "2",
           role: { $in: ["2", "3"] },
-          'department.key': { $in: department }
+          "department.key": { $in: department }
         })
-        .unwind('department')
+        .unwind("department")
         .match({
-          'department.key': { $in: department }
+          "department.key": { $in: department }
         })
         .exec();
     } else {
       let res1 = await this.ctx.model.User.aggregate()
         .project(selectParam)
         .match({
-          role: '1'
+          role: "1"
         })
-        .unwind('department')
+        .unwind("department")
         .match({
-          'department.key': { $in: department }
+          "department.key": { $in: department }
         })
         .exec();
-      console.log(department)
+      console.log(department);
       let res2 = await this.ctx.model.User.aggregate()
         .project(selectParam)
         .match({
-          status: '2', //医生和代理商需要激活
-          role: { $in: ['2', '3'] }
+          status: "2", //医生和代理商需要激活
+          role: { $in: ["2", "3"] }
         })
-        .unwind('department')
+        .unwind("department")
         .match({
-          'department.key': { $in: department }
+          "department.key": { $in: department }
         })
         .exec();
       res = [...res1, ...res2];
@@ -400,96 +416,105 @@ class AppController extends BaseController {
    */
   async userDetail() {
     this.ctx.validate({
-      user_id: 'string'
+      user_id: "string"
     });
     let { user_id } = this.ctx.request.body;
     let find = await this.ctx.model.User.findOne({ _id: user_id }).select(
       `name phone hospital department role title description gender avatarUrl avatar`
     );
     //文章筛选 已审核 公开和仅科室查看
-    let article = await this.ctx.model.Article.find({ user_id, status: '2', type: { $in: ['1', '2'] } }).exec();
+    let article = await this.ctx.model.Article.find({
+      user_id,
+      status: "2",
+      type: { $in: ["1", "2"] }
+    }).exec();
     let res = { userinfo: find, article };
     if (find) return this.success(res);
-    return this.error('未找到');
+    return this.error("未找到");
   }
 
   //混合搜索 医生 问题 资讯
   async search() {
     this.ctx.validate({
-      key: 'string',
+      key: "string",
       last_id: {
-        type: 'string',
+        type: "string",
         required: false,
         allowEmpty: true
       },
       limit: {
-        type: 'number',
+        type: "number",
         required: false
       }
-    })
+    });
     let param = this.ctx.request.body;
     let user = this.ctx.state.user;
-    let opts = Object.assign(
-      {},
-      { last_id: 0, limit: 10, key: '' },
-      param
-    );
-    let res = '';
+    let opts = Object.assign({}, { last_id: 0, limit: 10, key: "" }, param);
+    let res = "";
     let oFindParam = {};
     let findParam = {};
-    let type = '';
-    let last_id = '';
+    let type = "";
+    let last_id = "";
     // 下拉加载
     if (opts.last_id) oFindParam._id = { $gt: opts.last_id };
     let finder = await this.ctx.model.User.findOne({ _id: user._id });
     let finder_department = [];
     finder.department.forEach(element => {
-      finder_department.push(element.key)
+      finder_department.push(element.key);
     });
     //首先搜索问题
     findParam = Object.assign({}, oFindParam, {
-      'department.key': { $in: finder_department },//只能搜索跟自己相关的问题
+      "department.key": { $in: finder_department }, //只能搜索跟自己相关的问题
       $text: { $search: param.key }
-    })
+    });
     res = await this.ctx.model.Qa.find(findParam)
-      .select('title illness_name department content answer meta').limit(opts.limit ? opts.limit | 0 : 10).exec();
+      .select("title illness_name department content answer meta")
+      .limit(opts.limit ? opts.limit | 0 : 10)
+      .exec();
     type = "qa";
     if (!res.length) {
       //没有的话再搜索资讯
       findParam = Object.assign({}, oFindParam, {
         $or: [
-          { 'department.key': { $in: finder_department }, type: '2' },//只能搜索跟自己相关的资讯
-          { type: '1' },//或者文章是公开的
+          { "department.key": { $in: finder_department }, type: "2" }, //只能搜索跟自己相关的资讯
+          { type: "1" } //或者文章是公开的
         ],
-        $text: { $search: param.key },//根据索引搜索关键词
-      })
-      res = await this.ctx.model.Article.find(findParam).populate({ path: 'user_id', select: 'name avatar' })
-        .select('title author illness_name department pre_content illness_time illness_name images meta').limit(opts.limit ? opts.limit | 0 : 10).exec();
-      type = 'article'
+        $text: { $search: param.key } //根据索引搜索关键词
+      });
+      res = await this.ctx.model.Article.find(findParam)
+        .populate({ path: "user_id", select: "name avatar" })
+        .select(
+          "title author illness_name department pre_content illness_time illness_name images meta"
+        )
+        .limit(opts.limit ? opts.limit | 0 : 10)
+        .exec();
+      type = "article";
     }
     if (!res.length) {
       //没有的话再搜索医生
       findParam = Object.assign({}, oFindParam, {
-        status: '2',
-        role: { $in: ['2'] }, //只能搜索医生和经理人
-        'department.key': { $in: finder_department }, //只能搜索跟自己相关的科室
-        $text: { $search: param.key }, //根据索引搜索关键词
-      })
+        status: "2",
+        role: { $in: ["2"] }, //只能搜索医生和经理人
+        "department.key": { $in: finder_department }, //只能搜索跟自己相关的科室
+        $text: { $search: param.key } //根据索引搜索关键词
+      });
       res = await this.ctx.model.User.find(findParam)
-        .select('name avatar avatarUrl hospital title department description meta').limit(opts.limit ? opts.limit | 0 : 10).exec();
-      type = 'user'
+        .select(
+          "name avatar avatarUrl hospital title department description meta"
+        )
+        .limit(opts.limit ? opts.limit | 0 : 10)
+        .exec();
+      type = "user";
     }
-    if (!res.length) type = ''
+    if (!res.length) type = "";
     if (res.length) {
-      last_id = res[res.length - 1]['_id'];
+      last_id = res[res.length - 1]["_id"];
     } else {
-      last_id = ''
+      last_id = "";
     }
     // res = await this.ctx.model.Hospital.find(findParam).select('city label').limit(opts.limit ? opts.limit | 0 : 10).exec();
-    this.success({ list: res, type, last_id })
+    this.success({ list: res, type, last_id });
   }
-
-
 
   //医生发送手机
   // async doctorSendSms() {

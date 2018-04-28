@@ -99,7 +99,7 @@ class QaController extends BaseController {
       avatarUrl: find.avatarUrl,
       content: info.content,
       images: info.images,
-      type: '1'
+      type: "1"
     };
     try {
       await this.ctx.model.Qa.update(
@@ -111,7 +111,6 @@ class QaController extends BaseController {
       return this.error();
     }
   }
-
 
   async qaSearch() {
     this.ctx.validate({
@@ -125,7 +124,7 @@ class QaController extends BaseController {
       },
       key: {
         type: "string",
-        required: false,
+        required: false
       }
     });
     let { _id, role } = this.ctx.state.user;
@@ -136,47 +135,58 @@ class QaController extends BaseController {
     if (user_id) {
       this.ctx.validate({
         user_id: "string"
-      })
+      });
       //如果指定user_id则表示 只查该用户问答
       //验证用户权限
-      if (user_id != finder._id) this.ctx.throw(401, '没有权限');
-      if (last_id) oFindParam._id = { $gt: last_id };
+      if (user_id != finder._id) this.ctx.throw(401, "没有权限");
+      if (last_id) oFindParam._id = { $lt: last_id };
       //如果为医生和经理人则查找回答
-      if (finder.role == '2' || finder.role == '3') {
+      if (finder.role == "2" || finder.role == "3") {
         let findParam = Object.assign({}, oFindParam, {
-          'answer.user_id': { $in: [finder._id] }
-        })
+          "answer.user_id": { $in: [finder._id] }
+        });
         if (key) {
           //如果存在搜索则加上筛选
           Object.assign(findParam, { $text: { $search: key } });
         }
-        res = await this.ctx.model.Qa.find(findParam).select('title illness_name department answer_count content meta').limit(limit ? limit | 0 : 10).exec();
+        res = await this.ctx.model.Qa.find(findParam)
+          .select("title illness_name department answer_count content meta")
+          .limit(limit ? limit | 0 : 10)
+          .sort({ _id: -1 })
+          .exec();
       } else {
         let findParam = Object.assign({}, oFindParam, {
-          'user_id': finder._id
-        })
+          user_id: finder._id
+        });
         if (key) {
           //如果存在搜索则加上筛选
           Object.assign(findParam, { $text: { $search: key } });
         }
-        res = await this.ctx.model.Qa.find(findParam).select('title illness_name department answer_count content meta').limit(limit ? limit | 0 : 10).exec();
+        res = await this.ctx.model.Qa.find(findParam)
+          .select("title illness_name department answer_count content meta")
+          .limit(limit ? limit | 0 : 10)
+          .sort({ _id: -1 })
+          .exec();
       }
     } else {
       let departmentList = [];
       finder.department.forEach(element => {
         departmentList.push(element.key);
       });
-      if (last_id) oFindParam._id = { $gt: last_id };
+      if (last_id) oFindParam._id = { $lt: last_id };
       //首先搜索问题
       let findParam = Object.assign({}, oFindParam, {
-        'department.key': { $in: departmentList },//只能搜索跟自己相关的问题
-      })
+        "department.key": { $in: departmentList } //只能搜索跟自己相关的问题
+      });
       if (key) {
         //如果存在搜索则加上筛选
         Object.assign(findParam, { $text: { $search: key } });
       }
       res = await this.ctx.model.Qa.find(findParam)
-        .select('title illness_name department answer_count content meta').limit(limit ? limit | 0 : 10).exec();
+        .select("title illness_name department answer_count content meta")
+        .limit(limit ? limit | 0 : 10)
+        .sort({ _id: -1 })
+        .exec();
     }
     this.success(res);
   }
@@ -190,7 +200,23 @@ class QaController extends BaseController {
     this.success(find);
   }
 
+  async qaHot() {
+    let { role, _id } = this.ctx.state.user;
+    let finder = await this.ctx.model.User.findOne({ _id }).exec();
+    let departmentList = [];
+    finder.department.forEach(element => {
+      departmentList.push(element.key);
+    });
+    let findParam = {
+      "department.key": { $in: departmentList }
+    };
 
+    let res = await this.ctx.model.Qa.find(findParam)
+      .select("title illness_name department answer_count content meta")
+      .sort({ _id: -1 })
+      .exec();
+    this.success(res);
+  }
 }
 
 module.exports = QaController;

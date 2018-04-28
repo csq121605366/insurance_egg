@@ -4,16 +4,24 @@ module.exports = app => {
   router.post("/api/app/login", "app.getToken"); // 用户登录和注册
 
   router.get("/api/app/getuserinfo", app.jwt, "app.getuserinfo"); //获取用户信息
+
+  
+
   router.post("/api/app/updatebaseInfo", app.jwt, "app.updatebaseInfo"); //用户授权获取基本信息
 
+  router.post("/api/app/friend/get", app.jwt, "app.getFriend"); //经理人获取潜在用户
   router.get("/api/app/canupdate", app.jwt, "app.canUpdate"); // 用户信息完善更新
   router.post("/api/app/update", app.jwt, "app.update"); // 用户信息完善更新
 
   //获取科室列表
-  router.post("/api/app/user/department", app.jwt, auth, "app.userListBydepartment"); // 获取科室成员列表
+  router.post(
+    "/api/app/user/department",
+    app.jwt,
+    auth,
+    "app.userListBydepartment"
+  ); // 获取科室成员列表
   //获取用户详细资料
   router.post("/api/app/user/detail", app.jwt, auth, "app.userDetail"); // 获取用户详细信息
-
 
   router.get("/api/app/titlelist", "app.titleList"); // 获取职称列表
   // last_id: 0, limit: 10,key:''
@@ -25,23 +33,33 @@ module.exports = app => {
   //_id(主科室id)
   router.get("/api/app/department/vice", "department.departmentVice"); // 获取次科室列表
 
-
-
   //目前不用
   router.post("/api/app/wxuserinfo", app.jwt, auth, "app.wxGetUserInfo"); // getUserInfo信息解密
+  
 
   //创建文章
-  router.post("/api/app/article/createandupdate", app.jwt, auth, "article.createAndUpdate");
+  router.post(
+    "/api/app/article/createandupdate",
+    app.jwt,
+    auth,
+    "article.createAndUpdate"
+  );
   //获取单个文章内容 article_id(文章id)
-  router.post("/api/app/article/getdetail", app.jwt, auth, "article.getDetail");
+  router.post("/api/app/article/getdetail", app.jwt, "article.getDetail");
   //获取新建文章的资源列表 article_id(文章id)
   router.post(
     "/api/app/article/getArticleAssets",
-    app.jwt, auth,
+    app.jwt,
+    auth,
     "article.getArticleAssets"
   );
   //增加主文 article_id(文章id)
-  router.post("/api/app/article/addcontent", app.jwt, auth, "article.addContent");
+  router.post(
+    "/api/app/article/addcontent",
+    app.jwt,
+    auth,
+    "article.addContent"
+  );
   //发表 article_id(文章id)
   router.post("/api/app/article/publish", app.jwt, auth, "article.publish");
 
@@ -63,12 +81,14 @@ module.exports = app => {
   //提问问题
   router.post("/api/app/qa/create", app.jwt, auth, "qa.qaCreate");
   //回答问题
-  router.post('/api/app/qa/answer', app.jwt, auth, 'qa.qaAnswer');
+  router.post("/api/app/qa/answer", app.jwt, auth, "qa.qaAnswer");
   //问题列表 user_id相关用户_id limit(限制返回几个) last_id(最后一个_id)
   router.post("/api/app/qa/search", app.jwt, auth, "qa.qaSearch");
   //问题详情
   router.post("/api/app/qa/detail", app.jwt, auth, "qa.qaDetail");
+  //热门搜索
+  router.post("/api/app/qa/hot", app.jwt, "qa.qaHot");
 
   //混合搜索
-  router.post('/api/app/search', app.jwt, auth, "app.search");
+  router.post("/api/app/search", app.jwt, auth, "app.search");
 };

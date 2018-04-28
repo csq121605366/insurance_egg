@@ -257,8 +257,7 @@ class ArticleController extends BaseController {
       });
       res = await this.ctx.model.Article.findOneAndUpdate(
         {
-          _id: article_id,
-          "department.key": { $in: finder_department }
+          _id: article_id
         },
         setParam,
         selectParam

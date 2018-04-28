@@ -6,6 +6,8 @@ const getters = {
   genderList: state => state.app.genderList,
   sortList: state => state.app.sortList,
   authType: state => state.app.authType,
+  roleList: state => state.app.roleList,
+
   token: state => state.user.token,
   avatar: state => state.user.avatar,
   name: state => state.user.name,

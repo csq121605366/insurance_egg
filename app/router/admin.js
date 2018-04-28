@@ -20,7 +20,10 @@ module.exports = app => {
   // 关于用户
   router.post("/api/admin/user/list", app.jwt, auth, "admin.geUserList"); // 获取用户列表
   router.post("/api/admin/user/audit", app.jwt, auth, "admin.auditUser"); // 审核用户
-
+  //参数: key 副科室的key值
+  router.post('/api/admin/user/listbydetail', app.jwt, auth, 'admin.userListByDepartment');//管理员根据科室获取用户列表
+  //参数 _id用户_id
+  router.post('/api/admin/user/detail', app.jwt, auth, 'admin.userDetailByDepartment');//管理员根据_id获取用户详情
 
 
   router.post("/api/admin/upload", app.jwt, controller.admin.uploadByStream);

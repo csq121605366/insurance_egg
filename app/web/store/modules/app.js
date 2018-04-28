@@ -38,7 +38,8 @@ const app = {
     qiniuTicket: "",
     statusList: { '1': '待审核', '2': '已审核' },
     sortList: { "1": '日志', "2": '手术记录', "3": '科普文章' },
-    genderList:{0:'未知',1:'男性',2:'女性'},//0代表未知 1代表男性 2代表女性
+    genderList: { '0': '未知', '1': '男性', '2': '女性' },//0代表未知 1代表男性 2代表女性
+    roleList: { '1': '用户', '2': '医生', '3': '经理人' },
   },
   mutations: {
     TOGGLE_SIDEBAR: state => {

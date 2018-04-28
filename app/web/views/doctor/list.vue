@@ -16,6 +16,11 @@
           </el-table-column>
           <el-table-column prop="title" label="职称" width="120">
           </el-table-column>
+          <el-table-column label="科室" width="120">
+            <template v-if="scope.row.department" slot-scope="scope">
+              <el-tag v-for="(item,index) in scope.row.department" :key="index">{{item.label}}</el-tag>
+            </template>
+          </el-table-column>
           <el-table-column prop="description" label="个人简介">
           </el-table-column>
           <el-table-column label="医师资格证" width="320">
@@ -33,9 +38,10 @@
               <el-tag type="danger">{{statusList[scope.row.status]}}</el-tag>
             </template>
           </el-table-column> -->
-          <el-table-column v-if="role=='9'" label="操作" width="100">
+          <el-table-column v-if="role=='9'" label="操作" width="160">
             <template slot-scope="scope">
-              <el-button @click="handleClick(scope.row)" type="primary" size="small">审核</el-button>
+              <el-button @click="auditSuccess(scope.row)" type="primary" size="small">通过</el-button>
+              <el-button @click="auditError(scope.row)" type="danger" size="small">不通过</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -58,6 +64,11 @@
             </template>
           </el-table-column>
           <el-table-column prop="hospital.label" label="就职医院" width="220">
+          </el-table-column>
+          <el-table-column label="科室" width="120">
+            <template v-if="scope.row.department" slot-scope="scope">
+              <el-tag v-for="(item,index) in scope.row.department" :key="index">{{item.label}}</el-tag>
+            </template>
           </el-table-column>
           <el-table-column prop="title" label="职称" width="120">
           </el-table-column>
@@ -168,7 +179,7 @@ export default {
       this.default = item;
       this.getData();
     },
-    handleClick(item) {
+   auditSuccess(item) {
       let user_id = item._id;
       console.log(user_id);
       this.$confirm("确认审核通过?", "提示", {
@@ -176,7 +187,25 @@ export default {
         cancelButtonText: "取消",
         type: "warning"
       }).then(() => {
-        userAudit({ user_id }).then(res => {
+        userAudit({ user_id, status: "2" }).then(res => {
+          if (res.success) {
+            this.$message.success(res.message);
+            this.getData();
+          } else {
+            this.$message.error(res.message);
+          }
+        });
+      });
+    },
+    auditError(item) {
+      let user_id = item._id;
+      console.log(user_id);
+      this.$confirm("确认审核不通过?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      }).then(() => {
+        userAudit({ user_id, status: "3" }).then(res => {
           if (res.success) {
             this.$message.success(res.message);
             this.getData();

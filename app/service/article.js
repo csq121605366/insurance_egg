@@ -58,7 +58,7 @@ class ArticleService extends BaseService {
           tunllimit,
           tunlsort
         ]).exec();
-        let res = await this.ctx.model.User.populate(doc, { path: 'user_id', select: 'name avatar' });
+        let res = await this.ctx.model.User.populate(doc, { path: 'user_id', select: 'name avatar avatarUrl' });
         return res;
       } catch (e) {
         throw new Error();
@@ -78,7 +78,7 @@ class ArticleService extends BaseService {
           tunllimit,
           tunlsort
         ]).exec();
-        let res = await this.ctx.model.User.populate(doc, { path: 'user_id', select: 'name avatar' });
+        let res = await this.ctx.model.User.populate(doc, { path: 'user_id', select: 'name avatar avatarUrl' });
         return res;
       } catch (e) {
         throw new Error();

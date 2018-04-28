@@ -204,8 +204,6 @@ class Admin extends BaseController {
 
 
 
-
-
   async uploadByStream() {
     const { ctx } = this;
     return this.success(ctx.state.user);
@@ -244,7 +242,10 @@ class Admin extends BaseController {
         phone: 1,
         gender: 1,
         hospital: 1,
+        friend: 1,
+        agency: 1,
         title: 1,
+        department: 1,
         description: 1,
         certificate: 1,
         meta: 1,
@@ -256,26 +257,25 @@ class Admin extends BaseController {
       let amount = await this.ctx.model.User.find({ role: role, status: status }).count().exec();
       this.success({ list: find, amount, currentPage: currentPage | 0 });
     } catch (e) {
-      ctx.throw(500, '服务器错误')
+      this.ctx.throw(500, '服务器错误')
     }
   }
 
 
   //审核用户
   async auditUser() {
-    this.ctx.validate({ user_id: "string" });
+    this.ctx.validate({ user_id: "string", status: { type: 'enum', values: ['2', '3'] } });
     let { role } = this.ctx.state.user;
-    let { user_id } = this.ctx.request.body;
-    console.log(role)
+    let { user_id, status } = this.ctx.request.body;
     if (role != '2' && role != '9') return this.error("只有管理员可以审核!");
     // 将已锁定和未激活的用户激活
     let find = await this.ctx.model.User.findOne({
       _id: user_id,
-      status: { $in: ['1', '3'] }
+      status: '1'
     }).exec();
     if (!find) return this.error("未找到该用户,或该用户已被删除");
     // 激活用户账户
-    find.status = '2';
+    find.status = status;
     try {
       await find.save();
       return this.success();
@@ -284,6 +284,43 @@ class Admin extends BaseController {
     }
   }
 
+
+  async userListByDepartment() {
+    this.ctx.validate({ key: 'number' })
+    let { key } = this.ctx.request.body;
+    // 角色搜索
+    let selectParam = {
+      _id: 1,
+      name: 1,
+      role: 1,
+    };
+    let find = await this.ctx.model.User.aggregate()
+      .match({
+        $or: [
+          { 'role': '1', status: { $in: ['1', '2'] } },
+          { 'role': { $in: ['2', '3'] }, status: '2' }
+        ],
+        'department.key': key
+      })
+      .project(selectParam)
+      .group({ _id: { role: '$role' }, item: { $addToSet: { name: '$name', user_id: '$_id' } } })
+      .sort({ '_id.role': -1 })
+      .exec();
+    this.success(find);
+  }
+
+  async userDetailByDepartment() {
+    this.ctx.validate({ user_id: 'string' });
+    let { user_id } = this.ctx.request.body;
+    let selectParam = {
+      sms_code: -1,
+      session_key: -1,
+      password: -1,
+      openid: -1
+    };
+    let find = await this.ctx.model.User.findOne({ _id: user_id });
+    this.success(find);
+  }
 
 
 

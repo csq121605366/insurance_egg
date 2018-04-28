@@ -3,38 +3,36 @@
     <el-tabs @tab-click="tabClick" activeName="uncheckedData" class="tabs" type="border-card">
       <el-tab-pane name="uncheckedData" label="待审核">
         <el-table :data="uncheckedData.list" ref="uncheckedData" key="uncheckedData" border max-height="720">
-          <el-table-column prop="name" label="姓名" width="120">
+          <el-table-column prop="name" label="姓名">
           </el-table-column>
-          <el-table-column label="性别" width="60">
+          <el-table-column prop="phone" label="手机号">
+          </el-table-column>
+          <el-table-column label="性别">
             <template slot-scope="scope">
               {{genderList[scope.row.gender]}}
             </template>
           </el-table-column>
-          <el-table-column prop="hospital.label" label="就职医院" width="220">
-          </el-table-column>
-          <el-table-column prop="title" label="职称" width="120">
-          </el-table-column>
-          <el-table-column prop="description" label="个人简介">
-          </el-table-column>
-          <el-table-column label="医师资格证" width="320">
-            <template v-if="scope.row.certificate" slot-scope="scope">
-              <img v-for="(item,index) in scope.row.certificate" class="img" @click.self="pickviewHandle(item.imageURL)" :key="index" :src="item.imageURL" alt="">
+          <el-table-column label="关联科室">
+            <template v-if="scope.row.department" slot-scope="scope">
+              <el-tag v-for="(item,index) in scope.row.department" :key="index">{{item.label}}</el-tag>
             </template>
           </el-table-column>
-          <el-table-column prop="" label="提交时间" width="140">
+          <el-table-column label="代理医生">
+            <template v-if="scope.row.agency" slot-scope="scope">
+              <div v-for="(item,index) in scope.row.agency" :key="index">
+                <el-tag>{{item.department.label}} ：{{item.name.split(' ')}}</el-tag>
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column prop="" label="提交时间">
             <template slot-scope="scope">
               {{dayjs(scope.row.audit_create).format("YYYY MM-DD HH:mm")}}
             </template>
           </el-table-column>
-          <!-- <el-table-column label="审核状态" width="120">
+          <el-table-column label="操作">
             <template slot-scope="scope">
-              <el-tag type="danger">{{statusList[scope.row.status]}}</el-tag>
-            </template>
-          </el-table-column> -->
-          <el-table-column label="操作" width="100">
-            <template slot-scope="scope">
-              <el-button @click="handleClick(scope.row)" type="text" size="small">查看</el-button>
-              <el-button type="text" size="small">编辑</el-button>
+              <el-button @click="auditSuccess(scope.row)" type="primary" size="small">通过</el-button>
+              <el-button @click="auditError(scope.row)" type="danger" size="small">不通过</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -47,30 +45,33 @@
       </el-tab-pane>
       <el-tab-pane name="checkedData" label="已审核">
         <el-table :data="checkedData.list" ref="checkedData" key="checkedData" border max-height="720">
-          <el-table-column prop="name" label="姓名" width="120">
+          <el-table-column prop="name" label="姓名">
           </el-table-column>
-          <el-table-column label="性别" width="60">
+          <el-table-column prop="phone" label="手机号">
+          </el-table-column>
+          <el-table-column label="性别">
             <template slot-scope="scope">
               {{genderList[scope.row.gender]}}
             </template>
           </el-table-column>
-          <el-table-column prop="hospital.label" label="就职医院" width="220">
-          </el-table-column>
-          <el-table-column prop="title" label="职称" width="120">
-          </el-table-column>
-          <el-table-column prop="description" label="个人简介">
-          </el-table-column>
-          <el-table-column label="医师资格证" width="320">
-            <template v-if="scope.row.certificate" slot-scope="scope">
-              <img v-for="(item,index) in scope.row.certificate" class="img" @click.self="pickviewHandle(item.imageURL)" :key="index" :src="item.imageURL" alt="">
+          <el-table-column label="关联科室">
+            <template v-if="scope.row.department" slot-scope="scope">
+              <el-tag v-for="(item,index) in scope.row.department" :key="index">{{item.label}}</el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="提交时间" width="140">
+          <el-table-column label="代理医生">
+            <template v-if="scope.row.agency" slot-scope="scope">
+              <div v-for="(item,index) in scope.row.agency" :key="index">
+                <el-tag>{{item.department.label}} ：{{item.name.split(' ')}}</el-tag>
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column label="提交时间">
             <template slot-scope="scope">
               {{dayjs(scope.row.audit_create).format("YYYY MM-DD HH:mm")}}
             </template>
           </el-table-column>
-          <el-table-column label="审核时间" width="140">
+          <el-table-column label="审核时间">
             <template slot-scope="scope">
               {{dayjs(scope.row.audit_end).format("YYYY MM-DD HH:mm")}}
             </template>
@@ -90,7 +91,7 @@
 </template>
 
 <script>
-import { userList } from "@/api/app";
+import { userList, userAudit } from "@/api/app";
 import { mapGetters } from "vuex";
 import dayjs from "dayjs";
 
@@ -164,6 +165,42 @@ export default {
       this[item].currentPage = e;
       this.default = item;
       this.getData();
+    },
+    auditSuccess(item) {
+      let user_id = item._id;
+      console.log(user_id);
+      this.$confirm("确认审核通过?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      }).then(() => {
+        userAudit({ user_id, status: "2" }).then(res => {
+          if (res.success) {
+            this.$message.success(res.message);
+            this.getData();
+          } else {
+            this.$message.error(res.message);
+          }
+        });
+      });
+    },
+    auditError(item) {
+      let user_id = item._id;
+      console.log(user_id);
+      this.$confirm("确认审核不通过?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      }).then(() => {
+        userAudit({ user_id, status: "3" }).then(res => {
+          if (res.success) {
+            this.$message.success(res.message);
+            this.getData();
+          } else {
+            this.$message.error(res.message);
+          }
+        });
+      });
     }
   }
 };

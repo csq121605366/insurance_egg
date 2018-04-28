@@ -27,9 +27,9 @@ class AppController extends BaseController {
     let find = await this.service.app.findUserByOpenId(openid);
     // 如果用户已经存在
     if (find) {
-      if (find.status == 3) return this.error("该用户已被锁定");
+      if (find.status == '3') return this.error("您的帐号审核未通过");
       //如果用户已经完善信息(不是游客)并且已经激活(已审核) 未完善的用户不发放token
-      if (find.role !== 0 && find.status == 2) {
+      if (find.role !== '0' && find.status == '2') {
         //更新session_key
         find.session_key = session_key;
         // 保存
@@ -131,13 +131,24 @@ class AppController extends BaseController {
     let { _id } = this.ctx.state.user;
     let finder = await this.ctx.model.User.findOne({ _id });
     if (!finder) this.ctx.throw(404, "未找到");
-    if (finder.role != "3") this.ctx.throw(401, "没有权限");
+    if (finder.role != "3") this.ctx.throw(400, "没有权限");
     if (!finder.friend || !finder.friend.length)
-      this.ctx.throw(403, "没有找到潜在客户");
+      this.ctx.throw(404, "没有找到潜在客户");
     let res = finder.friend.find(item => item._id == friend_id);
     if (!res) return this.error("未找到");
     this.success(res);
   }
+
+  async getAgency() {
+    let { _id } = this.ctx.state.user;
+    let finder = await this.ctx.model.User.findOne({ _id });
+    if (!finder) this.ctx.throw(404, "未找到");
+    if (finder.role != "3") this.ctx.throw(400, "没有权限");
+    if (!finder.friend || !finder.friend.length)
+      this.ctx.throw(404, "没有找到潜在客户");
+    this.success(finder.agency);
+  }
+
 
   async canUpdate() {
     let oInfo = this.ctx.state.user;
@@ -148,6 +159,14 @@ class AppController extends BaseController {
     if (find.role != "0" && find.status == "1")
       return this.error("账号审核中...");
     else return this.success();
+  }
+
+  async updateLocaltion() {
+    this.ctx.validate({ localtion: { type: 'object', required: false } })
+    let { _id } = this.ctx.state.user;
+    let { localtion } = this.ctx.request.body;
+    await this.ctx.model.User.update({ _id }, { $addToSet: { localtion } }).exec();
+    this.success()
   }
 
   async update() {
@@ -176,13 +195,13 @@ class AppController extends BaseController {
     let find = await this.ctx.model.User.findOne({ _id: oInfo._id }).exec();
     if (!find) return this.error("未找到帐号");
     // 如果role角色不为0表示非游客 账号状态1未激活
-    if (find.role != "0" && find.status == "1")
+    if ((find.role == '2' || find.role == '3') && find.status == "1")
       return this.error("账号审核中...");
     // 检验验证码
     let canBind = await this.service.sms.validate(info.phone, 71356, info.code);
     if (!canBind) return this.error("验证码不正确或者已失效");
     // 转移头像资源地址
-    if (info.avatar.key) {
+    if (info.avatar && info.avatar.key) {
       await this.service.qiniu
         .removeImage([info.avatar])
         .then(res => {
@@ -297,7 +316,7 @@ class AppController extends BaseController {
       idcard: info.idcard,
       gender: info.gender,
       avatar: info.avatar,
-
+      status: '1',
       audit_create: new Date()
     });
     await find.save();
@@ -350,17 +369,16 @@ class AppController extends BaseController {
 
   // 获取科室人员列表
   async userListBydepartment() {
-    let { role, status } = this.ctx.state.user;
-    this.ctx.validate({
-      department: {
-        type: "array",
-        required: true
-      }
+    let { role, status, _id } = this.ctx.state.user;
+    let finder = await this.ctx.model.User.findOne({ _id });
+    let department = [];
+    finder.department.forEach(element => {
+      department.push(element.key);
     });
-    let { department } = this.ctx.request.body;
     let res = { user: [], doctor: [], agent: [] };
     // 角色搜索
     let selectParam = {
+      _id: 1,
       name: 1,
       role: 1,
       status: 1,
@@ -392,10 +410,10 @@ class AppController extends BaseController {
         })
         .unwind("department")
         .match({
+          _id: { $ne: this.app.mongoose.Types.ObjectId(_id) },
           "department.key": { $in: department }
         })
         .exec();
-      console.log(department);
       let res2 = await this.ctx.model.User.aggregate()
         .project(selectParam)
         .match({
@@ -404,6 +422,7 @@ class AppController extends BaseController {
         })
         .unwind("department")
         .match({
+          _id: { $ne: this.app.mongoose.Types.ObjectId(_id) },
           "department.key": { $in: department }
         })
         .exec();
@@ -427,7 +446,7 @@ class AppController extends BaseController {
       user_id,
       status: "2",
       type: { $in: ["1", "2"] }
-    }).exec();
+    }).select("title pre_content illness_time illness_name status author department").exec();
     let res = { userinfo: find, article };
     if (find) return this.success(res);
     return this.error("未找到");

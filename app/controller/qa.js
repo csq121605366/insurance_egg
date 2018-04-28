@@ -130,6 +130,7 @@ class QaController extends BaseController {
     let { _id, role } = this.ctx.state.user;
     let { limit, user_id, last_id, key } = this.ctx.request.body;
     let finder = await this.ctx.model.User.findOne({ _id });
+    if (!finder) return this.error('未找到用户')
     let res;
     let oFindParam = {};
     if (user_id) {

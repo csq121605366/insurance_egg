@@ -5,13 +5,15 @@ module.exports = app => {
 
   router.get("/api/app/getuserinfo", app.jwt, "app.getuserinfo"); //获取用户信息
 
-  
+
 
   router.post("/api/app/updatebaseInfo", app.jwt, "app.updatebaseInfo"); //用户授权获取基本信息
 
   router.post("/api/app/friend/get", app.jwt, "app.getFriend"); //经理人获取潜在用户
+  router.get("/api/app/agency/get", app.jwt, "app.getAgency"); //经理人获取代理医生
   router.get("/api/app/canupdate", app.jwt, "app.canUpdate"); // 用户信息完善更新
   router.post("/api/app/update", app.jwt, "app.update"); // 用户信息完善更新
+  router.post("/api/app/updatelocaltion", app.jwt, "app.updateLocaltion"); // 增加用户地址信息
 
   //获取科室列表
   router.post(
@@ -22,6 +24,8 @@ module.exports = app => {
   ); // 获取科室成员列表
   //获取用户详细资料
   router.post("/api/app/user/detail", app.jwt, auth, "app.userDetail"); // 获取用户详细信息
+
+
 
   router.get("/api/app/titlelist", "app.titleList"); // 获取职称列表
   // last_id: 0, limit: 10,key:''
@@ -35,7 +39,7 @@ module.exports = app => {
 
   //目前不用
   router.post("/api/app/wxuserinfo", app.jwt, auth, "app.wxGetUserInfo"); // getUserInfo信息解密
-  
+
 
   //创建文章
   router.post(
@@ -76,7 +80,7 @@ module.exports = app => {
   // 游客进入首页的分页
   router.post("/api/app/article/paging", "article.paging");
   // 用户文章分页
-  router.post("/api/app/article/list", app.jwt, auth, "article.list");
+  router.post("/api/app/article/list", app.jwt, "article.list");
 
   //提问问题
   router.post("/api/app/qa/create", app.jwt, auth, "qa.qaCreate");

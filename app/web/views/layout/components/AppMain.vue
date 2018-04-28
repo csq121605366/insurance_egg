@@ -17,3 +17,9 @@ export default {
   }
 }
 </script>
+<style lang="scss">
+.app-main{
+  position: relative;
+}
+</style>
+

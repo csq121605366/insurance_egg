@@ -32,24 +32,13 @@ module.exports = app => {
       enum: config.USER_ROLE_STATUS,
       enum: config.USER_ROLE_STATUS,
       default: config.USER_ROLE_STATUS[1]
-    }, // 用户账号状态 0保留 1未激活 2已激活 3已锁定(也叫审核未通过) 9已删除
+    }, // 用户账号状态 0保留 1未激活 2已激活 3审核未通过 9已删除
     idcard: String, //身份证号
     language: String, //用户的语言，简体中文为zh_CN
     country: String, // 用户所在国家
     province: String, // 用户所在省份
     city: String, // 用户所在城市
-    localtion: [
-      {
-        type: String, //默认为 wgs84 返回 gps 坐标，gcj02 返回可用于wx.openLocation的坐标
-        latitude: String, //纬度
-        longitude: String, //经度
-        speed: String, //速度
-        accuracy: String, //位置的精确度
-        altitude: String, //高度
-        verticalAccuracy: String, //垂直精度（Android 无法获取，返回 0）
-        horizontalAccuracy: String //水平精度
-      }
-    ], //存储用户使用地址
+    localtion: Array, //存储用户使用地址
     hospital: Object, //医生就职医院
     certificate: Array, //医生证书
     department: Array, // 关联科室 医生只能关联一个科室,患者可以关联最多三个 经理人关联三个
@@ -61,7 +50,7 @@ module.exports = app => {
           key: String
         }
       }
-    ],
+    ], //代理的医生
     friend: [
       {
         name: "String",
@@ -126,12 +115,12 @@ module.exports = app => {
     next();
   });
   UserSchema.pre("save", function (next) {
-    if (this.avatar) {
+    if (this.avatar && this.avatar.imageURL) {
       this.avatarUrl = "";
-    } else {
+    } else if (!this.avatarUrl) {
       const options = {
         margin: 0.2,
-        size: 200
+        size: 100
       };
       // 使用hash 生成初始化头像
       let hash = Math.random()

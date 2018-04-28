@@ -110,7 +110,6 @@ class Weixin extends BaseController {
    */
   async oauth() {
     let params = queryString.parse(this.ctx.querystring);
-    console.log("params", params);
     let code = params.code;
     let user = await this.service.weixin.getUserByCode(code);
     // 信息获取成功后 需要判断用户是否注册 如果没有注册 就到注册页面

@@ -7,10 +7,10 @@ module.exports = app => {
 
 
 
-  router.post("/api/app/updatebaseInfo", app.jwt, "app.updatebaseInfo"); //用户授权获取基本信息
+  router.post("/api/app/updatebaseInfo", app.jwt, auth, "app.updatebaseInfo"); //用户授权获取基本信息
 
-  router.post("/api/app/friend/get", app.jwt, "app.getFriend"); //经理人获取潜在用户
-  router.get("/api/app/agency/get", app.jwt, "app.getAgency"); //经理人获取代理医生
+  router.post("/api/app/friend/get", app.jwt, auth, "app.getFriend"); //经理人获取潜在用户
+  router.get("/api/app/agency/get", app.jwt, auth, "app.getAgency"); //经理人获取代理医生
   router.get("/api/app/canupdate", app.jwt, "app.canUpdate"); // 用户信息完善更新
   router.post("/api/app/update", app.jwt, "app.update"); // 用户信息完善更新
   router.post("/api/app/updatelocaltion", app.jwt, "app.updateLocaltion"); // 增加用户地址信息

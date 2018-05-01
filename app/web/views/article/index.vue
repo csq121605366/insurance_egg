@@ -32,18 +32,6 @@
       </ul>
       <h3 v-else>没有提交图片素材</h3>
     </el-dialog>
-    <!-- <el-dialog class="article_assets" title="视频选择" :visible.sync="videosVisible">
-      <ul v-if="article_videos.length" class="article_assets_list">
-        <el-row :gutter="18" class="row-bg">
-          <el-col v-for="(item,index) in article_videos" :key="index" :span="8">
-            <div @click="videoSelect(item)" class="article_assets_item">
-              <img :src="item.thumbImg.imageURL" alt="">
-            </div>
-          </el-col>
-        </el-row>
-      </ul>
-      <h3 v-else>没有提交视频素材</h3>
-    </el-dialog> -->
   </div>
 </template>
 
@@ -51,7 +39,6 @@
 import wxHeader from "@/components/wxHeader";
 import "quill/dist/quill.core.css";
 import "quill/dist/quill.snow.css";
-// import "quill/dist/quill.bubble.css";
 import { quillEditor } from "vue-quill-editor";
 import { urlArgs } from "@/utils";
 import { jssdk, getArticleAssets, addContent } from "@/api/app";
@@ -64,21 +51,15 @@ export default {
     let self = this;
     wx.miniProgram.getEnv(function(res) {
       let url = "http://csq.weixin.caishangqing.com/app/article";
-      // let url = "http://localhost:7001/app/article";
-      // jssdk({ url }).then(res => {
-      //   self.wxConfig(res.data);
-      // });
     });
     let args = urlArgs();
     this.article_id = args["article_id"];
     this.Authorization = args["Authorization"];
-    console.log(args);
     getArticleAssets({
       article_id: this.article_id,
       Authorization: args["Authorization"]
     }).then(res => {
       this.article_images = res.data.images;
-      // this.article_videos = res.data.videos;
       this.content = res.data.content;
     });
   },
@@ -100,7 +81,6 @@ export default {
             container: "#toolbar",
             handlers: {
               image: this.imageUpload
-              // video: this.videoUpload
             }
           }
         }
@@ -143,19 +123,6 @@ export default {
       return;
     },
     UploadHandler() {
-      // wx.miniProgram.switchTab({ url: "/pages/my/main" });
-      // wx.ready(function() {
-      //   wx.chooseImage({
-      //     count: 1, // 默认9
-      //     sizeType: ["original", "compressed"], // 可以指定是原图还是压缩图，默认二者都有
-      //     sourceType: ["album", "camera"], // 可以指定来源是相册还是相机，默认二者都有
-      //     success: function(res) {
-      //       // 返回选定照片的本地文件路径列表，tempFilePath可以作为img标签的src属性显示图片
-      //       var tempFilePaths = res.tempFilePaths;
-      //       console.log(tempFilePaths);
-      //     }
-      //   });
-      // });
       this.$confirm("确定提交?", "提示", {
         customClass: "wx",
         confirmButtonText: "确定",

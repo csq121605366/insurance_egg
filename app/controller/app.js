@@ -27,9 +27,9 @@ class AppController extends BaseController {
     let find = await this.service.app.findUserByOpenId(openid);
     // 如果用户已经存在
     if (find) {
-      if (find.status == '3') return this.error("您的帐号审核未通过");
+      // if (find.status == '3') return this.error("您的帐号审核未通过");
       //如果用户已经完善信息(不是游客)并且已经激活(已审核) 未完善的用户不发放token
-      if (find.role !== '0' && find.status == '2') {
+      if (find.role != "0" && find.status == "2") {
         //更新session_key
         find.session_key = session_key;
         // 保存
@@ -149,7 +149,6 @@ class AppController extends BaseController {
     this.success(finder.agency);
   }
 
-
   async canUpdate() {
     let oInfo = this.ctx.state.user;
     //判断用户是否可以更新内
@@ -162,11 +161,14 @@ class AppController extends BaseController {
   }
 
   async updateLocaltion() {
-    this.ctx.validate({ localtion: { type: 'object', required: false } })
+    this.ctx.validate({ localtion: { type: "object", required: false } });
     let { _id } = this.ctx.state.user;
     let { localtion } = this.ctx.request.body;
-    await this.ctx.model.User.update({ _id }, { $addToSet: { localtion } }).exec();
-    this.success()
+    await this.ctx.model.User.update(
+      { _id },
+      { $addToSet: { localtion } }
+    ).exec();
+    this.success();
   }
 
   async update() {
@@ -195,7 +197,7 @@ class AppController extends BaseController {
     let find = await this.ctx.model.User.findOne({ _id: oInfo._id }).exec();
     if (!find) return this.error("未找到帐号");
     // 如果role角色不为0表示非游客 账号状态1未激活
-    if ((find.role == '2' || find.role == '3') && find.status == "1")
+    if ((find.role == "2" || find.role == "3") && find.status == "1")
       return this.error("账号审核中...");
     // 检验验证码
     let canBind = await this.service.sms.validate(info.phone, 71356, info.code);
@@ -316,7 +318,7 @@ class AppController extends BaseController {
       idcard: info.idcard,
       gender: info.gender,
       avatar: info.avatar,
-      status: '1',
+      status: "1",
       audit_create: new Date()
     });
     await find.save();
@@ -387,7 +389,8 @@ class AppController extends BaseController {
       department: 1,
       description: 1,
       gender: 1,
-      avatar: 1
+      avatar: 1,
+      avatarUrl: 1
     };
     if (role == "1") {
       res = await this.ctx.model.User.aggregate()
@@ -446,7 +449,11 @@ class AppController extends BaseController {
       user_id,
       status: "2",
       type: { $in: ["1", "2"] }
-    }).select("title pre_content illness_time illness_name status author department").exec();
+    })
+      .select(
+        "title pre_content illness_time illness_name status author department"
+      )
+      .exec();
     let res = { userinfo: find, article };
     if (find) return this.success(res);
     return this.error("未找到");

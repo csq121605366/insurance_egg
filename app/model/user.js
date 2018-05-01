@@ -51,26 +51,7 @@ module.exports = app => {
         }
       }
     ], //代理的医生
-    friend: [
-      {
-        name: "String",
-        gender: {
-          type: String,
-          enum: ["0", "1", "2"], // 0代表未知 1代表男性 2代表女性
-          default: "0"
-        },
-        phone: String,
-        department: [
-          {
-            label: String,
-            key: String
-          }
-        ],
-        hospital: String,
-        title: String, //职称
-        description: String // 简介
-      }
-    ], // 代理人的潜在客户
+    friend: Array, // 代理人的潜在客户
     title: String, // 职称
     treatment_info: {
       doctor_name: String, //医生姓名
@@ -105,7 +86,7 @@ module.exports = app => {
     }
   });
 
-  UserSchema.pre("save", function (next) {
+  UserSchema.pre("save", function(next) {
     if (this.isNew) {
       // 创建时间
       this.meta.createdAt = this.meta.updatedAt = new Date();
@@ -114,7 +95,7 @@ module.exports = app => {
     }
     next();
   });
-  UserSchema.pre("save", function (next) {
+  UserSchema.pre("save", function(next) {
     if (this.avatar && this.avatar.imageURL) {
       this.avatarUrl = "";
     } else if (!this.avatarUrl) {
@@ -132,17 +113,20 @@ module.exports = app => {
     next();
   });
 
-  UserSchema.index({
-    name: 'text',
-    'department.label': 'text',
-    'hospital.label': 'text'
-  }, {
+  UserSchema.index(
+    {
+      name: "text",
+      "department.label": "text",
+      "hospital.label": "text"
+    },
+    {
       weights: {
         name: 10,
-        'department.label': 9,
-        'hospital.label': 8
+        "department.label": 9,
+        "hospital.label": 8
       }
-    })
+    }
+  );
 
   return mongoose.model("User", UserSchema);
 };

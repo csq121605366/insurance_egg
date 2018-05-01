@@ -1,7 +1,7 @@
 <template>
   <div class="home-container">
     <div class="home-text">name:{{name}}</div>
-    <div class="home-text">role:{{role}}</div>
+    <div class="home-text">role:{{adminRoleList[role]}}</div>
   </div>
 </template>
 
@@ -11,7 +11,7 @@ import { mapGetters } from "vuex";
 export default {
   name: "home",
   computed: {
-    ...mapGetters(["name", "role"])
+    ...mapGetters(["name", "role", "adminRoleList"])
   }
 };
 </script>

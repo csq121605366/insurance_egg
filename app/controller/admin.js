@@ -67,7 +67,9 @@ class Admin extends BaseController {
     ctx.validate(this.AdminTransfer);
     const { username, password } = ctx.request.body;
     // 使用admin基础服务获取用户信息
-    let find = await this.ctx.model.Admin.find({ $or: [{ username }, { phone: username }] }).exec();
+    let find = await this.ctx.model.Admin.find({
+      $or: [{ username }, { phone: username }]
+    }).exec();
     find = find[0];
     // 帐号不存在就返回错误
     if (!find) return this.error("账号未找到");
@@ -79,7 +81,7 @@ class Admin extends BaseController {
       return this.error(`尝试登录次数太多账号已被锁,解锁时间还有${time}秒`);
     }
     // 管理员状态检测
-    if (find.status != '2') return this.error("帐号状态有误,请联系最高管理员");
+    if (find.status != "2") return this.error("帐号状态有误,请联系最高管理员");
     // 比较密码
     let isMatch = await find.comparePassword(password, find.password);
     let max = myconfig.dbconfig.MAX_LOGIN_ATTEMPTS;
@@ -94,7 +96,9 @@ class Admin extends BaseController {
   //获取用户详情
   async getUserinfo() {
     let _id = this.ctx.state.user._id;
-    let find = await this.ctx.model.Admin.findOne({ _id }).select('-_id -__v -password -loginAttempts -lockUntil').exec();
+    let find = await this.ctx.model.Admin.findOne({ _id })
+      .select("-_id -__v -password -loginAttempts -lockUntil")
+      .exec();
     if (!find) return this.error("未找到");
     return this.success(find);
   }
@@ -156,53 +160,53 @@ class Admin extends BaseController {
     // 修改密码
     find.password = newPassword;
     try {
-      await find.save()
+      await find.save();
       return this.success();
     } catch (e) {
       return this.error();
     }
   }
 
-
-
   //绑定手机
   async bindPhone() {
-    this.ctx.validate({ phone: { type: 'string', format: this.reg.phone }, code: 'string' });
+    this.ctx.validate({
+      phone: { type: "string", format: this.reg.phone },
+      code: "string"
+    });
     let { _id } = this.ctx.state.user;
     let { phone, code } = this.ctx.request.body;
     // 查找是否有绑定该手机号的
     let one = await this.ctx.model.Admin.findOne({ phone }).exec();
-    if (one) return this.error('该手机已绑定');
+    if (one) return this.error("该手机已绑定");
     //找到要绑定的帐号
     let find = await this.ctx.model.Admin.findOne({ _id }).exec();
     // 检验验证码是否正确
     let validate = await this.service.sms.validate(phone, 71356, code);
-    if (!validate) return this.error('验证码不正确');
+    if (!validate) return this.error("验证码不正确");
     //绑定手机号
     find.phone = phone;
     await find.save();
-    this.success('绑定成功')
+    this.success("绑定成功");
   }
   //解绑手机
   async unbindPhone() {
-    this.ctx.validate({ phone: { type: 'string', format: this.reg.phone }, code: 'string' });
+    this.ctx.validate({
+      phone: { type: "string", format: this.reg.phone },
+      code: "string"
+    });
     let { _id } = this.ctx.state.user;
     let { phone, code } = this.ctx.request.body;
     //找到要绑定的帐号
     let find = await this.ctx.model.Admin.findOne({ _id }).exec();
-    if (find.phone != phone) return this.error('不是该账户绑定的手机号');
+    if (find.phone != phone) return this.error("不是该账户绑定的手机号");
     // 检验验证码是否正确
     let validate = await this.service.sms.validate(phone, 71545, code);
-    if (!validate) return this.error('验证码不正确');
+    if (!validate) return this.error("验证码不正确");
     //绑定手机号
-    find.phone = '';
+    find.phone = "";
     await find.save();
-    this.success('解绑成功')
+    this.success("解绑成功");
   }
-
-
-
-
 
   async uploadByStream() {
     const { ctx } = this;
@@ -227,15 +231,19 @@ class Admin extends BaseController {
   //获取用户列表
   async geUserList() {
     this.ctx.validate({
-      role: 'string',
-      status: 'string',
+      role: "string",
+      status: "string",
       currentPage: {
-        type: 'number',
+        type: "number",
         required: false
       },
-      limit: 'number'
+      limit: "number"
     });
-    let { role, status, currentPage, limit } = Object.assign({}, { currentPage: 1 }, this.ctx.request.body);
+    let { role, status, currentPage, limit } = Object.assign(
+      {},
+      { currentPage: 1 },
+      this.ctx.request.body
+    );
     try {
       let selectParam = {
         name: 1,
@@ -252,79 +260,86 @@ class Admin extends BaseController {
         audit_create: 1,
         audit_end: 1,
         status: 1
-      }
-      let find = await this.ctx.model.User.find({ role: role, status: status }).skip((currentPage - 1) * limit | 0).limit(limit | 0).select(selectParam).exec()
-      let amount = await this.ctx.model.User.find({ role: role, status: status }).count().exec();
+      };
+      let find = await this.ctx.model.User.find({ role: role, status: status })
+        .skip(((currentPage - 1) * limit) | 0)
+        .limit(limit | 0)
+        .select(selectParam)
+        .exec();
+      let amount = await this.ctx.model.User.find({
+        role: role,
+        status: status
+      })
+        .count()
+        .exec();
       this.success({ list: find, amount, currentPage: currentPage | 0 });
     } catch (e) {
-      this.ctx.throw(500, '服务器错误')
+      this.ctx.throw(500, "服务器错误");
     }
   }
 
-
   //审核用户
   async auditUser() {
-    this.ctx.validate({ user_id: "string", status: { type: 'enum', values: ['2', '3'] } });
+    this.ctx.validate({
+      user_id: "string",
+      status: { type: "enum", values: ["2", "3"] }
+    });
     let { role } = this.ctx.state.user;
     let { user_id, status } = this.ctx.request.body;
-    if (role != '2' && role != '9') return this.error("只有管理员可以审核!");
+    if (role != "2" && role != "9") return this.error("只有管理员可以审核!");
     // 将已锁定和未激活的用户激活
     let find = await this.ctx.model.User.findOne({
       _id: user_id,
-      status: '1'
+      status: "1"
     }).exec();
     if (!find) return this.error("未找到该用户,或该用户已被删除");
     // 激活用户账户
     find.status = status;
+    find.audit_end = new Date();
     try {
       await find.save();
       return this.success();
     } catch (e) {
-      ctx.throw(500, '服务器错误')
+      ctx.throw(500, "服务器错误");
     }
   }
 
-
   async userListByDepartment() {
-    this.ctx.validate({ key: 'number' })
+    this.ctx.validate({ key: "number" });
     let { key } = this.ctx.request.body;
     // 角色搜索
     let selectParam = {
       _id: 1,
       name: 1,
-      role: 1,
+      role: 1
     };
     let find = await this.ctx.model.User.aggregate()
       .match({
         $or: [
-          { 'role': '1', status: { $in: ['1', '2'] } },
-          { 'role': { $in: ['2', '3'] }, status: '2' }
+          { role: "1", status: { $in: ["1", "2"] } },
+          { role: { $in: ["2", "3"] }, status: "2" }
         ],
-        'department.key': key
+        "department.key": key
       })
       .project(selectParam)
-      .group({ _id: { role: '$role' }, item: { $addToSet: { name: '$name', user_id: '$_id' } } })
-      .sort({ '_id.role': -1 })
+      .group({
+        _id: { role: "$role" },
+        item: { $addToSet: { name: "$name", user_id: "$_id" } }
+      })
+      .sort({ "_id.role": -1 })
       .exec();
     this.success(find);
   }
 
   async userDetailByDepartment() {
-    this.ctx.validate({ user_id: 'string' });
+    this.ctx.validate({ user_id: "string" });
     let { user_id } = this.ctx.request.body;
-    let selectParam = {
-      sms_code: -1,
-      session_key: -1,
-      password: -1,
-      openid: -1
-    };
-    let find = await this.ctx.model.User.findOne({ _id: user_id });
+    let selectParam = `-sms_code -session_key -password -openid`;
+    let find = await this.ctx.model.User.findOne({ _id: user_id })
+      .select(selectParam)
+      .exec();
     this.success(find);
   }
-
-
-
 }
 
 module.exports = Admin;
-

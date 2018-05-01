@@ -153,7 +153,6 @@ export default {
         currentPage: this[this.default].currentPage
       };
       userList(param).then(res => {
-        console.log(res.data, param);
         this[this.default].list = res.data.list;
         this[this.default].amount = res.data.amount;
       });
@@ -181,7 +180,6 @@ export default {
     },
    auditSuccess(item) {
       let user_id = item._id;
-      console.log(user_id);
       this.$confirm("确认审核通过?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
@@ -199,7 +197,6 @@ export default {
     },
     auditError(item) {
       let user_id = item._id;
-      console.log(user_id);
       this.$confirm("确认审核不通过?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",

@@ -99,7 +99,8 @@ class QaController extends BaseController {
       avatarUrl: find.avatarUrl,
       content: info.content,
       images: info.images,
-      type: "1"
+      type: "1",
+      created: new Date()
     };
     try {
       await this.ctx.model.Qa.update(
@@ -130,7 +131,7 @@ class QaController extends BaseController {
     let { _id, role } = this.ctx.state.user;
     let { limit, user_id, last_id, key } = this.ctx.request.body;
     let finder = await this.ctx.model.User.findOne({ _id });
-    if (!finder) return this.error('未找到用户')
+    if (!finder) return this.error("未找到用户");
     let res;
     let oFindParam = {};
     if (user_id) {
@@ -148,7 +149,7 @@ class QaController extends BaseController {
         });
         if (key) {
           //如果存在搜索则加上筛选
-          Object.assign(findParam, { $text: { $search: key } });
+          Object.assign(findParam, { title: new RegExp(key, "ig") });
         }
         res = await this.ctx.model.Qa.find(findParam)
           .select("title illness_name department answer_count content meta")
@@ -161,7 +162,7 @@ class QaController extends BaseController {
         });
         if (key) {
           //如果存在搜索则加上筛选
-          Object.assign(findParam, { $text: { $search: key } });
+          Object.assign(findParam, { title: new RegExp(key, "ig") });
         }
         res = await this.ctx.model.Qa.find(findParam)
           .select("title illness_name department answer_count content meta")
@@ -181,7 +182,7 @@ class QaController extends BaseController {
       });
       if (key) {
         //如果存在搜索则加上筛选
-        Object.assign(findParam, { $text: { $search: key } });
+        Object.assign(findParam, { title: new RegExp(key, "ig") });
       }
       res = await this.ctx.model.Qa.find(findParam)
         .select("title illness_name department answer_count content meta")

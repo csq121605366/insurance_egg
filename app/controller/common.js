@@ -30,8 +30,8 @@ class CommonController extends BaseController {
       return this.error('类型错误')
     }
     // 检验是否可以发送验证码
-    let cansend = await this.service.sms.canSendCode(phone,sendType);
-    if(!cansend) return this.error('验证码已发送,请注意查收');
+    // let cansend = await this.service.sms.canSendCode(phone,sendType);
+    // if(!cansend) return this.error('验证码已发送,请注意查收');
     await this.service.sms.sendPhoneCode(phone,sendType);
     this.success('发送成功');
   }

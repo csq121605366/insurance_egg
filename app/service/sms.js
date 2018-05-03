@@ -11,9 +11,10 @@ class SmsService extends BaseService {
   async sendPhoneCode(mobile, tpl_id) {
     let smsConf = this.config.myconfig.sms;
     let key = smsConf.SMS_KEY;
-    let sms_code = Math.random()
-      .toString(10)
-      .slice(2, 6);
+    // let sms_code = Math.random()
+    //   .toString(10)
+    //   .slice(2, 6);
+    let sms_code = 1111;
     let tpl_value = "#code#=" + sms_code;
     if (smsConf.SMS_TYPE.indexOf(tpl_id) > -1) {
       let param = {
@@ -29,7 +30,8 @@ class SmsService extends BaseService {
         await this.ctx.model.Sms.create({
           phone: mobile,
           type: tpl_id,
-          sms_code
+          sms_code,
+          created: new Date()
         });
         return true;
       } catch (e) {
@@ -69,8 +71,6 @@ class SmsService extends BaseService {
     // 防止重复 找到最新的一条
     let last = find[find.length - 1];
     // 如果存在 并且不超过保质期 表示通过 否则false
-    console.log(last,
-      new Date(last.created).getTime() + smsConf.SMS_EXPIRES, Date.now())
     if (
       last &&
       new Date(last.created).getTime() + smsConf.SMS_EXPIRES > Date.now()

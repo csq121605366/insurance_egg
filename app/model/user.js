@@ -30,7 +30,6 @@ module.exports = app => {
     status: {
       type: String,
       enum: config.USER_ROLE_STATUS,
-      enum: config.USER_ROLE_STATUS,
       default: config.USER_ROLE_STATUS[1]
     }, // 用户账号状态 0保留 1未激活 2已激活 3审核未通过 9已删除
     idcard: String, //身份证号

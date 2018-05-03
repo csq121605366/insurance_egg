@@ -11,10 +11,7 @@ module.exports = app => {
     phone: String,//手机号
     sms_code: String, //验证码
     type: Number, //验证码类型 在service.base中已经设置范围
-    created: {
-      type: Date,
-      default: new Date()
-    }
+    created: Date
   });
   return mongoose.model("Sms", SmsSchema);
 };

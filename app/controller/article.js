@@ -52,8 +52,10 @@ class ArticleController extends BaseController {
     } = this.ctx.request.body;
     //获取用户信息
     let { name, role, _id, status } = this.ctx.state.user;
+    let find = await this.ctx.model.User.findOne({ _id }).select('department role status name');
     //只有医生可以发文章
-    if (role != "2" && status != "2") return this.error("没有发表权限");
+    console.log(find)
+    if (find.role != "2" && find.status != "2") return this.error("没有发表权限");
     if (article_id) {
       /**
        * 更新
@@ -101,7 +103,7 @@ class ArticleController extends BaseController {
       /**
        * 新建
        */
-      let find = await this.ctx.model.User.findOne({ _id }).exec();
+     
       // //限制1分钟内只能发一条
       // let findArticle = await this.ctx.model.Article.find({ user_id: _id })
       //   .sort({ "meta.updated": 1 })
@@ -313,7 +315,7 @@ class ArticleController extends BaseController {
     });
     let reqParam = this.ctx.request.body;
     let { _id } = this.ctx.state.user;
-
+    console.log(reqParam)
     let opts;
     //首先 用户自己查找自己
     if (_id == reqParam.user_id) {

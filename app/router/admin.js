@@ -25,6 +25,4 @@ module.exports = app => {
   //参数 _id用户_id
   router.post('/api/admin/user/detail', app.jwt, auth, 'admin.userDetailByDepartment');//管理员根据_id获取用户详情
 
-
-  router.post("/api/admin/upload", app.jwt, controller.admin.uploadByStream);
 };

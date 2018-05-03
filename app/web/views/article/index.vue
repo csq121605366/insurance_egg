@@ -215,7 +215,9 @@ export default {
       }
     }
   }
-
+  .ql-editor{
+    min-height:600px;
+  }
   .ql-editor .ql-indent-1:not(.ql-direction-rtl) {
     padding-left: 2em;
   }

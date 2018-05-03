@@ -110,18 +110,6 @@ export const constantRouterMap = [
       }
     ]
   },
-  // {
-  //   path: "/upload",
-  //   component: Layout,
-  //   children: [
-  //     {
-  //       path: "",
-  //       name: "Upload",
-  //       component: _import("upload/index"),
-  //       meta: { title: "上传素材", icon: "icon-zuzhi" }
-  //     }
-  //   ]
-  // },
   {
     path: "/user",
     component: Layout,

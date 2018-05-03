@@ -39,21 +39,21 @@ class QiniuService extends BaseService {
         let opt = qiniu.rs.copyOp(srcBucket, item.key, destBucket, mkfilename);
         moveOperations.push(opt);
         // 组装生成的数据
-        if (/.(avi|rm|mov|wav|mp4|rmvb)$/i.test(item.key)) {
-          let thumbImgName =   this.guid() + /\.[^\.]+$/.exec(item.thumbImg.key)[0];
-          let thumbImgOpt = qiniu.rs.copyOp(srcBucket, item.thumbImg.key, destBucket, thumbImgName);
-          moveOperations.push(thumbImgOpt);
+        if (/.(avi|mp4|rmvb)$/i.test(item.key)) {
+          // let thumbImgName =   this.guid() + /\.[^\.]+$/.exec(item.thumbImg.key)[0];
+          // let thumbImgOpt = qiniu.rs.copyOp(srcBucket, item.thumbImg.key, destBucket, thumbImgName);
+          // moveOperations.push(thumbImgOpt);
           tmp = {
             hash: item.hash,
             fsize: item.fsize,
             bucket: destBucket,
             videoURL: 'http://' + destUrl + '/' + mkfilename,
-            thumbImg: {
-              hash: item.thumbImg.hash,
-              fsize: item.thumbImg.fsize,
-              bucket: destBucket,
-              imageURL: 'http://' + destUrl + '/' + thumbImgName
-            }
+            // thumbImg: {
+            //   hash: item.thumbImg.hash,
+            //   fsize: item.thumbImg.fsize,
+            //   bucket: destBucket,
+            //   imageURL: 'http://' + destUrl + '/' + thumbImgName
+            // }
           }
         } else {
           tmp = {

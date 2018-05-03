@@ -19,7 +19,6 @@ class ActionTokenService extends BaseService {
     );
   }
   async userToken(user) {
-    console.log(user)
     const { app } = this;
     return app.jwt.sign(
       {

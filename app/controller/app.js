@@ -155,9 +155,10 @@ class AppController extends BaseController {
     let find = await this.ctx.model.User.findOne({ _id: oInfo._id }).exec();
     if (!find) return this.error("未找到帐号");
     // 如果role角色不为0表示非游客 账号状态1未激活
-    if (find.role != "0" && find.status == "1")
+    if ((find.role == "2" || find.role == "3") && find.status == "1") {
       return this.error("账号审核中...");
-    else return this.success();
+    }
+    return this.success();
   }
 
   async updateLocaltion() {

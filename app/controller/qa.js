@@ -72,8 +72,11 @@ class QaController extends BaseController {
       },
       content: "string"
     });
+    let { role, _id } = this.ctx.state.user;
     let info = this.ctx.request.body;
-    let { role, status, _id } = this.ctx.state.user;
+    let qa = await this.ctx.model.Qa.findOne({ _id: info.qa_id }).exec();
+    console.log( _id != qa.user_id)
+    if (role == "1" && _id != qa.user_id) return this.error("您不是该问题提问者");
     if (info.images && info.images.length) {
       //转移治疗信息的图片
       await this.service.qiniu
@@ -99,7 +102,7 @@ class QaController extends BaseController {
       avatarUrl: find.avatarUrl,
       content: info.content,
       images: info.images,
-      type: "1",
+      type: role == "1" ? "2" : "1", //医生经理人为回答 患者为追问
       created: new Date()
     };
     try {

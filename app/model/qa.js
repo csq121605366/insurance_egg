@@ -45,7 +45,7 @@ module.exports = app => {
           type: String,
           enum: ["1", "2"],
           default: "1"
-        }, //该回答是医生回答 还是患者补充提问
+        }, //该回答是医生经理人回答 还是患者补充提问
         created: Date
       }
     ], //问题关联内容

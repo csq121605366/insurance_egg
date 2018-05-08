@@ -2,8 +2,8 @@
  * 用户信息
  */
 
-const bcrypt = require("bcrypt");
-const Identicon = require("identicon.js");
+// const bcrypt = require("bcrypt");
+// const Identicon = require("identicon.js");
 
 module.exports = app => {
   const config = app.config.myconfig.dbconfig;
@@ -98,16 +98,27 @@ module.exports = app => {
     if (this.avatar && this.avatar.imageURL) {
       this.avatarUrl = "";
     } else if (!this.avatarUrl) {
-      const options = {
-        margin: 0.2,
-        size: 100
-      };
-      // 使用hash 生成初始化头像
+      // const options = {
+      //   margin: 0.2,
+      //   size: 100
+      // };
+      // // 使用hash 生成初始化头像
+      // let hash = Math.random()
+      //   .toString(16)
+      //   .slice(4);
+      // let avatar = new Identicon(hash + this.openid, options).toString();
+      // this.avatarUrl = "data:image/png;base64," + avatar;
       let hash = Math.random()
         .toString(16)
         .slice(4);
-      let avatar = new Identicon(hash + this.openid, options).toString();
-      this.avatarUrl = "data:image/png;base64," + avatar;
+      let url = "https://gravatar.com/avatar/" + hash + "?size=100&d=wavatar";
+      // www.gravatar.com 被墙
+      url = url.replace("www.gravatar.com", "gravatar.com");
+      // 让协议自适应 protocol，使用 `//` 开头
+      if (url.indexOf("http:") === 0) {
+        url = url.slice(5);
+      }
+      this.avatarUrl = url;
     }
     next();
   });

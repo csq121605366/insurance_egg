@@ -86,7 +86,7 @@
     "build:prod": "cross-env easywebpack build prod",
     "dll": "cross-env easywebpack build dev -f webpack.dll.js",
     "dev": "cross-env WORKERS=1 node index.js",
-    "start": "cross-env egg-scripts start --port=7001 --daemon --title=insurance --sticky",
+    "start": "cross-env EGG_SERVER_ENV=prod NODE_ENV=production node index.js",
     "stop": "egg-scripts stop --title=insurance",
     "test": "npm run lint -- --fix && npm run test-local",
     "test-local": "egg-bin test",

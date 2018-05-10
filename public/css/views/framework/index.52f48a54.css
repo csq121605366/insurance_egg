@@ -1,0 +1,76 @@
+
+.fw {
+  padding: 20px 40px;
+  box-sizing: content-box;
+}
+.userlist .el-collapse-item__content {
+  display: flex;
+  flex-flow: row wrap;
+}
+.userinfo__title {
+  font-size: 20px;
+}
+.userinfo__avatar {
+  border-radius: 6px;
+  border: 1px solid #333;
+  width: 220px;
+  height: 220px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.userinfo__avatar img {
+  max-width: 200px;
+  max-height: 200px;
+}
+.userinfo__base, .userinfo__extend {
+  padding: 0 10px;
+}
+.userinfo__subtitle {
+  padding: 20px 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+.userinfo__row .el-col {
+  padding: 10px 0;
+}
+.userinfo__images {
+  padding-top: 20px;
+  display: flex;
+  flex-flow: row wrap;
+}
+.userinfo__image {
+  margin-right: 10px;
+  margin-bottom: 10px;
+}
+.userinfo__image img {
+  height: 100px;
+  width: 100px;
+  cursor: pointer;
+}
+.userinfo__rowtitle {
+  font-size: 18px;
+  font-weight: 500;
+}
+.userinfo__agency dd {
+  line-height: 2;
+}
+.pick-view {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 9999;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(3, 3, 3, 0.6);
+}
+.pick-view img {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+  height: 460px;
+  width: auto;
+}

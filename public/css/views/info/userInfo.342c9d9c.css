@@ -1,0 +1,39 @@
+
+.userinfo {
+  padding-top: 40px;
+}
+.userinfo_wrap {
+  background-color: #fff;
+  box-shadow: 0 0 4px rgba(51, 51, 51, 0.6);
+  border-radius: 4px;
+  padding: 20px;
+  min-width: 500px;
+}
+.userinfo_avatar img {
+  max-height: 160px;
+}
+.userinfo .el-tabs__nav {
+  width: 100%;
+}
+.userinfo .el-tabs__item {
+  width: 50%;
+  text-align: center;
+}
+.userinfo .el-tabs__header {
+  margin: 0 0 30px 0;
+}
+.userinfo .el-input {
+  width: 240px;
+  margin-right: 20px;
+}
+.userinfo .el-form-item.el-form-item {
+  margin-bottom: 22px;
+}
+.userinfo .el-tab-pane {
+  padding-left: 40px;
+}
+
+.timeBtn.timeBtn--disabled[data-v-47ee6eb0] {
+  color: #ccc !important;
+  cursor: not-allowed;
+}

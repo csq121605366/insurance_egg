@@ -1,0 +1,11 @@
+
+.app-breadcrumb.el-breadcrumb[data-v-1cf03d04] {
+  display: inline-block;
+  font-size: 14px;
+  line-height: 50px;
+  margin-left: 10px;
+}
+.app-breadcrumb.el-breadcrumb .no-redirect[data-v-1cf03d04] {
+  color: #97a8be;
+  cursor: text;
+}

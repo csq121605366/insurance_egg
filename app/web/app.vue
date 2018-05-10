@@ -6,7 +6,7 @@
 
 <script>
 import Vue from "vue";
-import { sync } from "vuex-router-sync";
+// import { sync } from "vuex-router-sync";
 import "normalize.css/normalize.css"; // A modern alternative to CSS resets
 import router from "./router";
 import store from "./store";
@@ -21,7 +21,7 @@ Vue.use(ElementUI);
 
 Vue.config.productionTip = false;
 
-sync(store, router);
+// sync(store, router);
 export default {
   store,
   router

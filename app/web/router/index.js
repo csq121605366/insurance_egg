@@ -67,14 +67,14 @@ export const constantRouterMap = [
         name: "doctor_list",
         meta: { title: "医生管理", icon: "icon-zuzhi" },
         component: _import("doctor/list"),
-        children: [
-          {
-            path: ":id",
-            hidden: true,
-            name: "doctor_Detail",
-            component: _import("doctor/detail")
-          }
-        ]
+        // children: [
+        //   {
+        //     path: ":id",
+        //     hidden: true,
+        //     name: "doctor_Detail",
+        //     component: _import("doctor/detail")
+        //   }
+        // ]
       }
     ]
   },
@@ -87,14 +87,14 @@ export const constantRouterMap = [
         name: "agent_list",
         component: _import("agent/list"),
         meta: { title: "经理人", icon: "icon-zuzhi" },
-        children: [
-          {
-            path: ":id",
-            hidden: true,
-            name: "agent_Detail",
-            component: _import("agent/detail")
-          }
-        ]
+        // children: [
+        //   {
+        //     path: ":id",
+        //     hidden: true,
+        //     name: "agent_Detail",
+        //     component: _import("agent/detail")
+        //   }
+        // ]
       }
     ]
   },

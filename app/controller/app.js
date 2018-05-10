@@ -113,7 +113,7 @@ class AppController extends BaseController {
     let user = await this.ctx.model.User.findOne({ openid })
       .select(
         `name role nickName status phone 
-      hospital certificate department agency 
+      hospital idcard certificate department agency 
       friend title description treatment_info
       gender avatarUrl avatar`
       )

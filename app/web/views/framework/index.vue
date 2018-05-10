@@ -21,7 +21,7 @@
         </el-col>
         <el-col :span="12">
           <div class="fw__info">
-            <el-card v-if="userinfo" shadow="hover" :body-style="{ padding: '0px' }">
+            <el-card v-if="userinfo" shadow="hover" :body-style="{ padding: '20px' }">
               <div slot="header" class="userinfo__title clearfix">
                 <span>用户信息</span>
               </div>
@@ -127,7 +127,7 @@
                       <span class="userinfo__rowtitle">代理医生：</span>
                       <el-row :gutter="10">
                         <el-col :span="8" v-for="(x,i) in userinfo.agency" :key="i">
-                          <dl>
+                          <dl class="userinfo__agency">
                             <dt>{{x.department.label+':'}}</dt>
                             <dd v-for="(y,j) in x.name.split(' ')" :key="j">{{y}}</dd>
                           </dl>
@@ -136,20 +136,17 @@
                     </el-col>
                     <el-col :span="24">
                       <!-- <span class="userinfo__rowtitle">潜在代理医生：</span> -->
-                      <el-col :span="3"></el-col>
-                      <el-col :span="18">
-                        <el-collapse>
-                          <el-collapse-item v-for="(x,i) in userinfo.friend" :key="i" :title="'潜在代理医生'+ ++i">
-                            <el-row :gutter="20">
-                              <el-col :span="12">姓名：{{x.name}}</el-col>
-                              <el-col :span="12">手机号：{{x.phone}}</el-col>
-                              <el-col :span="24">医院：{{x.hospital.label}}</el-col>
-                              <el-col :span="12">科室：{{x.department.label}}</el-col>
-                              <el-col :span="12">职称：{{x.title}}</el-col>
-                            </el-row>
-                          </el-collapse-item>
-                        </el-collapse>
-                      </el-col>
+                      <el-collapse>
+                        <el-collapse-item v-for="(x,i) in userinfo.friend" :key="i" :title="'潜在代理医生'+ ++i">
+                          <el-row :gutter="20">
+                            <el-col :span="12">姓名：{{x.name}}</el-col>
+                            <el-col :span="12">手机号：{{x.phone}}</el-col>
+                            <el-col :span="24">医院：{{x.hospital.label}}</el-col>
+                            <el-col :span="12">科室：{{x.department.label}}</el-col>
+                            <el-col :span="12">职称：{{x.title}}</el-col>
+                          </el-row>
+                        </el-collapse-item>
+                      </el-collapse>
                     </el-col>
                   </el-row>
                 </div>
@@ -303,6 +300,11 @@ export default {
   &__rowtitle {
     font-size: 18px;
     font-weight: 500;
+  }
+  &__agency {
+    dd {
+      line-height: 2;
+    }
   }
 }
 

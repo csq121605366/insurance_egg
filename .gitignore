@@ -17,7 +17,7 @@ npm-debug.log
 .idea/
 dist
 static
-public
+#public
 private
 run
 *.iml
@@ -26,7 +26,7 @@ _site
 logs
 .vscode
 config/manifest.json
-app/view/*
+#app/view/*
 !app/view/layout.html
 !app/view/.gitkeep
 package-lock.json

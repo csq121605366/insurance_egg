@@ -3,9 +3,14 @@
     <el-tabs @tab-click="tabClick" activeName="uncheckedData" class="tabs" type="border-card">
       <el-tab-pane name="uncheckedData" label="待审核">
         <el-table :data="uncheckedData.list" ref="uncheckedData" key="uncheckedData" border max-height="720">
-          <el-table-column prop="name" label="姓名">
+          <el-table-column label="头像" width="120">
+            <template slot-scope="scope">
+              <img class="tabs__avatar" :src="scope.row.avatar?scope.row.avatar.imageURL:scope.row.avatarUrl" alt="">
+            </template>
           </el-table-column>
-          <el-table-column prop="phone" label="手机号">
+          <el-table-column prop="name" label="姓名" width="120">
+          </el-table-column>
+          <el-table-column prop="phone" label="手机号" width="120">
           </el-table-column>
           <el-table-column label="性别">
             <template slot-scope="scope">
@@ -45,9 +50,14 @@
       </el-tab-pane>
       <el-tab-pane name="checkedData" label="已审核">
         <el-table :data="checkedData.list" ref="checkedData" key="checkedData" border max-height="720">
-          <el-table-column prop="name" label="姓名">
+          <el-table-column label="头像" width="120">
+            <template slot-scope="scope">
+              <img class="tabs__avatar" :src="scope.row.avatar?scope.row.avatar.imageURL:scope.row.avatarUrl" alt="">
+            </template>
           </el-table-column>
-          <el-table-column prop="phone" label="手机号">
+          <el-table-column prop="name" label="姓名" width="120">
+          </el-table-column>
+          <el-table-column prop="phone" label="手机号" width="120">
           </el-table-column>
           <el-table-column label="性别">
             <template slot-scope="scope">
@@ -204,6 +214,11 @@ export default {
 </script>
 
 <style lang="scss">
+.tabs__avatar {
+  width: 80px;
+  height: auto;
+  border-radius: 6px;
+}
 .doctor-list {
   padding: 20px 40px;
   .el-tabs__nav {

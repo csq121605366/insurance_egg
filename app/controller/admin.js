@@ -247,6 +247,8 @@ class Admin extends BaseController {
       let selectParam = {
         name: 1,
         phone: 1,
+        avatarUrl: 1,
+        avatar: 1,
         gender: 1,
         hospital: 1,
         friend: 1,

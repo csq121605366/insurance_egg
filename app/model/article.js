@@ -12,7 +12,9 @@ module.exports = app => {
     illness_time: String, //手术时间进程
     author: String, //作者
     ip: String, //发表ip
-    looked: Array,//查看次数
+    looked: [
+      { type: Schema.Types.ObjectId, ref: "User" }
+    ],//查看次数
     department: {
       label: String,
       key: Number

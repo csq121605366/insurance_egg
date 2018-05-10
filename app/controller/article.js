@@ -52,10 +52,13 @@ class ArticleController extends BaseController {
     } = this.ctx.request.body;
     //获取用户信息
     let { name, role, _id, status } = this.ctx.state.user;
-    let find = await this.ctx.model.User.findOne({ _id }).select('department role status name');
+    let find = await this.ctx.model.User.findOne({ _id }).select(
+      "department role status name"
+    );
     //只有医生可以发文章
-    console.log(find)
-    if (find.role != "2" && find.status != "2") return this.error("没有发表权限");
+    console.log(find);
+    if (find.role != "2" && find.status != "2")
+      return this.error("没有发表权限");
     if (article_id) {
       /**
        * 更新
@@ -103,7 +106,7 @@ class ArticleController extends BaseController {
       /**
        * 新建
        */
-     
+
       // //限制1分钟内只能发一条
       // let findArticle = await this.ctx.model.Article.find({ user_id: _id })
       //   .sort({ "meta.updated": 1 })
@@ -211,6 +214,7 @@ class ArticleController extends BaseController {
     if (!finder) return this.error("未找到用户");
     let res;
     let selectParam = {
+      new: true,
       fields: {
         title: 1,
         user_id: 1,
@@ -234,12 +238,7 @@ class ArticleController extends BaseController {
     };
     let setParam = {
       $addToSet: {
-        looked: {
-          user_id: finder._id,
-          avatar: finder.avatar,
-          avatarUrl: finder.avatarUrl,
-          name: finder.name
-        }
+        looked: finder._id
       }
     };
     if (finder.role == "0") {
@@ -250,7 +249,12 @@ class ArticleController extends BaseController {
         },
         setParam,
         selectParam
-      ).exec();
+      )
+        .populate({
+          path: "looked",
+          select: "avatarUrl"
+        })
+        .exec();
     } else {
       //查找的用户的科室列表
       let finder_department = [];
@@ -263,7 +267,12 @@ class ArticleController extends BaseController {
         },
         setParam,
         selectParam
-      ).exec();
+      )
+        .populate({
+          path: "looked",
+          select: "avatarUrl"
+        })
+        .exec();
     }
     if (!res) return this.error("未找到文章");
     return this.success(res);
@@ -315,7 +324,7 @@ class ArticleController extends BaseController {
     });
     let reqParam = this.ctx.request.body;
     let { _id } = this.ctx.state.user;
-    console.log(reqParam)
+    console.log(reqParam);
     let opts;
     //首先 用户自己查找自己
     if (_id == reqParam.user_id) {

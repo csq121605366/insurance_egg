@@ -10,8 +10,8 @@ module.exports = app => {
       type: Schema.Types.ObjectId,
       ref: "User"
     }, //提问问题用户
-    title: String,//问题标题
-    illness_name: String,//疾病名称
+    title: String, //问题标题
+    illness_name: String, //疾病名称
     // type: {
     //   type: String,
     //   enum: ['1', '2', '3'],
@@ -21,7 +21,7 @@ module.exports = app => {
     images: Array, //问题相关图片
     operation: {
       type: String,
-      enum: ["0", "1", "2"],//是否手术 0保密 1否 2已手术
+      enum: ["0", "1", "2"], //是否手术 0保密 1否 2已手术
       default: "0"
     },
     answer: [
@@ -43,9 +43,10 @@ module.exports = app => {
         images: Array,
         type: {
           type: String,
-          enum: ['1', '2'],
-          default: '1'
-        }, //该回答是医生回答 还是患者补充提问
+          enum: ["1", "2"],
+          default: "1"
+        }, //该回答是医生经理人回答 还是患者补充提问
+        created: Date
       }
     ], //问题关联内容
     answer_count: {
@@ -55,6 +56,7 @@ module.exports = app => {
     content: String,
     like: Number, //喜欢
     unlike: Number, //不喜欢
+    created: Date,
     meta: {
       created: {
         type: Date,
@@ -66,7 +68,7 @@ module.exports = app => {
       }
     }
   });
-  QaSchema.pre("save", function (next) {
+  QaSchema.pre("save", function(next) {
     if (this.isNew) {
       this.meta.created = this.meta.updated = new Date();
     } else {
@@ -75,18 +77,20 @@ module.exports = app => {
     next();
   });
 
-  QaSchema.index({
-    title: 'text',
-    illness_name: 'text',
-    content: 'text'
-  }, {
+  QaSchema.index(
+    {
+      title: "text",
+      illness_name: "text",
+      content: "text"
+    },
+    {
       weights: {
         title: 10,
         illness_name: 9,
         content: 1
       }
-    })
+    }
+  );
 
   return mongoose.model("Qa", QaSchema);
-
 };

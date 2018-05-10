@@ -115,7 +115,7 @@ class AppController extends BaseController {
         `name role nickName status phone 
       hospital idcard certificate department agency 
       friend title description treatment_info
-      gender avatarUrl avatar`
+      idcard gender avatarUrl avatar`
       )
       .exec();
     //查询医院
@@ -155,9 +155,10 @@ class AppController extends BaseController {
     let find = await this.ctx.model.User.findOne({ _id: oInfo._id }).exec();
     if (!find) return this.error("未找到帐号");
     // 如果role角色不为0表示非游客 账号状态1未激活
-    if (find.role != "0" && find.status == "1")
+    if ((find.role == "2" || find.role == "3") && find.status == "1") {
       return this.error("账号审核中...");
-    else return this.success();
+    }
+    return this.success();
   }
 
   async updateLocaltion() {
@@ -183,7 +184,7 @@ class AppController extends BaseController {
         },
         phone: { type: "string", format: reg.phone, required: true },
         code: { type: "string", required: true },
-        idcard: { type: "string", format: reg.idcard, required: false },
+        idcard: { type: "string", format: reg.idcard, required: true },
         gender: { type: "enum", values: ["0", "1", "2"], required: true },
         avatar: { type: "object", required: false }
       },
@@ -491,7 +492,10 @@ class AppController extends BaseController {
     //首先搜索问题
     findParam = Object.assign({}, oFindParam, {
       "department.key": { $in: finder_department }, //只能搜索跟自己相关的问题
-      $text: { $search: param.key }
+      $or: [
+        { title: new RegExp(param.key, "ig") },
+        { illness_name: new RegExp(param.key, "ig") }
+      ]
     });
     res = await this.ctx.model.Qa.find(findParam)
       .select("title illness_name department content answer meta")
@@ -505,7 +509,10 @@ class AppController extends BaseController {
           { "department.key": { $in: finder_department }, type: "2" }, //只能搜索跟自己相关的资讯
           { type: "1" } //或者文章是公开的
         ],
-        $text: { $search: param.key } //根据索引搜索关键词
+        $or: [
+          { title: new RegExp(param.key, "ig") },
+          { illness_name: new RegExp(param.key, "ig") }
+        ] //根据索引搜索关键词
       });
       res = await this.ctx.model.Article.find(findParam)
         .populate({ path: "user_id", select: "name avatar" })
@@ -522,7 +529,11 @@ class AppController extends BaseController {
         status: "2",
         role: { $in: ["2"] }, //只能搜索医生和经理人
         "department.key": { $in: finder_department }, //只能搜索跟自己相关的科室
-        $text: { $search: param.key } //根据索引搜索关键词
+        $or: [
+          { name: new RegExp(param.key, "ig") },
+          { "department.label": new RegExp(param.key, "ig") },
+          { "hospital.label": new RegExp(param.key, "ig") }
+        ] //根据索引搜索关键词
       });
       res = await this.ctx.model.User.find(findParam)
         .select(

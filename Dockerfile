@@ -2,10 +2,10 @@
 FROM node:8.11.0
 
 # 将根目录下的文件都copy到container（运行此镜像的容器）文件系统的app文件夹下
-COPY . /myapp/
+# COPY . /myapp/
 
 # cd到app文件夹下
-WORKDIR /myapp
+WORKDIR .
 
 # 安装项目依赖包
 RUN npm install

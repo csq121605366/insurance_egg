@@ -37,7 +37,7 @@ module.exports = app => {
       consoleLevel: "DEBUG", // ERROR  WARN  INFO DEBUG NONE
       dir: path.join(app.baseDir, "logs")
     },
-    middleware: ["access", "gzip", "errorHandler"],
+    middleware: ["gzip", "errorHandler"],
     gzip: { threshold: 1024 },
     static: {
       prefix: "/public/",
@@ -51,13 +51,14 @@ module.exports = app => {
   // mongoose
   exports.mongoose = {
     client: {
-      url: "mongodb://insurance_admin:csqcsq1214@47.52.63.21:27017/insurance",
+      // url: "mongodb://insurance_admin:csqcsq1214@47.52.63.21:27017/insurance",
+      url: "mongodb://root:mypassword1234@127.0.0.1:27017/insurance",
       options: {
         useMongoClient: true,
         autoReconnect: true,
         socketTimeoutMS: 0,
         keepAlive: true,
-        reconnectTries: 30 
+        reconnectTries: 30
       }
     }
   };

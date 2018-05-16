@@ -1,0 +1,23 @@
+version: '1.0.0'
+
+services:
+  db:
+    image: mongo
+    restart: always
+    ports: 
+      - '27017:27017'
+    commond: '--smallfiles --logpath=/dev/null 2>&1'
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: mypassword1234
+  web:
+    build: .
+    command: node app.js
+    volumes:
+      - .:/myapp
+    ports:
+      - "7001:7001"
+    links:
+      - db
+    environment:
+      PORT: 7001

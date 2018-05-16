@@ -2,11 +2,11 @@ version: '2'
 
 services:
   db:
-    image: mongo
+    image: mongo:3.2
     restart: always
     ports: 
       - '27017:27017'
-    commond: '--smallfiles --logpath=/dev/null 2>&1'
+    command: '--smallfiles --logpath=/dev/null 2>&1'
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: mypassword1234

@@ -22,8 +22,8 @@ services:
     # 容器的依赖
     depends_on: 
       - db
-    volumes:
-      - .:/myapp
+    # volumes:
+    #   - .:/myapp
     # expose只是指定暴露的端口 实际端口映射还是需要ports
     expose:
       - "7001"

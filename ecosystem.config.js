@@ -5,9 +5,9 @@ module.exports = {
             script: "./index.js",
             watch: false,
             env: {
-                
+
             },
-            env_production: {
+            prod: {
                 "NODE_ENV": "production",
                 "EGG_SERVER_ENV": "prod",
                 "WORKERS": 4

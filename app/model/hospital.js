@@ -1,6 +1,6 @@
 
 /**
- * 科室
+ * 医院
  */
 
  module.exports = app => {

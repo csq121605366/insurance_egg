@@ -1,36 +1,18 @@
-# egg
+# health-happy
 
-## QuickStart
 
-<!-- add docs here for user -->
+## 服务器配置
 
-see [egg docs][egg] for more detail.
+自启动配置 /etc/rc.local
 
-### Development
+### www配置
 
-```bash
-$ npm i
-$ npm run dev
-$ open http://localhost:7001/
-```
+网站目录地址 /home/www/insurance_egg
 
-### Deploy
 
-```bash
-$ npm start
-$ npm stop
-```
+### 数据库配置(mongodb)
 
-### npm scripts
-
-* Use `npm run lint` to check code style.
-* Use `npm test` to run unit test.
-* Use `npm run autod` to auto detect dependencies upgrade, see [autod](https://www.npmjs.com/package/autod) for more detail.
-
-[egg]: https://eggjs.org
-
-# 问题
-
-> 这里记录一些问题
-
-* 大部分接口没有对用户的权限限制 比如 role=='0' || ((role=='2'||role=='3')&&status!='2')
+version: ^3.0
+conf: /etc/mongod.conf
+管理员账号密码 health_happy_admin   rayplus1234
+health_happy 数据集合账号密码 health_happy_admin rayplus1234

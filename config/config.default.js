@@ -51,7 +51,7 @@ module.exports = app => {
   // mongoose
   exports.mongoose = {
     client: {
-      url: "mongodb://insurance_admin:csqcsq1214@47.52.63.21:27017/insurance",
+      url: "mongodb://health_happy_admin:rayplus1234@127.0.0.1:27017/health_happy",
       // url: "mongodb://root:mypassword1234@127.0.0.1:27017/insurance",
       options: {
         useMongoClient: true,
@@ -64,12 +64,6 @@ module.exports = app => {
   };
 
   exports.onerror = {
-    // all(err, ctx) {
-    //   // 在此处定义针对所有响应类型的错误处理方法
-    //   // 注意，定义了 config.all 之后，其他错误处理方法不会再生效
-    //   ctx.body = 'error';
-    //   ctx.status = 500;
-    // },
     html(err, ctx) {
       // html hander
       ctx.body = "<h3>error</h3>";

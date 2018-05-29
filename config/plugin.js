@@ -9,8 +9,6 @@ exports.vuessr = {
   package: 'egg-view-vue-ssr'
 };
 
-exports.static = true;
-
 // 验证插件
 exports.validate = {
   enable: true,

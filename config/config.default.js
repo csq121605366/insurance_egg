@@ -34,7 +34,7 @@ module.exports = app => {
     },
     logger: {
       level: "WARN",
-      consoleLevel: "DEBUG", // ERROR  WARN  INFO DEBUG NONE
+      // consoleLevel: "DEBUG", // ERROR  WARN  INFO DEBUG NONE
       dir: path.join(app.baseDir, "logs")
     },
     middleware: ["gzip", "errorHandler"],

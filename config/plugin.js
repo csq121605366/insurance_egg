@@ -1,7 +1,8 @@
 'use strict';
 
 // had enabled by egg
-// exports.static = true;
+exports.static = true;
+
 
 exports.vuessr = {
   enable: true,
@@ -52,3 +53,4 @@ exports.jwt = {
 //   enable: true,
 //   package: 'egg-passport',
 // };
+

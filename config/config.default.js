@@ -51,8 +51,8 @@ module.exports = app => {
   // mongoose
   exports.mongoose = {
     client: {
-      url: "mongodb://health_happy_admin:rayplus1234@127.0.0.1:27017/health_happy",
-      // url: "mongodb://root:mypassword1234@127.0.0.1:27017/insurance",
+      // url: "mongodb://health_happy_admin:rayplus1234@127.0.0.1:27017/health_happy",
+      url: "mongodb://insurance_admin:csqcsq1214@47.52.63.21:27017/insurance",
       options: {
         useMongoClient: true,
         autoReconnect: true,

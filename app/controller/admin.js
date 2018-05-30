@@ -1,6 +1,6 @@
 const BaseController = require("./base");
 const fs = require("fs");
-
+const path = require('path');
 class Admin extends BaseController {
   constructor(ctx) {
     super(ctx);
@@ -56,8 +56,12 @@ class Admin extends BaseController {
   async index() {
     // 页面
     const { ctx } = this;
-    
-    await ctx.renderClient("app.js",{hello:'dsafds'});
+    await ctx.renderClient("app.js", { hello: 'dsafds' });
+  }
+
+  async weixinConnect() {
+    this.ctx.type = 'text/plain; charset=utf-8';
+    this.ctx.body = fs.createReadStream(path.join(this.app.baseDir, 'j8I4G45DwH.txt'));
   }
 
   async getToken() {

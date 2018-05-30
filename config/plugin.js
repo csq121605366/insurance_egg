@@ -1,7 +1,7 @@
 'use strict';
 
 // had enabled by egg
-exports.static = true;
+
 
 
 exports.vuessr = {
@@ -14,6 +14,7 @@ exports.validate = {
   enable: true,
   package: 'egg-validate',
 };
+
 
 // websocket
 // exports.io = {

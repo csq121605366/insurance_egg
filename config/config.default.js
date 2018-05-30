@@ -9,6 +9,11 @@ module.exports = app => {
     )
   };
 
+  // exports.static = {
+  //   prefix:"/public/",
+  //   dir: path.join(appInfo.baseDir, 'app')
+  // };
+
   exports.vuessr = {
     layout: path.join(app.baseDir, "app/web/layout.html"),
     renderOptions: {
@@ -38,10 +43,10 @@ module.exports = app => {
     },
     middleware: ["gzip", "errorHandler"],
     gzip: { threshold: 1024 },
-    static: {
-      prefix: "/public/",
-      dir: path.join(app.baseDir, "public")
-    },
+    // static: {
+    //   prefix: "/public/",
+    //   dir: path.join(app.baseDir, "public")
+    // },
     keys: "insurance_cookie_secret",
     key: "insurance_cookie", // 承载 Session 的 Cookie 键值对名字
     maxAge: 86400000 // Session 的最大有效时间

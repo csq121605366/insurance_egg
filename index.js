@@ -1,6 +1,8 @@
 'use strict';
 const path = require('path');
-process.env.VUE_ENV = 'server';
+// process.env.VUE_ENV = 'server';
+process.env.EGG_SERVER_ENV = 'prod';
+process.env.NODE_ENV = 'production';
 require('egg').startCluster({
   baseDir: __dirname,
   workers: process.env.WORKERS || '2',
